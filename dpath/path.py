@@ -80,6 +80,33 @@ def search(obj, glob, dirs=True, leaves=False):
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
 
+def set(obj, path, value, create_missing=True):
+    """Set the value of the given path in the object. Path
+    must be a list of specific path elements, not a glob.
+
+    If create_missing is True (the default behavior), then any
+    missing path components in the dictionary are made silently.
+    Otherwise, if False, an exception is thrown if path
+    components are missing.
+    """
+    cur = obj
+    traversed = []
+    for elem in path:
+        if (not elem in obj) and (create_missing):
+            if len(traversed) == len(path):
+                obj[elem] = value
+                return
+            obj[elem] = {}
+        else:
+            raise dpath.exceptions.PathNotFound(
+                "{} does not exist in {}".format(
+                    elem,
+                    "/".join(traversed)
+                    )
+                )
+        traversed.append(elem)
+        obj = obj[elem]
+
 def get(obj, path, view=False):
     """Get the value of the given path.
 
@@ -121,28 +148,3 @@ def get(obj, path, view=False):
         if isinstance(target, basestring):
             target = '"' + target + '"'
         return target
-
-def merge(dst, src):
-    """Merge source into destination. Like dict.copy() but performs
-    deep merging."""
-    if isinstance(src, dict):
-        for (i, v) in enumerate(src):
-            if not v in dst:
-                dst[v] = src[v]
-            else:
-                if not isinstance(src[v], (dict, list)):
-                    dst[v] = src[v]
-                else:
-                    merge(dst[v], src[v])
-    elif isinstance(src, list):
-        for (i, v) in enumerate(src):
-            if i >= len(dst):
-                dst += [None] * (i - len(dst) + 1)
-            if dst[i] == None:
-                dst[i] = src[i]
-            else:
-                if not isinstance(src[i], (dict, list)):
-                    dst[i] = src[i]
-                else:
-                    merge(dst[i], src[i])
-
