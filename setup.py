@@ -8,7 +8,7 @@ if __name__ == "__main__":
         name="dpath",
         version=version.VERSION,
         description="Filesystem-like pathing and searching for dictionaries",
-        long_description="librelman",
+        long_description="dpath",
         author=("Caleb Case, "
                 "Andrew Kesterson"),
         author_email="calebcase@gmail.com, andrew@aklabs.net",
