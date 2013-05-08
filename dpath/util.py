@@ -48,7 +48,7 @@ def search(obj, glob, yielded=False):
     return _search_view(obj, glob)
 
 def merge(dst, src):
-    """Merge source into destination. Like dict.copy() but performs
+    """Merge source into destination. Like dict.update() but performs
     deep merging."""
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
