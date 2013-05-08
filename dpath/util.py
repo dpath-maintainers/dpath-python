@@ -11,18 +11,20 @@ def search(obj, glob, yielded=False):
     will be a list of separated path elements constructing the path.
     ("/".join() them again if that's what you want.)
     """
+
+    def _search_view(obj, glob):
+        view = {}
+        for path in dpath.path.search(obj, glob.split("/")):
+            dpath.path.merge(view, dpath.path.get(obj, path, view=True))
+        return view
+
+    def _search_yielded(obj, glob):
+        for path in dpath.path.search(obj, glob.split("/")):
+            yield (path, dpath.path.get(obj, path))
+
     if yielded:
         return _search_yielded(obj, glob)
     return _search_view(obj, glob)
-def _search_view(obj, glob):
-    view = {}
-    for path in dpath.path.search(obj, glob.split("/")):
-        dpath.path.merge(view, dpath.path.get(obj, path, view=True))
-    return view
-
-def _search_yielded(obj, glob):
-    for path in dpath.path.search(obj, glob.split("/")):
-        yield (path, dpath.path.get(obj, path))
 
 def merge(dst, src):
     """Merge source into destination. Like dict.copy() but performs
