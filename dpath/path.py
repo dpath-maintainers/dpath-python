@@ -83,6 +83,8 @@ def is_glob(string):
 def set(obj, path, value, create_missing=True):
     """Set the value of the given path in the object. Path
     must be a list of specific path elements, not a glob.
+    You can use dpath.util.set for globs, but the paths must
+    slready exist.
 
     If create_missing is True (the default behavior), then any
     missing path components in the dictionary are made silently.
@@ -91,13 +93,42 @@ def set(obj, path, value, create_missing=True):
     """
     cur = obj
     traversed = []
+
+    def _presence_test_dict(obj, elem):
+        return (elem in obj)
+
+    def _create_missing_dict(obj, elem):
+        obj[elem] = {}
+
+    def _presence_test_list(obj, idx):
+        return (idx < len(obj))
+
+    def _create_missing_list(obj, idx):
+        idx = int(str(elem))
+        while (len(obj)-1) < idx:
+            obj.append(None)
+
     for elem in path:
-        if (not elem in obj) and (create_missing):
-            if len(traversed) == len(path):
-                obj[elem] = value
-                return
-            obj[elem] = {}
+        tester = None
+        creator = None
+        if issubclass(obj.__class__, (dict)):
+            tester = _presence_test_dict
+            creator = _create_missing_dict
+        elif issubclass(obj.__class__, (list, tuple)):
+            if not str(elem).isdigit():
+                raise TypeError("Can only create integer indexes in lists, "
+                                "not {}, in {}".format(type(obj),
+                                                       "/".join(traversed)
+                                                       )
+                                )
+            tester = _presence_test_list
+            creator = _create_missing_list
         else:
+            raise TypeError("Unable to path into elements of type {} "
+                            "at {}".format(type(elem), "/".join(traversed)))
+        if (not tester) and (create_missing):
+            creator(obj, elem, value)
+        elif (not tester):
             raise dpath.exceptions.PathNotFound(
                 "{} does not exist in {}".format(
                     elem,
@@ -105,7 +136,10 @@ def set(obj, path, value, create_missing=True):
                     )
                 )
         traversed.append(elem)
-        obj = obj[elem]
+        if len(traversed) < len(path):
+            obj = obj[elem]
+    obj[elem] = value
+    return
 
 def get(obj, path, view=False):
     """Get the value of the given path.

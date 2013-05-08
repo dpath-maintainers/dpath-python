@@ -1,5 +1,16 @@
 import dpath.path
 
+def set(obj, glob, value):
+    """
+    Given a path glob, set all existing elements in the document
+    to the given value. Returns the number of elements changed.
+    """
+    changed = 0
+    for path in dpath.path.search(obj, glob.split("/")):
+        changed += 1
+        dpath.path.set(obj, path, value, create_missing=False)
+    return changed
+
 def search(obj, glob, yielded=False):
     """
     Given a path glob, return a dictionary containing all keys
@@ -7,9 +18,7 @@ def search(obj, glob, yielded=False):
 
     If 'yielded' is true, then a dictionary will not be returned.
     Instead tuples will be yielded in the form of (path, value) for
-    every element in the document that matched the glob. The path
-    will be a list of separated path elements constructing the path.
-    ("/".join() them again if that's what you want.)
+    every element in the document that matched the glob.
     """
 
     def _search_view(obj, glob):
@@ -20,7 +29,7 @@ def search(obj, glob, yielded=False):
 
     def _search_yielded(obj, glob):
         for path in dpath.path.search(obj, glob.split("/")):
-            yield (path, dpath.path.get(obj, path))
+            yield ("/".join(path), dpath.path.get(obj, path))
 
     if yielded:
         return _search_yielded(obj, glob)
