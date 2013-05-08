@@ -126,9 +126,9 @@ def set(obj, path, value, create_missing=True):
         else:
             raise TypeError("Unable to path into elements of type {} "
                             "at {}".format(type(elem), "/".join(traversed)))
-        if (not tester) and (create_missing):
-            creator(obj, elem, value)
-        elif (not tester):
+        if (not tester(obj, elem)) and (create_missing):
+            creator(obj, elem)
+        elif (not tester(obj, elem)):
             raise dpath.exceptions.PathNotFound(
                 "{} does not exist in {}".format(
                     elem,

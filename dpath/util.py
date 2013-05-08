@@ -1,5 +1,17 @@
 import dpath.path
 
+def new(obj, path, value):
+    """
+    Set the element at the terminus of path to value, and create
+    it if it does not exist (as opposed to 'set' that can only
+    change existing keys).
+
+    path will NOT be treated like a glob. If it has globbing
+    characters in it, they will become part of the resulting
+    keys
+    """
+    return dpath.path.set(obj, path.split("/"), value, create_missing=True)
+
 def set(obj, glob, value):
     """
     Given a path glob, set all existing elements in the document
