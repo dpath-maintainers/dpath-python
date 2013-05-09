@@ -1,6 +1,6 @@
 import dpath.path
 
-def new(obj, path, value):
+def new(obj, path, value, separator="/"):
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -10,20 +10,49 @@ def new(obj, path, value):
     characters in it, they will become part of the resulting
     keys
     """
-    return dpath.path.set(obj, path.split("/"), value, create_missing=True)
+    return dpath.path.set(obj, path.split(separator), value, create_missing=True)
 
-def set(obj, glob, value):
+def delete(obj, glob, separator="/", filter=None):
+    """
+    Given a path glob, delete all elements that match the glob.
+
+    Returns the number of deleted objects
+    """
+    deleted = 0
+    paths = []
+    for path in dpath.path.search(obj, glob.split("/")):
+        # These are yielded back, don't mess up the dict.
+        paths.append(path)
+
+    for path in paths:
+        print path
+        cur = obj
+        prev = None
+        for item in path:
+            prev = cur
+            try:
+                cur = cur[item]
+            except AttributeError, e:
+                # This only happens when we delete X/Y and the next
+                # item in the paths is X/Y/Z
+                pass
+        if (not filter) or (filter and filter(prev[item])):
+            prev.pop(item)
+        deleted += 1
+    return deleted
+
+def set(obj, glob, value, separator="/", filter=None):
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
     """
     changed = 0
-    for path in dpath.path.search(obj, glob.split("/")):
+    for path in dpath.path.search(obj, glob.split(separator)):
         changed += 1
-        dpath.path.set(obj, path, value, create_missing=False)
+        dpath.path.set(obj, path, value, create_missing=False, filter=filter)
     return changed
 
-def search(obj, glob, yielded=False):
+def search(obj, glob, yielded=False, separator="/", filter=None):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
@@ -35,39 +64,49 @@ def search(obj, glob, yielded=False):
 
     def _search_view(obj, glob):
         view = {}
-        for path in dpath.path.search(obj, glob.split("/")):
-            dpath.path.merge(view, dpath.path.get(obj, path, view=True))
+        for path in dpath.path.search(obj, glob.split(separator)):
+            val = dpath.path.get(obj, path, view=False)
+            if (not filter) or (filter and (filter(val) == True)):
+                dpath.path.set(view, path, val, create_missing=True)
         return view
 
     def _search_yielded(obj, glob):
-        for path in dpath.path.search(obj, glob.split("/")):
-            yield ("/".join(path), dpath.path.get(obj, path))
+        for path in dpath.path.search(obj, glob.split(separator)):
+            val = dpath.path.get(obj, path)
+            if (not filter) or (filter and filter(val)):
+                yield (separator.join(path), val)
 
     if yielded:
         return _search_yielded(obj, glob)
     return _search_view(obj, glob)
 
-def merge(dst, src):
+def merge(dst, src, filter=None):
     """Merge source into destination. Like dict.update() but performs
     deep merging."""
+
+    def _filter_assign(obj, key, value):
+        if (not filter) or (filter and filter(value)):
+            obj[key] = value
+
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
             if not v in dst:
-                dst[v] = src[v]
+                _filter_assign(dst, v, src[v])
             else:
                 if not isinstance(src[v], (dict, list)):
-                    dst[v] = src[v]
+                    _filter_assign(dst, v, src[v])
                 else:
-                    merge(dst[v], src[v])
+                    merge(dst[v], src[v], filter=filter)
     elif isinstance(src, list):
         for (i, v) in enumerate(src):
             if i >= len(dst):
                 dst += [None] * (i - len(dst) + 1)
             if dst[i] == None:
-                dst[i] = src[i]
+                _filter_assign(dst, i, src[i])
             else:
                 if not isinstance(src[i], (dict, list)):
-                    dst[i] = src[i]
+                    _filter_assign(dst, i, src[i])
                 else:
-                    merge(dst[i], src[i])
+                    merge(dst[i], src[i], filter=filter)
+
 

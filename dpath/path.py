@@ -80,7 +80,7 @@ def search(obj, glob, dirs=True, leaves=False):
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
 
-def set(obj, path, value, create_missing=True):
+def set(obj, path, value, create_missing=True, separator="/", filter=None):
     """Set the value of the given path in the object. Path
     must be a list of specific path elements, not a glob.
     You can use dpath.util.set for globs, but the paths must
@@ -108,37 +108,61 @@ def set(obj, path, value, create_missing=True):
         while (len(obj)-1) < idx:
             obj.append(None)
 
+    def _accessor_dict(obj, elem):
+        return obj[elem]
+
+    def _accessor_list(obj, elem):
+        if isinstance(elem, int):
+            return obj[elem]
+        return obj[int(str(elem))]
+
+    def _assigner_dict(obj, elem, value):
+        obj[elem] = value
+
+    def _assigner_list(obj, elem, value):
+        if isinstance(elem, int):
+            obj[elem] = value
+        obj[int(str(elem))] = value
+
+    elem = None
     for elem in path:
         tester = None
         creator = None
+        accessor = None
+        assigner = None
         if issubclass(obj.__class__, (dict)):
             tester = _presence_test_dict
             creator = _create_missing_dict
+            accessor = _accessor_dict
+            assigner = _assigner_dict
         elif issubclass(obj.__class__, (list, tuple)):
             if not str(elem).isdigit():
                 raise TypeError("Can only create integer indexes in lists, "
                                 "not {}, in {}".format(type(obj),
-                                                       "/".join(traversed)
+                                                       separator.join(traversed)
                                                        )
                                 )
             tester = _presence_test_list
             creator = _create_missing_list
+            accessor = _accessor_list
+            assigner = _assigner_list
         else:
             raise TypeError("Unable to path into elements of type {} "
-                            "at {}".format(type(elem), "/".join(traversed)))
+                            "at {}".format(type(elem), separator.join(traversed)))
         if (not tester(obj, elem)) and (create_missing):
             creator(obj, elem)
         elif (not tester(obj, elem)):
             raise dpath.exceptions.PathNotFound(
                 "{} does not exist in {}".format(
                     elem,
-                    "/".join(traversed)
+                    separator.join(traversed)
                     )
                 )
         traversed.append(elem)
         if len(traversed) < len(path):
-            obj = obj[elem]
-    obj[elem] = value
+            obj = accessor(obj, elem)
+    if elem:
+        assigner(obj, elem, value)
     return
 
 def get(obj, path, view=False):
