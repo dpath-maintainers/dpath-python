@@ -203,6 +203,4 @@ def get(obj, path, view=False):
         up[path[-1]] = target
         return head
     else:
-        if isinstance(target, basestring):
-            target = '"' + target + '"'
         return target

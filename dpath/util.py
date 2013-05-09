@@ -64,15 +64,15 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
 
     def _search_view(obj, glob):
         view = {}
-        for path in dpath.path.search(obj, glob.split(separator)):
+        for path in dpath.path.search(obj, glob.split(separator), dirs=False):
             val = dpath.path.get(obj, path, view=False)
-            if (not filter) or (filter and (filter(val) == True)):
+            if (not filter) or (filter(val)):
                 dpath.path.set(view, path, val, create_missing=True)
         return view
 
     def _search_yielded(obj, glob):
         for path in dpath.path.search(obj, glob.split(separator)):
-            val = dpath.path.get(obj, path)
+            val = dpath.path.get(obj, path, view=False)
             if (not filter) or (filter and filter(val)):
                 yield (separator.join(path), val)
 

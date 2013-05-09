@@ -239,4 +239,45 @@ Filtering
 
 All of the methods in this library (except new()) support a 'filter' argument. This can be set to a function that will return True or False to say 'yes include that value in my result set' or 'no don't include it'.
 
-HOWEVER, the filtering is somewhat picky at this point, and its behavior is not terribly well documented. It's best to stay away from it until I update this documentation. Have fun!
+Filtering functions receive every terminus node in a search - e.g., anything that is not a dict or a list, at the very end of the path. For each value, they return True to include that value in the result set, or False to exclude it.
+
+Consider this example. Given the source dictionary, we want to find ALL keys inside it, but we only really want the ones that contain "ffle" in them:
+
+    >>> print json.dumps(x, indent=4, sort_keys=True)
+    {
+	"a": {
+	    "b": {
+		"3": 2,
+		"43": 30,
+		"c": "Waffles",
+		"d": "Waffles",
+		"e": {
+		    "f": {
+			"g": "Roffle"
+		    }
+		}
+	    }
+	}
+    }
+    >>> def filter(x):
+    ...     if "ffle" in str(x):
+    ...             return True
+    ...     return False
+    ...
+    >>> result = dpath.util.search(x, '**', filter=filter)
+    >>> print json.dumps(result, indent=4, sort_keys=True)
+    {
+	"a": {
+	    "b": {
+		"c": "Waffles",
+		"d": "Waffles",
+		"e": {
+		    "f": {
+			"g": "Roffle"
+		    }
+		}
+	    }
+	}
+    }
+
+Obviously filtering functions can perform more advanced tests (regular expressions, etc etc).
