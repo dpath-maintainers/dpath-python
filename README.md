@@ -3,7 +3,7 @@ dpath-python
 
 A python library for accessing and searching dictionaries via /slashed/paths ala xpath
 
-Basically it lets you glob over a dictionary as if it were a filesystem.
+Basically it lets you glob over a dictionary as if it were a filesystem. It allows you to specify globs (ala the bash eglob syntax, through some advanced fnmatch.fnmatch magic) to access dictionary elements, and provides some facility for filtering those results.
 
 Separators
 ==========
