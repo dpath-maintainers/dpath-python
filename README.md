@@ -8,7 +8,7 @@ Basically it lets you glob over a dictionary as if it were a filesystem. It allo
 Separators
 ==========
 
-All of the functions in this library accept a 'separator' argument, which is the character that should separate path components. The default is '/', but you can set it to whatever you want.
+All of the functions in this library (except 'merge') accept a 'separator' argument, which is the character that should separate path components. The default is '/', but you can set it to whatever you want.
 
 Searching
 =========
