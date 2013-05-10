@@ -112,16 +112,12 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
         return obj[elem]
 
     def _accessor_list(obj, elem):
-        if isinstance(elem, int):
-            return obj[elem]
         return obj[int(str(elem))]
 
     def _assigner_dict(obj, elem, value):
         obj[elem] = value
 
     def _assigner_list(obj, elem, value):
-        if isinstance(elem, int):
-            obj[elem] = value
         obj[int(str(elem))] = value
 
     elem = None
@@ -161,9 +157,11 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
         traversed.append(elem)
         if len(traversed) < len(path):
             obj = accessor(obj, elem)
-    if elem:
+
+    if elem is None:
+        return
+    if (filter and filter(accessor(obj, elem))) or (not filter):
         assigner(obj, elem, value)
-    return
 
 def get(obj, path, view=False):
     """Get the value of the given path.

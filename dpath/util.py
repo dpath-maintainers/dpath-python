@@ -1,4 +1,9 @@
 import dpath.path
+import dpath.exceptions
+
+MERGE_REPLACE=(1 << 1)
+MERGE_ADDITIVE=(1 << 2)
+MERGE_TYPESAFE=(1 << 3)
 
 def new(obj, path, value, separator="/"):
     """
@@ -16,7 +21,8 @@ def delete(obj, glob, separator="/", filter=None):
     """
     Given a path glob, delete all elements that match the glob.
 
-    Returns the number of deleted objects
+    Returns the number of deleted objects. Raises PathNotFound if no paths are
+    found to delete.
     """
     deleted = 0
     paths = []
@@ -25,7 +31,6 @@ def delete(obj, glob, separator="/", filter=None):
         paths.append(path)
 
     for path in paths:
-        print path
         cur = obj
         prev = None
         for item in path:
@@ -39,6 +44,8 @@ def delete(obj, glob, separator="/", filter=None):
         if (not filter) or (filter and filter(prev[item])):
             prev.pop(item)
         deleted += 1
+    if not deleted:
+        raise dpath.exceptions.PathNotFound("Could not find {} to delete it".format(glob))
     return deleted
 
 def set(obj, glob, value, separator="/", filter=None):
@@ -80,9 +87,15 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
         return _search_yielded(obj, glob)
     return _search_view(obj, glob)
 
-def merge(dst, src, filter=None):
+def merge(dst, src, filter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
     deep merging."""
+
+    def _check_typesafe(obj1, obj2, key, path):
+        if ( (flags & MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
+            raise TypeError("Cannot merge objects of type {} and {} at {}"
+                            "".format(type(obj1[key]), type(obj2[key]), path))
+
 
     def _filter_assign(obj, key, value):
         if (not filter) or (filter and filter(value)):
@@ -90,23 +103,35 @@ def merge(dst, src, filter=None):
 
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
+            _check_typesafe(dst, src, v, "/".join([_path, str(v)]))
+
             if not v in dst:
-                _filter_assign(dst, v, src[v])
+                if not isinstance(src[v], (dict, list)):
+                    _filter_assign(dst, v, src[v])
+                else:
+                    dst[v] = src[v]
             else:
                 if not isinstance(src[v], (dict, list)):
                     _filter_assign(dst, v, src[v])
                 else:
-                    merge(dst[v], src[v], filter=filter)
+                    merge(dst[v], src[v], filter=filter, flags=flags,
+                          _path="/".join([_path, str(v)]))
     elif isinstance(src, list):
         for (i, v) in enumerate(src):
-            if i >= len(dst):
-                dst += [None] * (i - len(dst) + 1)
-            if dst[i] == None:
-                _filter_assign(dst, i, src[i])
+            _check_typesafe(dst, src, i, "/".join([_path, str(i)]))
+
+            dsti = i
+            if ( flags & MERGE_ADDITIVE):
+                dsti += len(src)
+            if dsti >= len(dst):
+                dst += [None] * (dsti - len(dst) + 1)
+            if dst[dsti] == None:
+                _filter_assign(dst, dsti, src[i])
             else:
                 if not isinstance(src[i], (dict, list)):
-                    _filter_assign(dst, i, src[i])
+                    _filter_assign(dst, dsti, src[i])
                 else:
-                    merge(dst[i], src[i], filter=filter)
+                    merge(dst[i], src[i], filter=filter, flags=flags,
+                          _path="/".join(_path, v))
 
 

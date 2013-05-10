@@ -14,9 +14,9 @@ if __name__ == "__main__":
         author_email="calebcase@gmail.com, andrew@aklabs.net",
         license="MIT",
         install_requires=[],
-        scripts=SCRIPTS,
+        scripts=[],
         packages=["dpath"],
-        data_files=DATA_DIRS,
+        data_files=[],
         classifiers=[
             'Development Status :: 1 - Development',
             'Environment :: Console',
