@@ -22,7 +22,7 @@ if __name__ == "__main__":
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Intended Audience :: Developers',
-            'License :: OSI Approved :: MIT',
+            'License :: OSI Approved :: MIT License',
             'Natural Language :: English',
             'Programming Language :: Python 2.7',
             'Topic :: Software Development :: Libraries :: Python Modules',
