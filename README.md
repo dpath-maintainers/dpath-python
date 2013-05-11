@@ -5,6 +5,8 @@ A python library for accessing and searching dictionaries via /slashed/paths ala
 
 Basically it lets you glob over a dictionary as if it were a filesystem. It allows you to specify globs (ala the bash eglob syntax, through some advanced fnmatch.fnmatch magic) to access dictionary elements, and provides some facility for filtering those results.
 
+Automated pylint and nosetest runs are in the AKLabs bamboo, here: http://bamboo.aklabs.net/browse/DPATHPYTHON
+
 Separators
 ==========
 
