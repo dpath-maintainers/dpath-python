@@ -1,5 +1,5 @@
 from distutils.core import setup
-import version
+import dpath.version
 import os
 import sys
 
