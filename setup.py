@@ -19,7 +19,7 @@ if __name__ == "__main__":
         packages=["dpath"],
         data_files=[],
         classifiers=[
-            'Development Status :: 1 - Development',
+            'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Intended Audience :: Developers',
             'License :: MIT',
