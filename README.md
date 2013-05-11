@@ -173,10 +173,21 @@ Also, check out dpath.util.merge. The python dict update() method is great and a
 
     >>> help(dpath.util.merge)
     Help on function merge in module dpath.util:
-
-    merge(dst, src)
-	Merge source into destination. Like dict.update() but performs
-	deep merging.
+    
+    merge(dst, src, filter=None, flags=4, _path='')
+        Merge source into destination. Like dict.update() but performs
+        deep merging.
+        
+        flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE, or
+        MERGE_TYPESAFE.
+            * MERGE_ADDITIVE : List objects are combined onto one long
+              list (NOT a set). This is the default flag.
+            * MERGE_REPLACE : Instead of combining list objects, when
+              2 list objects are at an equal depth of merge, replace
+              the destination with the source.
+            * MERGE_TYPESAFE : When 2 keys at equal levels are of different
+              types, raise a TypeError exception. By default, the source
+              replaces the destination in this situation.
 
     >>> y = {'a': {'b': { 'e': {'f': {'h': [None, 0, 1, None, 13, 14]}}}, 'c': 'RoffleWaffles'}}
     >>> print json.dumps(y, indent=4, sort_keys=True)
