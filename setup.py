@@ -6,7 +6,7 @@ import sys
 if __name__ == "__main__":
     setup(
         name="dpath",
-        version=version.VERSION,
+        version=dpath.version.VERSION,
         description="Filesystem-like pathing and searching for dictionaries",
         long_description="dpath",
         author=("Caleb Case, "
