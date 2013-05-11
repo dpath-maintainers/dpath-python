@@ -7,6 +7,8 @@ Basically it lets you glob over a dictionary as if it were a filesystem. It allo
 
 Automated pylint and nosetest runs are in the AKLabs bamboo, here: http://bamboo.aklabs.net/browse/DPATHPYTHON
 
+sdists are available on pypi: http://pypi.python.org/pypi/dpath
+
 Separators
 ==========
 
