@@ -9,7 +9,7 @@ if __name__ == "__main__":
         url="https://www.github.com/akesterson/dpath-python",
         version=dpath.version.VERSION,
         description="Filesystem-like pathing and searching for dictionaries",
-        long_description="dpath",
+        long_description="DPath is a library that allows you to access dictionaries similar to using find over a filesystem. The proper documentation is maintained on GitHub: https://github.com/akesterson/dpath-python",
         author=("Caleb Case, "
                 "Andrew Kesterson"),
         author_email="calebcase@gmail.com, andrew@aklabs.net",
