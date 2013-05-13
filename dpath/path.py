@@ -2,8 +2,24 @@ import dpath.exceptions
 import re
 import fnmatch
 import shlex
+import sys
 
-def paths(obj, dirs=True, leaves=True, path=[], skip=False):
+def validate(path, separator="/", regex=None):
+    validated = []
+    for key in path:
+        if (separator and (separator in key)):
+            raise dpath.exceptions.InvalidKeyName("{} at {} contains the separator {}"
+                                                  "".format(key,
+                                                            separator.join(validated),
+                                                            separator))
+        elif (regex and (not regex.findall(key))):
+            raise dpath.exceptions.InvalidKeyName("{} at {} does not match the expression {}"
+                                                  "".format(key,
+                                                            separator.join(validated),
+                                                            regex.pattern))
+        validated.append(key)
+
+def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
     """Yield all paths of the object.
 
     Arguments:
@@ -23,6 +39,7 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
             if skip and v[0] == '+':
                 continue
             newpath = path + [v]
+            validate(newpath, separator=separator)
             if dirs:
                 yield newpath
             for child in paths(obj[v], dirs, leaves, newpath, skip):
