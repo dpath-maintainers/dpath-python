@@ -21,7 +21,7 @@ def test_search_paths():
         'a/b/c/e',
         'a/b/c/f'
         ]
-    for (path, value) in dpath.util.search(dict, '**', yielded=True):
+    for (path, value) in dpath.util.search(dict, '/**', yielded=True):
         assert(path in paths)
 
 def test_search_filter():
@@ -45,7 +45,7 @@ def test_search_filter():
         'a/b/c/e',
         'a/b/c/f'
         ]
-    for (path, value) in dpath.util.search(dict, '**', yielded=True, filter=filter):
+    for (path, value) in dpath.util.search(dict, '/**', yielded=True, filter=filter):
         assert(path in paths)
 
 def test_search_globbing():
@@ -64,5 +64,5 @@ def test_search_globbing():
         'a/b/c/d',
         'a/b/c/f'
         ]
-    for (path, value) in dpath.util.search(dict, 'a/**/[df]', yielded=True):
+    for (path, value) in dpath.util.search(dict, '/a/**/[df]', yielded=True):
         assert(path in paths)

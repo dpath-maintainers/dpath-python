@@ -6,7 +6,7 @@ def test_set_new_dict():
         "a": {
             }
         }
-    dpath.util.new(dict, 'a/b', 1)
+    dpath.util.new(dict, '/a/b', 1)
     assert(dict['a']['b'] == 1)
 
 def test_set_new_list():
@@ -14,6 +14,6 @@ def test_set_new_list():
         "a": [
             ]
         }
-    dpath.util.new(dict, 'a/1', 1)
+    dpath.util.new(dict, '/a/1', 1)
     assert(dict['a'][1] == 1)
     assert(dict['a'][0] == None)

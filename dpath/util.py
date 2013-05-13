@@ -15,7 +15,7 @@ def new(obj, path, value, separator="/"):
     characters in it, they will become part of the resulting
     keys
     """
-    return dpath.path.set(obj, path.split(separator), value, create_missing=True)
+    return dpath.path.set(obj, path.lstrip(separator).split(separator), value, create_missing=True)
 
 def delete(obj, glob, separator="/", filter=None):
     """
@@ -26,7 +26,8 @@ def delete(obj, glob, separator="/", filter=None):
     """
     deleted = 0
     paths = []
-    for path in dpath.path.search(obj, glob.split("/")):
+    print separator
+    for path in dpath.path.search(obj, glob.lstrip(separator).split("/")):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
@@ -54,7 +55,7 @@ def set(obj, glob, value, separator="/", filter=None):
     to the given value. Returns the number of elements changed.
     """
     changed = 0
-    for path in dpath.path.search(obj, glob.split(separator)):
+    for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
         changed += 1
         dpath.path.set(obj, path, value, create_missing=False, filter=filter)
     return changed
@@ -71,14 +72,14 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
 
     def _search_view(obj, glob):
         view = {}
-        for path in dpath.path.search(obj, glob.split(separator), dirs=False):
+        for path in dpath.path.search(obj, glob.lstrip(separator).split(separator), dirs=False):
             val = dpath.path.get(obj, path, view=False)
             if (not filter) or (filter(val)):
                 dpath.path.set(view, path, val, create_missing=True)
         return view
 
     def _search_yielded(obj, glob):
-        for path in dpath.path.search(obj, glob.split(separator)):
+        for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
             val = dpath.path.get(obj, path, view=False)
             if (not filter) or (filter and filter(val)):
                 yield (separator.join(path), val)

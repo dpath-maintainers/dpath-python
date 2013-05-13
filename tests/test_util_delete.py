@@ -9,7 +9,7 @@ def test_delete_existing():
             "b": 0
             }
         }
-    dpath.util.delete(dict, 'a/b', 1)
+    dpath.util.delete(dict, '/a/b')
     assert(not 'b' in dict['a'])
 
 @raises(dpath.exceptions.PathNotFound)
@@ -18,7 +18,7 @@ def test_delete_missing():
         "a": {
             }
         }
-    dpath.util.delete(dict, 'a/b')
+    dpath.util.delete(dict, '/a/b')
 
 def test_delete_filter():
     def filter(x):
@@ -33,7 +33,7 @@ def test_delete_filter():
             "d": 31
             }
         }
-    dpath.util.delete(dict, 'a/*', filter=filter)
+    dpath.util.delete(dict, '/a/*', filter=filter)
     assert (dict['a']['b'] == 0)
     assert (dict['a']['c'] == 1)
     assert ('d' not in dict['a'])

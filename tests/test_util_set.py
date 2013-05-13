@@ -7,7 +7,7 @@ def test_set_existing_dict():
             "b": 0
             }
         }
-    dpath.util.set(dict, 'a/b', 1)
+    dpath.util.set(dict, '/a/b', 1)
     assert(dict['a']['b'] == 1)
 
 def test_set_existing_list():
@@ -16,7 +16,7 @@ def test_set_existing_list():
             0
             ]
         }
-    dpath.util.set(dict, 'a/0', 1)
+    dpath.util.set(dict, '/a/0', 1)
     assert(dict['a'][0] == 1)
 
 def test_set_filter():
@@ -32,7 +32,7 @@ def test_set_filter():
             "d": 31
             }
         }
-    dpath.util.set(dict, 'a/*', 31337, filter=filter)
+    dpath.util.set(dict, '/a/*', 31337, filter=filter)
     print dict
     assert (dict['a']['b'] == 0)
     assert (dict['a']['c'] == 1)
