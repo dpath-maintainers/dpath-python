@@ -27,7 +27,7 @@ def delete(obj, glob, separator="/", filter=None):
     deleted = 0
     paths = []
     print separator
-    for path in dpath.path.search(obj, glob.lstrip(separator).split("/")):
+    for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
@@ -88,7 +88,7 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
         return _search_yielded(obj, glob)
     return _search_view(obj, glob)
 
-def merge(dst, src, filter=None, flags=MERGE_ADDITIVE, _path=""):
+def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
     deep merging.
 
@@ -116,7 +116,7 @@ def merge(dst, src, filter=None, flags=MERGE_ADDITIVE, _path=""):
 
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
-            _check_typesafe(dst, src, v, "/".join([_path, str(v)]))
+            _check_typesafe(dst, src, v, separator.join([_path, str(v)]))
 
             if not v in dst:
                 if not isinstance(src[v], (dict, list)):
@@ -128,10 +128,10 @@ def merge(dst, src, filter=None, flags=MERGE_ADDITIVE, _path=""):
                     _filter_assign(dst, v, src[v])
                 else:
                     merge(dst[v], src[v], filter=filter, flags=flags,
-                          _path="/".join([_path, str(v)]))
+                          _path=separator.join([_path, str(v)]), separator=separator)
     elif isinstance(src, list):
         for (i, v) in enumerate(src):
-            _check_typesafe(dst, src, i, "/".join([_path, str(i)]))
+            _check_typesafe(dst, src, i, separator.join([_path, str(i)]))
 
             dsti = i
             if ( flags & MERGE_ADDITIVE):
@@ -145,6 +145,6 @@ def merge(dst, src, filter=None, flags=MERGE_ADDITIVE, _path=""):
                     _filter_assign(dst, dsti, src[i])
                 else:
                     merge(dst[i], src[i], filter=filter, flags=flags,
-                          _path="/".join(_path, v))
+                          _path=separator.join(_path, v), separator=separator)
 
 

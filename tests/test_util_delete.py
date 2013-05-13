@@ -3,6 +3,15 @@ from nose.tools import raises
 import dpath.util
 import dpath.exceptions
 
+def test_delete_separator():
+    dict = {
+        "a": {
+            "b": 0
+            }
+        }
+    dpath.util.delete(dict, ';a;b', separator=";")
+    assert(not 'b' in dict['a'])
+
 def test_delete_existing():
     dict = {
         "a": {

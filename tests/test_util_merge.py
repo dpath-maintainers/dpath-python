@@ -3,6 +3,24 @@ from nose.tools import raises
 
 import dpath.util
 
+def test_merge_typesafe_and_separator():
+    src = {
+        "dict": {
+            "integer": 0
+            }
+        }
+    dst = {
+        "dict": {
+            "integer": "3"
+            }
+        }
+    try:
+        dpath.util.merge(dst, src, flags=(dpath.util.MERGE_ADDITIVE | dpath.util.MERGE_TYPESAFE), separator=";")
+    except TypeError, e:
+        assert(str(e).endswith("dict;integer"))
+        return
+    raise Exception("MERGE_TYPESAFE failed to raise an exception when merging between str and int!")
+
 def test_merge_simple_int():
     src = {
         "integer": 0

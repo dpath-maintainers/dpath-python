@@ -15,6 +15,29 @@ def test_search_paths():
         }
     paths = [
         'a',
+        'a;b',
+        'a;b;c',
+        'a;b;c;d',
+        'a;b;c;e',
+        'a;b;c;f'
+        ]
+    for (path, value) in dpath.util.search(dict, '/**', yielded=True, separator=";"):
+        assert(path in paths)
+
+def test_search_paths():
+    dict = {
+        "a": {
+            "b": {
+                "c": {
+                    "d": 0,
+                    "e": 1,
+                    "f": 2
+                    }
+                }
+            }
+        }
+    paths = [
+        'a',
         'a/b',
         'a/b/c',
         'a/b/c/d',

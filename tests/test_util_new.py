@@ -1,6 +1,14 @@
 import nose
 import dpath.util
 
+def test_set_new_separator():
+    dict = {
+        "a": {
+            }
+        }
+    dpath.util.new(dict, ';a;b', 1, separator=";")
+    assert(dict['a']['b'] == 1)
+
 def test_set_new_dict():
     dict = {
         "a": {
