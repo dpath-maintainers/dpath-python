@@ -10,3 +10,6 @@ def test_path_paths_invalid_keyname():
         }
     for x in dpath.path.paths(tdict):
         pass
+
+def test_path_paths_int_keys():
+    dpath.path.validate(['I', 'am', 'path', 0, 'of', 2])

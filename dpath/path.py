@@ -7,17 +7,18 @@ import sys
 def validate(path, separator="/", regex=None):
     validated = []
     for key in path:
-        if (separator and (separator in key)):
+        strkey = str(key)
+        if (separator and (separator in strkey)):
             raise dpath.exceptions.InvalidKeyName("{} at {} contains the separator {}"
-                                                  "".format(key,
+                                                  "".format(strkey,
                                                             separator.join(validated),
                                                             separator))
-        elif (regex and (not regex.findall(key))):
+        elif (regex and (not regex.findall(strkey))):
             raise dpath.exceptions.InvalidKeyName("{} at {} does not match the expression {}"
-                                                  "".format(key,
+                                                  "".format(strkey,
                                                             separator.join(validated),
                                                             regex.pattern))
-        validated.append(key)
+        validated.append(strkey)
 
 def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
     """Yield all paths of the object.
