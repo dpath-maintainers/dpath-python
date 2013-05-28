@@ -26,8 +26,7 @@ def delete(obj, glob, separator="/", filter=None):
     """
     deleted = 0
     paths = []
-    print separator
-    for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
+    for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
@@ -55,7 +54,7 @@ def set(obj, glob, value, separator="/", filter=None):
     to the given value. Returns the number of elements changed.
     """
     changed = 0
-    for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
+    for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
         changed += 1
         dpath.path.set(obj, path, value, create_missing=False, filter=filter)
     return changed
@@ -72,21 +71,31 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
 
     def _search_view(obj, glob):
         view = {}
-        for path in dpath.path.search(obj, glob.lstrip(separator).split(separator), dirs=False):
-            val = dpath.path.get(obj, path, view=False)
-            if (not filter) or (filter(val)):
-                dpath.path.set(view, path, val, create_missing=True)
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+            try:
+                val = dpath.path.get(obj, path, filter=filter, view=True)
+                merge(view, val)
+            except dpath.exceptions.FilteredValue:
+                pass
         return view
 
     def _search_yielded(obj, glob):
-        for path in dpath.path.search(obj, glob.lstrip(separator).split(separator)):
-            val = dpath.path.get(obj, path, view=False)
-            if (not filter) or (filter and filter(val)):
-                yield (separator.join(path), val)
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+            try:
+                val = dpath.path.get(obj, path, view=False, filter=filter)
+                yield (separator.join(map(str, dpath.path.paths_only(path))), val)
+            except dpath.exceptions.FilteredValue:
+                pass
 
     if yielded:
         return _search_yielded(obj, glob)
     return _search_view(obj, glob)
+
+def _inner_search(obj, glob, dirs=True, leaves=False):
+    """Search the object paths that match the glob."""
+    for path in dpath.path.paths(obj, dirs, leaves, skip=True):
+        if dpath.path.match(path, glob):
+            yield path
 
 def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
@@ -108,7 +117,6 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
         if ( (flags & MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             raise TypeError("Cannot merge objects of type {} and {} at {}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
-
 
     def _filter_assign(obj, key, value):
         if (not filter) or (filter and filter(value)):
@@ -132,7 +140,6 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
     elif isinstance(src, list):
         for (i, v) in enumerate(src):
             _check_typesafe(dst, src, i, separator.join([_path, str(i)]))
-
             dsti = i
             if ( flags & MERGE_ADDITIVE):
                 dsti += len(src)
@@ -146,5 +153,3 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
                 else:
                     merge(dst[i], src[i], filter=filter, flags=flags,
                           _path=separator.join(_path, v), separator=separator)
-
-

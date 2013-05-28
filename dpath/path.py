@@ -4,6 +4,15 @@ import fnmatch
 import shlex
 import sys
 
+def paths_only(path):
+    """
+    Return a list containing only the pathnames of the given path list, not the types.
+    """
+    l = []
+    for p in path:
+        l.append(p[0])
+    return l
+
 def validate(path, separator="/", regex=None):
     validated = []
     for key in path:
@@ -36,24 +45,24 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
 
     """
     if isinstance(obj, dict):
-        for (i, v) in enumerate(obj):
-            if skip and v[0] == '+':
+        for (k, v) in obj.iteritems():
+            if skip and k[0] == '+':
                 continue
-            newpath = path + [v]
+            newpath = path + [[k, v.__class__]]
             validate(newpath, separator=separator)
             if dirs:
                 yield newpath
-            for child in paths(obj[v], dirs, leaves, newpath, skip):
+            for child in paths(v, dirs, leaves, newpath, skip):
                 yield child
     elif isinstance(obj, (list, tuple)):
         for (i, v) in enumerate(obj):
-            newpath = path + [i]
+            newpath = path + [[i, v.__class__]]
             if dirs:
                 yield newpath
             for child in paths(obj[i], dirs, leaves, newpath, skip):
                 yield child
     elif leaves:
-        yield path + [obj]
+        yield path + [[obj, obj.__class__]]
     elif not dirs:
         yield path
 
@@ -85,15 +94,9 @@ def match(path, glob):
             ss_glob = glob[:ss] + glob[ss + 1:]
 
     if path_len == len(ss_glob):
-        return all(map(fnmatch.fnmatch, map(str, path), map(str, ss_glob)))
+        return all(map(fnmatch.fnmatch, map(str, paths_only(path)), map(str, ss_glob)))
 
     return False
-
-def search(obj, glob, dirs=True, leaves=False):
-    """Search the object paths that match the glob."""
-    for path in paths(obj, dirs, leaves, skip=True):
-        if match(path, glob):
-            yield path
 
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
@@ -113,33 +116,36 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
     traversed = []
 
     def _presence_test_dict(obj, elem):
-        return (elem in obj)
+        return (elem[0] in obj)
 
     def _create_missing_dict(obj, elem):
-        obj[elem] = {}
+        obj[elem[0]] = elem[1]()
 
-    def _presence_test_list(obj, idx):
-        return (idx < len(obj))
+    def _presence_test_list(obj, elem):
+        return (int(str(elem[0])) < len(obj))
 
-    def _create_missing_list(obj, idx):
-        idx = int(str(elem))
+    def _create_missing_list(obj, elem):
+        idx = int(str(elem[0]))
         while (len(obj)-1) < idx:
             obj.append(None)
 
     def _accessor_dict(obj, elem):
-        return obj[elem]
+        return obj[elem[0]]
 
     def _accessor_list(obj, elem):
-        return obj[int(str(elem))]
+        return obj[int(str(elem[0]))]
 
     def _assigner_dict(obj, elem, value):
-        obj[elem] = value
+        obj[elem[0]] = value
 
     def _assigner_list(obj, elem, value):
-        obj[int(str(elem))] = value
+        obj[int(str(elem[0]))] = value
 
     elem = None
     for elem in path:
+        elem_value = elem[0]
+        elem_type = elem[1]
+
         tester = None
         creator = None
         accessor = None
@@ -150,7 +156,7 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
             accessor = _accessor_dict
             assigner = _assigner_dict
         elif issubclass(obj.__class__, (list, tuple)):
-            if not str(elem).isdigit():
+            if not str(elem_value).isdigit():
                 raise TypeError("Can only create integer indexes in lists, "
                                 "not {}, in {}".format(type(obj),
                                                        separator.join(traversed)
@@ -162,7 +168,8 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
             assigner = _assigner_list
         else:
             raise TypeError("Unable to path into elements of type {} "
-                            "at {}".format(type(elem), separator.join(traversed)))
+                            "at {}".format(obj, separator.join(traversed)))
+
         if (not tester(obj, elem)) and (create_missing):
             creator(obj, elem)
         elif (not tester(obj, elem)):
@@ -181,7 +188,7 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
     if (filter and filter(accessor(obj, elem))) or (not filter):
         assigner(obj, elem, value)
 
-def get(obj, path, view=False):
+def get(obj, path, view=False, filter=None):
     """Get the value of the given path.
 
     Arguments:
@@ -198,7 +205,11 @@ def get(obj, path, view=False):
     head = type(target)()
     tail = head
     up = None
-    for key in path:
+    for pair in path:
+        print head
+        print path
+        print tail
+        key = pair[0]
         target = target[key]
         if view:
             if isinstance(tail, dict):
@@ -206,17 +217,29 @@ def get(obj, path, view=False):
                     tail[key] = None
                 else:
                     tail[key] = type(target)()
+                tail = tail[key]
             elif isinstance(tail, list):
-                if key >= len(tail):
-                    tail += [None] * (key - len(tail) + 1)
+                #if key >= len(tail):
+                #    tail += [None] * (key - len(tail) + 1)
                 if target == None:
-                    tail[key] = None
+                    tail.append(None)
                 else:
-                    tail[key] = type(target)()
+                    tail.append(type(target)())
+                key = len(tail)-1
+                print key
+                if issubclass(target.__class__, (dict, list, tuple)):
+                    tail = tail[:-1]
             up = tail
-            tail = tail[key]
+    print head
+    print up
     if view:
-        up[path[-1]] = target
-        return head
+        up[key] = target
+        if ((not filter) or (filter and filter(head))):
+            return head
+        else:
+            raise dpath.exceptions.FilteredValue
     else:
-        return target
+        if ((not filter) or (filter and filter(target))):
+            return target
+        else:
+            raise dpath.exceptions.FilteredValue
