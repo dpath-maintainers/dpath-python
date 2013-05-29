@@ -15,7 +15,6 @@ def path_types(obj, path):
         else:
             result.append([elem, dict])
     result.append([path[-1], path[-1].__class__])
-    print result
     return result
 
 def paths_only(path):
@@ -130,7 +129,6 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
     Otherwise, if False, an exception is thrown if path
     components are missing.
     """
-    print obj
     cur = obj
     traversed = []
 
@@ -220,7 +218,6 @@ def get(obj, path, view=False, filter=None):
     view -- Return a view of the object.
 
     """
-    print path
     target = obj
     head = type(target)()
     tail = head
@@ -249,12 +246,8 @@ def get(obj, path, view=False, filter=None):
             if (filter and (not filter(target))):
                 print "Raising filtered value exception on %s" % target
                 raise dpath.exceptions.FilteredValue
-    print head
-    print tail
-    print up
     if view:
         up[key] = target
-        print head
         return head
     else:
         return target

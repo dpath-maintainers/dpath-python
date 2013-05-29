@@ -16,7 +16,6 @@ def new(obj, path, value, separator="/"):
     keys
     """
     pathobj = dpath.path.path_types(obj, path.lstrip(separator).split(separator))
-    print pathobj
     return dpath.path.set(obj, pathobj, value, create_missing=True)
 
 def delete(obj, glob, separator="/", filter=None):
@@ -33,12 +32,9 @@ def delete(obj, glob, separator="/", filter=None):
         paths.append(path)
 
     for path in paths:
-        print path
         cur = obj
         prev = None
         for item in path:
-            print cur
-            print item
             prev = cur
             try:
                 cur = cur[item[0]]
@@ -76,7 +72,7 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
 
     def _search_view(obj, glob):
         view = {}
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=(filter == None)):
             try:
                 val = dpath.path.get(obj, path, filter=filter, view=True)
                 merge(view, val)
@@ -88,9 +84,7 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
     def _search_yielded(obj, glob):
         for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=False):
             try:
-                print path
                 val = dpath.path.get(obj, path, view=False, filter=filter)
-                print val
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)
             except dpath.exceptions.FilteredValue:
                 print "FilteredValue on %s" % str(path)
@@ -122,27 +116,26 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
           replaces the destination in this situation.
     """
 
+    if filter:
+        # Having merge do its own filtering is dumb, let search do the
+        # heavy lifting for us.
+        src = search(src, '**', filter=filter)
+        return merge(dst, src)
+
     def _check_typesafe(obj1, obj2, key, path):
         if ( (flags & MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             raise TypeError("Cannot merge objects of type {} and {} at {}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
-
-    def _filter_assign(obj, key, value):
-        if (not filter) or (filter and filter(value)):
-            obj[key] = value
 
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
             _check_typesafe(dst, src, v, separator.join([_path, str(v)]))
 
             if not v in dst:
-                if not isinstance(src[v], (dict, list)):
-                    _filter_assign(dst, v, src[v])
-                else:
-                    dst[v] = src[v]
+                dst[v] = src[v]
             else:
                 if not isinstance(src[v], (dict, list)):
-                    _filter_assign(dst, v, src[v])
+                    dst[v] = src[v]
                 else:
                     merge(dst[v], src[v], filter=filter, flags=flags,
                           _path=separator.join([_path, str(v)]), separator=separator)
@@ -155,10 +148,10 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
             if dsti >= len(dst):
                 dst += [None] * (dsti - len(dst) + 1)
             if dst[dsti] == None:
-                _filter_assign(dst, dsti, src[i])
+                dst[dsti] = src[i]
             else:
                 if not isinstance(src[i], (dict, list)):
-                    _filter_assign(dst, dsti, src[i])
+                    dst[dsti] = src[i]
                 else:
                     merge(dst[i], src[i], filter=filter, flags=flags,
                           _path=separator.join(_path, v), separator=separator)

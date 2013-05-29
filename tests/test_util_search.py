@@ -55,6 +55,7 @@ def test_search_filter():
 
     dict = {
         "a": {
+            "view_failure": "a",
             "b": {
                 "c": {
                     "d": 0,
@@ -69,8 +70,8 @@ def test_search_filter():
         'a/b/c/f'
         ]
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, filter=filter):
-        print path
         assert(path in paths)
+    assert("view_failure" not in dpath.util.search(dict, '/**', filter=filter)['a'])
 
 def test_search_globbing():
     dict = {
@@ -101,7 +102,6 @@ def test_search_return_dict_head():
             }
         }
     res = dpath.util.search(tdict, '/a/b')
-    print res
     assert(isinstance(res['a']['b'], dict))
     assert(len(res['a']['b']) == 3)
     assert(res['a']['b'] == {0: 0, 1: 1, 2: 2})
