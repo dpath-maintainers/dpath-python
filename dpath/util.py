@@ -15,7 +15,9 @@ def new(obj, path, value, separator="/"):
     characters in it, they will become part of the resulting
     keys
     """
-    return dpath.path.set(obj, path.lstrip(separator).split(separator), value, create_missing=True)
+    pathobj = dpath.path.path_types(obj, path.lstrip(separator).split(separator))
+    print pathobj
+    return dpath.path.set(obj, pathobj, value, create_missing=True)
 
 def delete(obj, glob, separator="/", filter=None):
     """
@@ -31,18 +33,21 @@ def delete(obj, glob, separator="/", filter=None):
         paths.append(path)
 
     for path in paths:
+        print path
         cur = obj
         prev = None
         for item in path:
+            print cur
+            print item
             prev = cur
             try:
-                cur = cur[item]
+                cur = cur[item[0]]
             except AttributeError, e:
                 # This only happens when we delete X/Y and the next
                 # item in the paths is X/Y/Z
                 pass
-        if (not filter) or (filter and filter(prev[item])):
-            prev.pop(item)
+        if (not filter) or (filter and filter(prev[item[0]])):
+            prev.pop(item[0])
         deleted += 1
     if not deleted:
         raise dpath.exceptions.PathNotFound("Could not find {} to delete it".format(glob))
@@ -76,15 +81,19 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
                 val = dpath.path.get(obj, path, filter=filter, view=True)
                 merge(view, val)
             except dpath.exceptions.FilteredValue:
+                print "FilteredValue on %s" % str(path)
                 pass
         return view
 
     def _search_yielded(obj, glob):
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=False):
             try:
+                print path
                 val = dpath.path.get(obj, path, view=False, filter=filter)
+                print val
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)
             except dpath.exceptions.FilteredValue:
+                print "FilteredValue on %s" % str(path)
                 pass
 
     if yielded:

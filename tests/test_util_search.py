@@ -69,6 +69,7 @@ def test_search_filter():
         'a/b/c/f'
         ]
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, filter=filter):
+        print path
         assert(path in paths)
 
 def test_search_globbing():
@@ -90,6 +91,35 @@ def test_search_globbing():
     for (path, value) in dpath.util.search(dict, '/a/**/[df]', yielded=True):
         assert(path in paths)
 
+def test_search_return_dict_head():
+    tdict = {
+        "a": {
+            "b": {
+                0: 0,
+                1: 1,
+                2: 2}
+            }
+        }
+    res = dpath.util.search(tdict, '/a/b')
+    print res
+    assert(isinstance(res['a']['b'], dict))
+    assert(len(res['a']['b']) == 3)
+    assert(res['a']['b'] == {0: 0, 1: 1, 2: 2})
+
+def test_search_return_dict_globbed():
+    tdict = {
+        "a": {
+            "b": {
+                0: 0,
+                1: 1,
+                2: 2}
+            }
+        }
+    res = dpath.util.search(tdict, '/a/b/[02]')
+    assert(isinstance(res['a']['b'], dict))
+    assert(len(res['a']['b']) == 2)
+    assert(res['a']['b'] == {0: 0, 2: 2})
+
 def test_search_return_list_head():
     tdict = {
         "a": {
@@ -100,9 +130,9 @@ def test_search_return_list_head():
             }
         }
     res = dpath.util.search(tdict, '/a/b')
-    assert(isinstance(res, list))
-    assert(len(res) == 3)
-    assert(res == [0, 1, 2])
+    assert(isinstance(res['a']['b'], list))
+    assert(len(res['a']['b']) == 3)
+    assert(res['a']['b'] == [0, 1, 2])
 
 def test_search_return_list_globbed():
     tdict = {
@@ -114,6 +144,7 @@ def test_search_return_list_globbed():
             }
         }
     res = dpath.util.search(tdict, '/a/b/[02]')
-    assert(isinstance(res, list))
-    assert(len(res) == 2)
-    assert(res == [0, 2])
+    assert(isinstance(res['a']['b'], list))
+    assert(len(res['a']['b']) == 2)
+    assert(res['a']['b'] == [0, 2])
+

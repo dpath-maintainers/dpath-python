@@ -4,6 +4,20 @@ import fnmatch
 import shlex
 import sys
 
+def path_types(obj, path):
+    """
+    Given a list of path name elements, return anew list of [name, type] path components, given the reference object.
+    """
+    result = []
+    for elem in path[:-1]:
+        if elem in obj:
+            result.append([elem, elem.__class__])
+        else:
+            result.append([elem, dict])
+    result.append([path[-1], path[-1].__class__])
+    print result
+    return result
+
 def paths_only(path):
     """
     Return a list containing only the pathnames of the given path list, not the types.
@@ -14,8 +28,12 @@ def paths_only(path):
     return l
 
 def validate(path, separator="/", regex=None):
+    """
+    Validate that all the keys in the given list of path components are valid, given that they do not contain the separator, and match any optional regex given.
+    """
     validated = []
-    for key in path:
+    for elem in path:
+        key = elem[0]
         strkey = str(key)
         if (separator and (separator in strkey)):
             raise dpath.exceptions.InvalidKeyName("{} at {} contains the separator {}"
@@ -46,7 +64,7 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
     """
     if isinstance(obj, dict):
         for (k, v) in obj.iteritems():
-            if skip and k[0] == '+':
+            if issubclass(k.__class__, (basestring)) and skip and k[0] == '+':
                 continue
             newpath = path + [[k, v.__class__]]
             validate(newpath, separator=separator)
@@ -112,6 +130,7 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
     Otherwise, if False, an exception is thrown if path
     components are missing.
     """
+    print obj
     cur = obj
     traversed = []
 
@@ -179,7 +198,7 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
                     separator.join(traversed)
                     )
                 )
-        traversed.append(elem)
+        traversed.append(elem_value)
         if len(traversed) < len(path):
             obj = accessor(obj, elem)
 
@@ -201,14 +220,12 @@ def get(obj, path, view=False, filter=None):
     view -- Return a view of the object.
 
     """
+    print path
     target = obj
     head = type(target)()
     tail = head
     up = None
     for pair in path:
-        print head
-        print path
-        print tail
         key = pair[0]
         target = target[key]
         if view:
@@ -217,29 +234,27 @@ def get(obj, path, view=False, filter=None):
                     tail[key] = None
                 else:
                     tail[key] = type(target)()
+                up = tail
                 tail = tail[key]
             elif isinstance(tail, list):
-                #if key >= len(tail):
-                #    tail += [None] * (key - len(tail) + 1)
                 if target == None:
                     tail.append(None)
                 else:
                     tail.append(type(target)())
                 key = len(tail)-1
-                print key
                 if issubclass(target.__class__, (dict, list, tuple)):
                     tail = tail[:-1]
-            up = tail
+                up = tail
+        if not issubclass(target.__class__, (list, dict)):
+            if (filter and (not filter(target))):
+                print "Raising filtered value exception on %s" % target
+                raise dpath.exceptions.FilteredValue
     print head
+    print tail
     print up
     if view:
         up[key] = target
-        if ((not filter) or (filter and filter(head))):
-            return head
-        else:
-            raise dpath.exceptions.FilteredValue
+        print head
+        return head
     else:
-        if ((not filter) or (filter and filter(target))):
-            return target
-        else:
-            raise dpath.exceptions.FilteredValue
+        return target
