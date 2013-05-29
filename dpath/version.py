@@ -1,0 +1,3 @@
+BRANCH='1.2.beta'
+REVISION='1'
+VERSION='1.2.beta-1'
