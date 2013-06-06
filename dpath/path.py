@@ -234,20 +234,15 @@ def get(obj, path, view=False, filter=None):
                 up = tail
                 tail = tail[key]
             elif isinstance(tail, list):
-                if target == None:
-                    tail.append(None)
-                else:
-                    tail.append(type(target)())
-                key = len(tail)-1
-                if issubclass(target.__class__, (dict, list, tuple)):
-                    tail = tail[:-1]
                 up = tail
         if not issubclass(target.__class__, (list, dict)):
             if (filter and (not filter(target))):
-                print "Raising filtered value exception on %s" % target
                 raise dpath.exceptions.FilteredValue
     if view:
-        up[key] = target
+        if issubclass(up.__class__, (list, tuple)):
+            up.append(target)
+        else:
+            up[key] = target
         return head
     else:
         return target

@@ -77,7 +77,6 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
                 val = dpath.path.get(obj, path, filter=filter, view=True)
                 merge(view, val)
             except dpath.exceptions.FilteredValue:
-                print "FilteredValue on %s" % str(path)
                 pass
         return view
 
@@ -87,7 +86,6 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
                 val = dpath.path.get(obj, path, view=False, filter=filter)
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)
             except dpath.exceptions.FilteredValue:
-                print "FilteredValue on %s" % str(path)
                 pass
 
     if yielded:
