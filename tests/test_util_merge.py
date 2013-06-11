@@ -84,12 +84,16 @@ def test_merge_filter():
 
     src = {
         "key": "metal",
-        "key2": "rubber"
+        "key2": "rubber",
+        "otherdict": {
+            "key3": "I shouldn't be here"
+            }
         }
     dst = {}
     dpath.util.merge(dst, src, filter=filter)
     assert ("key2" in dst)
     assert ("key" not in dst)
+    assert ("otherdict" not in dst)
 
 @raises(TypeError)
 def test_merge_typesafe():

@@ -12,4 +12,11 @@ def test_path_paths_invalid_keyname():
         pass
 
 def test_path_paths_int_keys():
-    dpath.path.validate(['I', 'am', 'path', 0, 'of', 2])
+    dpath.path.validate([
+            ['I', dict],
+            ['am', dict],
+            ['path', dict],
+            [0, dict],
+            ['of', dict],
+            [2, int]
+            ])

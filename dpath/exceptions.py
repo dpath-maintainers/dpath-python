@@ -9,3 +9,7 @@ class PathNotFound(Exception):
 class InvalidKeyName(Exception):
     """This key contains the separator character or another invalid character"""
     pass
+
+class FilteredValue(Exception):
+    """Unable to return a value, since the filter rejected it"""
+    pass

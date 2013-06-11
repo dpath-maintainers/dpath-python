@@ -175,11 +175,11 @@ Also, check out dpath.util.merge. The python dict update() method is great and a
 
     >>> help(dpath.util.merge)
     Help on function merge in module dpath.util:
-    
+
     merge(dst, src, filter=None, flags=4, _path='')
         Merge source into destination. Like dict.update() but performs
         deep merging.
-        
+
         flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE, or
         MERGE_TYPESAFE.
             * MERGE_ADDITIVE : List objects are combined onto one long
@@ -296,3 +296,10 @@ Consider this example. Given the source dictionary, we want to find ALL keys ins
     }
 
 Obviously filtering functions can perform more advanced tests (regular expressions, etc etc).
+
+dpath.path : The Undocumented Backend
+=====================================
+
+dpath.util is where you want to spend your time: this library has the friendly functions that will understand simple string globs, filter functions, etc.
+
+dpath.path is the backend pathing library - it is currently undocumented, and not meant to be used directly! It passes around lists of path components instead of string globs, and just generally does things in a way that you (as a frontend user) might not expect. Stay out of it. You have been warned!
