@@ -239,6 +239,7 @@ def get(obj, path, view=False, filter=None):
     for pair in path:
         key = pair[0]
         target = target[key]
+
         if view:
             if isinstance(tail, dict):
                 if issubclass(pair[1], (list, dict)):
