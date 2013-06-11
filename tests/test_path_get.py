@@ -13,7 +13,6 @@ def test_path_get_list_of_dicts():
             }
         }
     res = dpath.path.get(tdict, dpath.path.path_types(tdict, ['a', 'b', 0, 0]), view=True)
-    print res
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 1)
     assert(res['a']['b'][0][0] == 0)
