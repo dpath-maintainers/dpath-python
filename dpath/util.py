@@ -82,7 +82,6 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
 
     def _search_yielded(obj, glob):
         for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=False):
-            print path
             try:
                 val = dpath.path.get(obj, path, view=False, filter=filter)
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)

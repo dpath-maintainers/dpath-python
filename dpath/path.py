@@ -29,7 +29,6 @@ def path_types(obj, path):
             result.append([path[-1], cur[int(path[-1])].__class__])
     except (KeyError, IndexError):
         result.append([path[-1], path[-1].__class__])
-    print "result = {}".format(result)
     return result
 
 def paths_only(path):
@@ -237,15 +236,8 @@ def get(obj, path, view=False, filter=None):
     head = type(target)()
     tail = head
     up = None
-    print path
-    print "===="
     for pair in path:
-        print pair
-        print up
-        print tail
-        print head
         key = pair[0]
-        print key
         target = target[key]
         if view:
             if isinstance(tail, dict):
@@ -253,27 +245,21 @@ def get(obj, path, view=False, filter=None):
                     tail[key] = pair[1]()
                 else:
                     tail[key] = None
-                print "Assigning up to tail because tail was a dict, pathing into tail : {}".format(tail)
                 up = tail
                 tail = tail[key]
             elif issubclass(tail.__class__, (list, tuple)):
                 if issubclass(pair[1], (list, tuple, dict)):
-                    print "Appending object of type {} to tail".format(pair[1])
                     tail.append(pair[1]())
                     up = tail[-1]
+
         if not issubclass(target.__class__, (list, dict)):
             if (filter and (not filter(target))):
                 raise dpath.exceptions.FilteredValue
-        print up
-        print tail
-        print head
-        print "----"
+
     if view:
         if issubclass(up.__class__, (list, tuple)):
-            print "Appending {} to {} because up is a list/tuple".format(target, up)
             up.append(target)
         else:
-            print "Setting {}[{}] = {} because up is a dict".format(up, key, target)
             up[key] = target
         return head
     else:
