@@ -3,18 +3,32 @@ import re
 import fnmatch
 import shlex
 import sys
+import traceback
 
 def path_types(obj, path):
     """
     Given a list of path name elements, return anew list of [name, type] path components, given the reference object.
     """
     result = []
+    #for elem in path[:-1]:
+    cur = obj
     for elem in path[:-1]:
-        if elem in obj:
-            result.append([elem, elem.__class__])
+        if ((issubclass(cur.__class__, dict) and elem in cur)):
+            result.append([elem, cur[elem].__class__])
+            cur = cur[elem]
+        elif (issubclass(cur.__class__, (list, tuple)) and int(elem) < len(cur)):
+            elem = int(elem)
+            result.append([elem, cur[elem].__class__])
+            cur = cur[elem]
         else:
             result.append([elem, dict])
-    result.append([path[-1], path[-1].__class__])
+    try:
+        try:
+            result.append([path[-1], cur[path[-1]].__class__])
+        except TypeError:
+            result.append([path[-1], cur[int(path[-1])].__class__])
+    except (KeyError, IndexError):
+        result.append([path[-1], path[-1].__class__])
     return result
 
 def paths_only(path):
@@ -218,6 +232,8 @@ def get(obj, path, view=False, filter=None):
     view -- Return a view of the object.
 
     """
+    index = 0
+    path_count = len(path) - 1
     target = obj
     head = type(target)()
     tail = head
@@ -225,24 +241,30 @@ def get(obj, path, view=False, filter=None):
     for pair in path:
         key = pair[0]
         target = target[key]
+
         if view:
             if isinstance(tail, dict):
-                if target == None:
-                    tail[key] = None
+                if issubclass(pair[1], (list, dict)) and index != path_count:
+                    tail[key] = pair[1]()
                 else:
-                    tail[key] = type(target)()
+                    tail[key] = target
                 up = tail
                 tail = tail[key]
-            elif isinstance(tail, list):
+            elif issubclass(tail.__class__, (list, tuple)):
+                if issubclass(pair[1], (list, tuple, dict)) and index != path_count:
+                    tail.append(pair[1]())
+                else:
+                    tail.append(target)
                 up = tail
+                tail = tail[-1]
+
         if not issubclass(target.__class__, (list, dict)):
             if (filter and (not filter(target))):
                 raise dpath.exceptions.FilteredValue
+
+        index += 1
+
     if view:
-        if issubclass(up.__class__, (list, tuple)):
-            up.append(target)
-        else:
-            up[key] = target
         return head
     else:
         return target

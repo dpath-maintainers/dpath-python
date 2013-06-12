@@ -121,9 +121,13 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
         return merge(dst, src)
 
     def _check_typesafe(obj1, obj2, key, path):
-        if ( (flags & MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
+        if not key in obj1:
+            return
+        elif ( (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             raise TypeError("Cannot merge objects of type {} and {} at {}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
+        elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
+            obj1.pop(key)
 
     if isinstance(src, dict):
         for (i, v) in enumerate(src):
@@ -142,9 +146,9 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
             _check_typesafe(dst, src, i, separator.join([_path, str(i)]))
             dsti = i
             if ( flags & MERGE_ADDITIVE):
-                dsti += len(src)
+                dsti = len(dst)
             if dsti >= len(dst):
-                dst += [None] * (dsti - len(dst) + 1)
+                dst += [None] * (dsti - (len(dst) - 1))
             if dst[dsti] == None:
                 dst[dsti] = src[i]
             else:
@@ -152,4 +156,4 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
                     dst[dsti] = src[i]
                 else:
                     merge(dst[i], src[i], filter=filter, flags=flags,
-                          _path=separator.join(_path, v), separator=separator)
+                          _path=separator.join([_path, str(i)]), separator=separator)
