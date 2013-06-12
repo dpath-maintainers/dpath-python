@@ -232,6 +232,8 @@ def get(obj, path, view=False, filter=None):
     view -- Return a view of the object.
 
     """
+    index = 0
+    path_count = len(path) - 1
     target = obj
     head = type(target)()
     tail = head
@@ -242,26 +244,27 @@ def get(obj, path, view=False, filter=None):
 
         if view:
             if isinstance(tail, dict):
-                if issubclass(pair[1], (list, dict)):
+                if issubclass(pair[1], (list, dict)) and index != path_count:
                     tail[key] = pair[1]()
                 else:
-                    tail[key] = None
+                    tail[key] = target
                 up = tail
                 tail = tail[key]
             elif issubclass(tail.__class__, (list, tuple)):
-                if issubclass(pair[1], (list, tuple, dict)):
+                if issubclass(pair[1], (list, tuple, dict)) and index != path_count:
                     tail.append(pair[1]())
-                    up = tail[-1]
+                else:
+                    tail.append(target)
+                up = tail
+                tail = tail[-1]
 
         if not issubclass(target.__class__, (list, dict)):
             if (filter and (not filter(target))):
                 raise dpath.exceptions.FilteredValue
 
+        index += 1
+
     if view:
-        if issubclass(up.__class__, (list, tuple)):
-            up.append(target)
-        else:
-            up[key] = target
         return head
     else:
         return target
