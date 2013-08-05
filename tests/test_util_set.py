@@ -29,7 +29,7 @@ def test_set_existing_list():
     assert(dict['a'][0] == 1)
 
 def test_set_filter():
-    def filter(x):
+    def afilter(x):
         if int(x) == 31:
             return True
         return False
@@ -41,7 +41,7 @@ def test_set_filter():
             "d": 31
             }
         }
-    dpath.util.set(dict, '/a/*', 31337, filter=filter)
+    dpath.util.set(dict, '/a/*', 31337, afilter=afilter)
     print dict
     assert (dict['a']['b'] == 0)
     assert (dict['a']['c'] == 1)

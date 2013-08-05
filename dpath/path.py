@@ -83,14 +83,14 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
             validate(newpath, separator=separator)
             if dirs:
                 yield newpath
-            for child in paths(v, dirs, leaves, newpath, skip):
+            for child in paths(v, dirs, leaves, newpath, skip, separator=separator):
                 yield child
     elif isinstance(obj, (list, tuple)):
         for (i, v) in enumerate(obj):
             newpath = path + [[i, v.__class__]]
             if dirs:
                 yield newpath
-            for child in paths(obj[i], dirs, leaves, newpath, skip):
+            for child in paths(obj[i], dirs, leaves, newpath, skip, separator=separator):
                 yield child
     elif leaves:
         yield path + [[obj, obj.__class__]]
@@ -132,7 +132,7 @@ def match(path, glob):
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
 
-def set(obj, path, value, create_missing=True, separator="/", filter=None):
+def set(obj, path, value, create_missing=True, separator="/", afilter=None):
     """Set the value of the given path in the object. Path
     must be a list of specific path elements, not a glob.
     You can use dpath.util.set for globs, but the paths must
@@ -216,10 +216,10 @@ def set(obj, path, value, create_missing=True, separator="/", filter=None):
 
     if elem is None:
         return
-    if (filter and filter(accessor(obj, elem))) or (not filter):
+    if (afilter and afilter(accessor(obj, elem))) or (not afilter):
         assigner(obj, elem, value)
 
-def get(obj, path, view=False, filter=None):
+def get(obj, path, view=False, afilter=None):
     """Get the value of the given path.
 
     Arguments:
@@ -259,7 +259,7 @@ def get(obj, path, view=False, filter=None):
                 tail = tail[-1]
 
         if not issubclass(target.__class__, (list, dict)):
-            if (filter and (not filter(target))):
+            if (afilter and (not afilter(target))):
                 raise dpath.exceptions.FilteredValue
 
         index += 1
