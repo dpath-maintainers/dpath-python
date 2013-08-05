@@ -77,7 +77,7 @@ def test_merge_simple_dict():
     nose.tools.eq_(dst["dict"]["key"], src["dict"]["key"])
 
 def test_merge_filter():
-    def filter(x):
+    def afilter(x):
         if "rubber" not in str(x):
             return False
         return True
@@ -90,7 +90,7 @@ def test_merge_filter():
             }
         }
     dst = {}
-    dpath.util.merge(dst, src, filter=filter)
+    dpath.util.merge(dst, src, afilter=afilter)
     assert ("key2" in dst)
     assert ("key" not in dst)
     assert ("otherdict" not in dst)

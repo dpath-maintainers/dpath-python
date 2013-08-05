@@ -176,7 +176,7 @@ Also, check out dpath.util.merge. The python dict update() method is great and a
     >>> help(dpath.util.merge)
     Help on function merge in module dpath.util:
 
-    merge(dst, src, filter=None, flags=4, _path='')
+    merge(dst, src, afilter=None, flags=4, _path='')
         Merge source into destination. Like dict.update() but performs
         deep merging.
 
@@ -252,7 +252,7 @@ Now that's handy. You shouldn't try to use this as a replacement for the deepcop
 Filtering
 =========
 
-All of the methods in this library (except new()) support a 'filter' argument. This can be set to a function that will return True or False to say 'yes include that value in my result set' or 'no don't include it'.
+All of the methods in this library (except new()) support a 'afilter' argument. This can be set to a function that will return True or False to say 'yes include that value in my result set' or 'no don't include it'.
 
 Filtering functions receive every terminus node in a search - e.g., anything that is not a dict or a list, at the very end of the path. For each value, they return True to include that value in the result set, or False to exclude it.
 
@@ -274,12 +274,12 @@ Consider this example. Given the source dictionary, we want to find ALL keys ins
 	    }
 	}
     }
-    >>> def filter(x):
+    >>> def afilter(x):
     ...     if "ffle" in str(x):
     ...             return True
     ...     return False
     ...
-    >>> result = dpath.util.search(x, '**', filter=filter)
+    >>> result = dpath.util.search(x, '**', afilter=afilter)
     >>> print json.dumps(result, indent=4, sort_keys=True)
     {
 	"a": {
@@ -300,6 +300,6 @@ Obviously filtering functions can perform more advanced tests (regular expressio
 dpath.path : The Undocumented Backend
 =====================================
 
-dpath.util is where you want to spend your time: this library has the friendly functions that will understand simple string globs, filter functions, etc.
+dpath.util is where you want to spend your time: this library has the friendly functions that will understand simple string globs, afilter functions, etc.
 
 dpath.path is the backend pathing library - it is currently undocumented, and not meant to be used directly! It passes around lists of path components instead of string globs, and just generally does things in a way that you (as a frontend user) might not expect. Stay out of it. You have been warned!

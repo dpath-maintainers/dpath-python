@@ -30,7 +30,7 @@ def test_delete_missing():
     dpath.util.delete(dict, '/a/b')
 
 def test_delete_filter():
-    def filter(x):
+    def afilter(x):
         if int(x) == 31:
             return True
         return False
@@ -42,7 +42,7 @@ def test_delete_filter():
             "d": 31
             }
         }
-    dpath.util.delete(dict, '/a/*', filter=filter)
+    dpath.util.delete(dict, '/a/*', afilter=afilter)
     assert (dict['a']['b'] == 0)
     assert (dict['a']['c'] == 1)
     assert ('d' not in dict['a'])

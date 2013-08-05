@@ -18,7 +18,7 @@ def new(obj, path, value, separator="/"):
     pathobj = dpath.path.path_types(obj, path.lstrip(separator).split(separator))
     return dpath.path.set(obj, pathobj, value, create_missing=True)
 
-def delete(obj, glob, separator="/", filter=None):
+def delete(obj, glob, separator="/", afilter=None):
     """
     Given a path glob, delete all elements that match the glob.
 
@@ -27,7 +27,7 @@ def delete(obj, glob, separator="/", filter=None):
     """
     deleted = 0
     paths = []
-    for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+    for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
@@ -42,25 +42,25 @@ def delete(obj, glob, separator="/", filter=None):
                 # This only happens when we delete X/Y and the next
                 # item in the paths is X/Y/Z
                 pass
-        if (not filter) or (filter and filter(prev[item[0]])):
+        if (not afilter) or (afilter and afilter(prev[item[0]])):
             prev.pop(item[0])
         deleted += 1
     if not deleted:
         raise dpath.exceptions.PathNotFound("Could not find {} to delete it".format(glob))
     return deleted
 
-def set(obj, glob, value, separator="/", filter=None):
+def set(obj, glob, value, separator="/", afilter=None):
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
     """
     changed = 0
-    for path in _inner_search(obj, glob.lstrip(separator).split(separator)):
+    for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator):
         changed += 1
-        dpath.path.set(obj, path, value, create_missing=False, filter=filter)
+        dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
     return changed
 
-def search(obj, glob, yielded=False, separator="/", filter=None):
+def search(obj, glob, yielded=False, separator="/", afilter=None, dirs = True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
@@ -70,35 +70,37 @@ def search(obj, glob, yielded=False, separator="/", filter=None):
     every element in the document that matched the glob.
     """
 
-    def _search_view(obj, glob):
+    def _search_view(obj, glob, separator, afilter, dirs):
         view = {}
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=(filter == None)):
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator, dirs=dirs):
             try:
-                val = dpath.path.get(obj, path, filter=filter, view=True)
+                val = dpath.path.get(obj, path, afilter=afilter, view=True)
                 merge(view, val)
             except dpath.exceptions.FilteredValue:
                 pass
         return view
 
-    def _search_yielded(obj, glob):
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator), dirs=False):
+    def _search_yielded(obj, glob, separator, afilter, dirs):
+        for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator, dirs=dirs):
             try:
-                val = dpath.path.get(obj, path, view=False, filter=filter)
+                val = dpath.path.get(obj, path, view=False, afilter=afilter)
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)
             except dpath.exceptions.FilteredValue:
                 pass
 
+    if afilter is not None:
+        dirs = False
     if yielded:
-        return _search_yielded(obj, glob)
-    return _search_view(obj, glob)
+        return _search_yielded(obj, glob, separator, afilter, dirs)
+    return _search_view(obj, glob, separator, afilter, dirs)
 
-def _inner_search(obj, glob, dirs=True, leaves=False):
+def _inner_search(obj, glob, separator, dirs=True, leaves=False):
     """Search the object paths that match the glob."""
-    for path in dpath.path.paths(obj, dirs, leaves, skip=True):
+    for path in dpath.path.paths(obj, dirs, leaves, skip=True, separator = separator):
         if dpath.path.match(path, glob):
             yield path
 
-def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
+def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
     deep merging.
 
@@ -114,10 +116,10 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
           replaces the destination in this situation.
     """
 
-    if filter:
-        # Having merge do its own filtering is dumb, let search do the
+    if afilter:
+        # Having merge do its own afiltering is dumb, let search do the
         # heavy lifting for us.
-        src = search(src, '**', filter=filter)
+        src = search(src, '**', afilter=afilter)
         return merge(dst, src)
 
     def _check_typesafe(obj1, obj2, key, path):
@@ -139,7 +141,7 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
                 if not isinstance(src[v], (dict, list)):
                     dst[v] = src[v]
                 else:
-                    merge(dst[v], src[v], filter=filter, flags=flags,
+                    merge(dst[v], src[v], afilter=afilter, flags=flags,
                           _path=separator.join([_path, str(v)]), separator=separator)
     elif isinstance(src, list):
         for (i, v) in enumerate(src):
@@ -155,5 +157,5 @@ def merge(dst, src, separator="/", filter=None, flags=MERGE_ADDITIVE, _path=""):
                 if not isinstance(src[i], (dict, list)):
                     dst[dsti] = src[i]
                 else:
-                    merge(dst[i], src[i], filter=filter, flags=flags,
+                    merge(dst[i], src[i], afilter=afilter, flags=flags,
                           _path=separator.join([_path, str(i)]), separator=separator)
