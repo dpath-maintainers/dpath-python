@@ -47,8 +47,10 @@ def test_search_paths():
     for (path, value) in dpath.util.search(dict, '/**', yielded=True):
         assert(path in paths)
 
-def test_search_filter():
-    def filter(x):
+def test_search_afilter():
+    import json
+
+    def afilter(x):
         if x in [1, 2]:
             return True
         return False
@@ -69,9 +71,10 @@ def test_search_filter():
         'a/b/c/e',
         'a/b/c/f'
         ]
-    for (path, value) in dpath.util.search(dict, '/**', yielded=True, filter=filter):
+    for (path, value) in dpath.util.search(dict, '/**', yielded=True, afilter=afilter):
         assert(path in paths)
-    assert("view_failure" not in dpath.util.search(dict, '/**', filter=filter)['a'])
+    assert("view_failure" not in dpath.util.search(dict, '/**', afilter=afilter)['a'])
+    assert("d" not in dpath.util.search(dict, '/**', afilter=afilter)['a']['b']['c'])
 
 def test_search_globbing():
     dict = {
