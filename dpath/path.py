@@ -77,6 +77,8 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
     """
     if isinstance(obj, dict):
         for (k, v) in obj.iteritems():
+            if not k:
+                continue
             if issubclass(k.__class__, (basestring)) and skip and k[0] == '+':
                 continue
             newpath = path + [[k, v.__class__]]
