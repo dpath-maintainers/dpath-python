@@ -9,6 +9,19 @@ Automated pylint and nosetest runs are in the AKLabs bamboo, here: http://bamboo
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
+Installing
+==========
+
+The best way to install dpath is via easy_install or pip.
+
+    easy_install dpath
+    pip install dpath
+    
+Using Dpath
+===========
+
+    import dpath.util
+
 Separators
 ==========
 
