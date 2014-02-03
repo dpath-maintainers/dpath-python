@@ -1,3 +1,4 @@
+from dpath import PY3
 import dpath.exceptions
 import re
 import fnmatch
@@ -76,8 +77,17 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
 
     """
     if isinstance(obj, dict):
-        for (k, v) in obj.iteritems():
-            if issubclass(k.__class__, (basestring)) and skip and k[0] == '+':
+
+        # Python 3 support        
+        if PY3:
+            iteritems = obj.items()
+            string_class = str
+        else: # Default to PY2
+            iteritems = obj.iteritems()
+            string_class = basestring
+        
+        for (k, v) in iteritems:
+            if issubclass(k.__class__, (string_class)) and skip and k[0] == '+':
                 continue
             newpath = path + [[k, v.__class__]]
             validate(newpath, separator=separator)
@@ -125,7 +135,11 @@ def match(path, glob):
             ss_glob = glob[:ss] + glob[ss + 1:]
 
     if path_len == len(ss_glob):
-        return all(map(fnmatch.fnmatch, map(str, paths_only(path)), map(str, ss_glob)))
+        # Python 3 support
+        if PY3:
+            return all(map(fnmatch.fnmatch, list(map(str, paths_only(path))), list(map(str, ss_glob))))
+        else: # Default to Python 2
+            return all(map(fnmatch.fnmatch, map(str, paths_only(path)), map(str, ss_glob)))
 
     return False
 

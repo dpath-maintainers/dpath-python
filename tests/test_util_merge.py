@@ -16,7 +16,7 @@ def test_merge_typesafe_and_separator():
         }
     try:
         dpath.util.merge(dst, src, flags=(dpath.util.MERGE_ADDITIVE | dpath.util.MERGE_TYPESAFE), separator=";")
-    except TypeError, e:
+    except TypeError as e:
         assert(str(e).endswith("dict;integer"))
         return
     raise Exception("MERGE_TYPESAFE failed to raise an exception when merging between str and int!")
