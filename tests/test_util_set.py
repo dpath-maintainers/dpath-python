@@ -42,7 +42,7 @@ def test_set_filter():
             }
         }
     dpath.util.set(dict, '/a/*', 31337, afilter=afilter)
-    print dict
+    print(dict)
     assert (dict['a']['b'] == 0)
     assert (dict['a']['c'] == 1)
     assert (dict['a']['d'] == 31337)

@@ -37,6 +37,7 @@ Version 1.2 introduces a number of fixes against 1.1:
             'License :: OSI Approved :: MIT License',
             'Natural Language :: English',
             'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
             'Topic :: Software Development :: Libraries :: Python Modules',
         ],
     )

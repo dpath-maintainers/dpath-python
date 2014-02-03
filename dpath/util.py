@@ -38,7 +38,7 @@ def delete(obj, glob, separator="/", afilter=None):
             prev = cur
             try:
                 cur = cur[item[0]]
-            except AttributeError, e:
+            except AttributeError as e:
                 # This only happens when we delete X/Y and the next
                 # item in the paths is X/Y/Z
                 pass
