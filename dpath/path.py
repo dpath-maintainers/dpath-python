@@ -1,5 +1,6 @@
 from dpath import PY3
 import dpath.exceptions
+import dpath.options
 import re
 import fnmatch
 import shlex
@@ -77,19 +78,21 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
 
     """
     if isinstance(obj, dict):
-        # Python 3 support        
+        # Python 3 support
         if PY3:
             iteritems = obj.items()
             string_class = str
         else: # Default to PY2
             iteritems = obj.iteritems()
             string_class = basestring
-        
+
         for (k, v) in iteritems:
-            if not k:
-               continue
-            if issubclass(k.__class__, (string_class)) and skip and k[0] == '+':
-               continue
+            if issubclass(k.__class__, (string_class)):
+                if (not k) and (not dpath.options.ALLOW_EMPTY_STRING_KEYS):
+                    raise dpath.exceptions.InvalidKeyName("Empty string keys not allowed without "
+                                                          "dpath.options.ALLOW_EMPTY_STRING_KEYS=True")
+                elif (skip and k[0] == '+'):
+                    continue
             newpath = path + [[k, v.__class__]]
             validate(newpath, separator=separator)
             if dirs:

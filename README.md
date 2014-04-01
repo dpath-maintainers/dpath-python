@@ -16,7 +16,7 @@ The best way to install dpath is via easy_install or pip.
 
     easy_install dpath
     pip install dpath
-    
+
 Using Dpath
 ===========
 
@@ -309,6 +309,16 @@ Consider this example. Given the source dictionary, we want to find ALL keys ins
     }
 
 Obviously filtering functions can perform more advanced tests (regular expressions, etc etc).
+
+Key Names
+=========
+
+By default, dpath only understands dictionary keys that are integers or strings. String keys must be non-empty. You can change this behavior by setting a library-wide dpath option:
+
+    import dpath.options
+    dpath.options.ALLOW_EMPTY_STRING_KEYS=True
+
+Again, by default, this behavior is OFF, and empty string keys will result in dpath.exceptions.InvalidKeyName being thrown.
 
 dpath.path : The Undocumented Backend
 =====================================
