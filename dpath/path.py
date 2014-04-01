@@ -77,7 +77,6 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
 
     """
     if isinstance(obj, dict):
-
         # Python 3 support        
         if PY3:
             iteritems = obj.items()
@@ -87,8 +86,10 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
             string_class = basestring
         
         for (k, v) in iteritems:
+            if not k:
+               continue
             if issubclass(k.__class__, (string_class)) and skip and k[0] == '+':
-                continue
+               continue
             newpath = path + [[k, v.__class__]]
             validate(newpath, separator=separator)
             if dirs:
