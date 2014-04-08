@@ -39,7 +39,6 @@ def test_path_paths_empty_key_allowed():
     for x in path[:-1]:
         parts.append(x[0])
     dpath.options.ALLOW_EMPTY_STRING_KEYS=False
-    print "/".join(parts)
     assert("/".join(parts) == "Empty//Key")
 
 def test_path_paths_int_keys():
