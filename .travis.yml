@@ -1,11 +1,17 @@
-language: python
-python:
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-# command to install dependencies
-install:
-  - "pip install ."
-# command to run tests
-script: nosetests
+deploy:                                                                                                                                                                                 
+  provider: pypi                                                                                                                                                                        
+  user: akesterson                                                                                                                                                                      
+  password:                                                                                                                                                                             
+    secure: H0XRotyZm7xxpkR5bTxyjWSnwrUQUscKIj9Miqn9l1aROZN3GQ4oLLP8Epa590UQ/VLSlKQ28oalejlbDHG452K1726NAytO3r/0Oy/htuBf5DoR3VCa+aivOjeCVd2Axgc0385BB2ouG8aYJOL7Lc0sJ9fFUG7pQ2f3lZlzZLo=
+  on:                                                                                                                                                                                   
+    tags: true                                                                                                                                                                          
+    branch: master                                                                                                                                                                      
+install:                                                                                                                                                                                
+- pip install .                                                                                                                                                                         
+language: python                                                                                                                                                                        
+script: nosetests                                                                                                                                                                       
+python:                                                                                                                                                                                 
+- "2.7"                                                                                                                                                                                 
+- "3.2"                                                                                                                                                                                 
+- "3.3"                                                                                                                                                                                 
+- "3.4"                                                                                                                                                                                 
