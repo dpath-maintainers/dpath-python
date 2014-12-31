@@ -60,6 +60,32 @@ def set(obj, glob, value, separator="/", afilter=None):
         dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
     return changed
 
+def get(obj, glob, separator="/"):
+    """
+    Given an object which contains only one possible match for the given glob,
+    return the value for the leaf matching the given glob.
+
+    If more than one leaf matches the glob, ValueError is raised. If the glob is
+    not found, KeyError is raised.
+    """
+    ret = None
+    for item in search(obj, glob, yielded=True, separator=separator):
+        if ret is not None:
+            raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)
+        ret = item[1]
+    if ret is None:
+        raise KeyError(glob)
+    return ret
+
+def values(obj, glob, separator="/", afilter=None, dirs=True):
+    """
+    Given an object and a path glob, return an array of all values which match
+    the glob. The arguments to this function are identical to those of search(),
+    and it is primarily a shorthand for a list comprehension over a yielded
+    search call.
+    """
+    return [x[1] for x in dpath.util.search(obj, glob, yielded=True, separator=separator, afilter=afilter, dirs=dirs)]
+
 def search(obj, glob, yielded=False, separator="/", afilter=None, dirs = True):
     """
     Given a path glob, return a dictionary containing all keys

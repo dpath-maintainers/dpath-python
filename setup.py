@@ -12,6 +12,8 @@ if __name__ == "__main__":
         long_description="""
 DPath is a library that allows you to access dictionaries similar to using find over a filesystem. The proper documentation is maintained on GitHub: https://github.com/akesterson/dpath-python
 
+Version 1.3 introduces the get() and values() functions which are useful for quickly extracting values, and only values, without accompanying path information.
+
 Version 1.2 introduces a number of fixes against 1.1:
 
     * Support for python 3
@@ -26,7 +28,7 @@ Version 1.2 introduces a number of fixes against 1.1:
 
     * Support for python 3
 
-Many thanks to our community contributors for their patches (alan gibson, xhh2a).
+Many thanks to our community contributors for their patches.
 """,
         author=("Caleb Case, "
                 "Andrew Kesterson"),

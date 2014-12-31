@@ -44,7 +44,22 @@ Suppose we have a dictionary like this:
     }
 
 
-... And we want to say "Give me a new dictionary with the values of all elements in x['a']['b'] where the key is equal to the glob '[cd]'. Okay.
+... And we want to ask a simple question, like "Get me the value of the key '43' in the 'b' hash which is in the 'a' hash". That's easy.
+
+    >>> help(dpath.util.get)
+    Help on function get in module dpath.util:
+    
+    get(obj, glob, separator='/')
+        Given an object which contains only one possible match for the given glob,
+        return the value for the leaf matching the given glob.
+    
+        If more than one leaf matches the glob, ValueError is raised. If the glob is
+        not found, KeyError is raised.
+    
+    >>> dpath.util.get(x, '/a/b/43')
+    30
+
+Or you could say "Give me a new dictionary with the values of all elements in x['a']['b'] where the key is equal to the glob '[cd]'. Okay.
 
     >>> help(dpath.util.search)
     Help on function search in module dpath.util:
@@ -80,6 +95,20 @@ Suppose we have a dictionary like this:
     ...
     ('a/b/c', [])
     ('a/b/d', ['red', 'buggy', 'bumpers'])
+
+... Or what if I want to just get all the values back for the glob? I don't care about the paths they were found at:
+
+    >>> help(dpath.util.values)
+    Help on function values in module dpath.util:
+
+    values(obj, glob, separator='/', afilter=None, dirs=True)
+	Given an object and a path glob, return an array of all values which match
+	the glob. The arguments to this function are identical to those of search(),
+	and it is primarily a shorthand for a list comprehension over a yielded
+	search call.
+    
+    >>> dpath.util.values(x, '/a/b/d/*')
+    ['red', 'buggy', 'bumpers']
 
 Example: Setting existing keys
 ==============================

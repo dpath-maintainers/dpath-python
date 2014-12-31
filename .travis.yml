@@ -8,6 +8,7 @@ deploy:
     branch: master
 
 install:
+- pip install mock
 - pip install .
 language: python
 script: nosetests
