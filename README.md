@@ -1,25 +1,13 @@
 dpath-python
 ============
 
+[![Build Status](https://travis-ci.org/akesterson/dpath-python.svg?branch=travisci)](https://travis-ci.org/akesterson/dpath-python)
+
 A python library for accessing and searching dictionaries via /slashed/paths ala xpath
 
 Basically it lets you glob over a dictionary as if it were a filesystem. It allows you to specify globs (ala the bash eglob syntax, through some advanced fnmatch.fnmatch magic) to access dictionary elements, and provides some facility for filtering those results.
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
-
-Build Status
-============
-
-[click here for full pipeline](http://jenkins.aklabs.net/view/dpath/)
-
-centos : [![Build Status](http://jenkins.aklabs.net/buildStatus/icon?job=dpath-test-centos)](http://jenkins.aklabs.net/job/dpath-test-centos/)
-
-osx : [![Build Status](http://jenkins.aklabs.net/buildStatus/icon?job=dpath-test-osx)](http://jenkins.aklabs.net/job/dpath-test-osx/)
-
-ubuntu : [![Build Status](http://jenkins.aklabs.net/buildStatus/icon?job=dpath-test-ubuntu)](http://jenkins.aklabs.net/job/dpath-test-ubuntu/)
-
-windows 7 : [![Build Status](http://jenkins.aklabs.net/buildStatus/icon?job=dpath-test-windows7)](http://jenkins.aklabs.net/job/dpath-test-windows7/)
-
 
 Installing
 ==========
