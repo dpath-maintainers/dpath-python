@@ -1,3 +1,3 @@
 import os
 
-VERSION=os.environ.get("DPATH_VERSION", "git-unknown")
+VERSION="1.3-1"
