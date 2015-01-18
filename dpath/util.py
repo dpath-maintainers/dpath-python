@@ -46,7 +46,7 @@ def delete(obj, glob, separator="/", afilter=None):
             prev.pop(item[0])
         deleted += 1
     if not deleted:
-        raise dpath.exceptions.PathNotFound("Could not find {} to delete it".format(glob))
+        raise dpath.exceptions.PathNotFound("Could not find {0} to delete it".format(glob))
     return deleted
 
 def set(obj, glob, value, separator="/", afilter=None):
@@ -152,7 +152,7 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
         if not key in obj1:
             return
         elif ( (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
-            raise TypeError("Cannot merge objects of type {} and {} at {}"
+            raise TypeError("Cannot merge objects of type {0} and {1} at {2}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
         elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             obj1.pop(key)

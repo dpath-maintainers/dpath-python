@@ -51,7 +51,7 @@ def validate(path, separator="/", regex=None):
         key = elem[0]
         strkey = str(key)
         if (separator and (separator in strkey)):
-            raise dpath.exceptions.InvalidKeyName("{} at {} contains the separator {}"
+            raise dpath.exceptions.InvalidKeyName("{0} at {1} contains the separator {2}"
                                                   "".format(strkey,
                                                             separator.join(validated),
                                                             separator))
