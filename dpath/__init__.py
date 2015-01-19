@@ -9,3 +9,5 @@ else:
 
 PY2 = ( python_major_version == 2 )
 PY3 = ( python_major_version == 3 )  
+
+from .util import *
