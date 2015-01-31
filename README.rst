@@ -400,7 +400,7 @@ By default, dpath only understands dictionary keys that are integers or
 strings. String keys must be non-empty. You can change this behavior by
 setting a library-wide dpath option:
 
-.. code-block:: pycon
+.. code-block:: python
 
     import dpath.options
     dpath.options.ALLOW_EMPTY_STRING_KEYS = True
