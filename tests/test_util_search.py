@@ -77,7 +77,6 @@ def test_search_afilter():
         ]
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, afilter=afilter):
         assert(path in paths)
-    print dpath.util.search(dict, '/**', afilter=afilter)
     assert("view_failure" not in dpath.util.search(dict, '/**', afilter=afilter)['a'])
     assert("d" not in dpath.util.search(dict, '/**', afilter=afilter)['a']['b']['c'])
 
