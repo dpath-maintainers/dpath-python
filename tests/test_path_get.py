@@ -16,4 +16,3 @@ def test_path_get_list_of_dicts():
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 1)
     assert(res['a']['b'][0][0] == 0)
-

@@ -408,6 +408,19 @@ setting a library-wide dpath option:
 Again, by default, this behavior is OFF, and empty string keys will
 result in ``dpath.exceptions.InvalidKeyName`` being thrown.
 
+Separator got you down? Use lists as paths
+==========================================
+
+The default behavior in dpath is to assume that the path given is a string, which must be tokenized by splitting at the separator to yield a distinct set of path components against which dictionary keys can be individually glob tested. However, this presents a problem when you want to use paths that have a separator in their name; the tokenizer cannot properly understand what you mean by '/a/b/c' if it is possible for '/' to exist as a valid character in a key name.
+
+To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.util.* support the use of a list instead of a string as a path. So for example:
+
+.. code-block: python
+
+   >>> x = { 'a': {'b/c': 0}}
+   >>> dpath.util.get(['a', 'b/c'])
+   0
+
 dpath.path : The Undocumented Backend
 =====================================
 

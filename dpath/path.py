@@ -42,7 +42,7 @@ def paths_only(path):
         l.append(p[0])
     return l
 
-def validate(path, separator="/", regex=None):
+def validate(path, regex=None):
     """
     Validate that all the keys in the given list of path components are valid, given that they do not contain the separator, and match any optional regex given.
     """
@@ -50,19 +50,14 @@ def validate(path, separator="/", regex=None):
     for elem in path:
         key = elem[0]
         strkey = str(key)
-        if (separator and (separator in strkey)):
-            raise dpath.exceptions.InvalidKeyName("{0} at {1} contains the separator {2}"
-                                                  "".format(strkey,
-                                                            separator.join(validated),
-                                                            separator))
-        elif (regex and (not regex.findall(strkey))):
+        if (regex and (not regex.findall(strkey))):
             raise dpath.exceptions.InvalidKeyName("{} at {} does not match the expression {}"
                                                   "".format(strkey,
-                                                            separator.join(validated),
+                                                            validated,
                                                             regex.pattern))
         validated.append(strkey)
 
-def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
+def paths(obj, dirs=True, leaves=True, path=[], skip=False):
     """Yield all paths of the object.
 
     Arguments:
@@ -94,17 +89,17 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False, separator="/"):
                 elif (skip and k[0] == '+'):
                     continue
             newpath = path + [[k, v.__class__]]
-            validate(newpath, separator=separator)
+            validate(newpath)
             if dirs:
                 yield newpath
-            for child in paths(v, dirs, leaves, newpath, skip, separator=separator):
+            for child in paths(v, dirs, leaves, newpath, skip):
                 yield child
     elif isinstance(obj, (list, tuple)):
         for (i, v) in enumerate(obj):
             newpath = path + [[i, v.__class__]]
             if dirs:
                 yield newpath
-            for child in paths(obj[i], dirs, leaves, newpath, skip, separator=separator):
+            for child in paths(obj[i], dirs, leaves, newpath, skip):
                 yield child
     elif leaves:
         yield path + [[obj, obj.__class__]]
@@ -150,7 +145,7 @@ def match(path, glob):
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
 
-def set(obj, path, value, create_missing=True, separator="/", afilter=None):
+def set(obj, path, value, create_missing=True, afilter=None):
     """Set the value of the given path in the object. Path
     must be a list of specific path elements, not a glob.
     You can use dpath.util.set for globs, but the paths must
@@ -208,7 +203,7 @@ def set(obj, path, value, create_missing=True, separator="/", afilter=None):
             if not str(elem_value).isdigit():
                 raise TypeError("Can only create integer indexes in lists, "
                                 "not {}, in {}".format(type(obj),
-                                                       separator.join(traversed)
+                                                       traversed
                                                        )
                                 )
             tester = _presence_test_list
@@ -217,7 +212,7 @@ def set(obj, path, value, create_missing=True, separator="/", afilter=None):
             assigner = _assigner_list
         else:
             raise TypeError("Unable to path into elements of type {} "
-                            "at {}".format(obj, separator.join(traversed)))
+                            "at {}".format(obj, traversed))
 
         if (not tester(obj, elem)) and (create_missing):
             creator(obj, elem)
@@ -225,7 +220,7 @@ def set(obj, path, value, create_missing=True, separator="/", afilter=None):
             raise dpath.exceptions.PathNotFound(
                 "{} does not exist in {}".format(
                     elem,
-                    separator.join(traversed)
+                    traversed
                     )
                 )
         traversed.append(elem_value)
