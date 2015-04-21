@@ -1,9 +1,35 @@
 import dpath.path
 import dpath.exceptions
+import traceback
 
 MERGE_REPLACE=(1 << 1)
 MERGE_ADDITIVE=(1 << 2)
 MERGE_TYPESAFE=(1 << 3)
+
+def __safe_path__(path, separator):
+    """
+    Given a path and separator, return a list of path components. If path
+    is already a list, return it.
+
+    Note that a string path with the separator at index[0] will have the
+    separator stripped off. If you pass a list path, the separator is
+    ignored, and is assumed to be part of each key glob. It will not be
+    stripped.
+    """
+    if issubclass(path.__class__, (list)):
+        return path
+    path = path.lstrip(separator).split(separator)
+    validated = []
+    for elem in path:
+        key = elem[0]
+        strkey = str(key)
+        if (separator and (separator in strkey)):
+            raise dpath.exceptions.InvalidKeyName("{0} at {1} contains the separator {2}"
+                                                  "".format(strkey,
+                                                            separator.join(validated),
+                                                            separator))
+        validated.append(strkey)
+    return path
 
 def new(obj, path, value, separator="/"):
     """
@@ -15,7 +41,8 @@ def new(obj, path, value, separator="/"):
     characters in it, they will become part of the resulting
     keys
     """
-    pathobj = dpath.path.path_types(obj, path.lstrip(separator).split(separator))
+    pathlist = __safe_path__(path, separator)
+    pathobj = dpath.path.path_types(obj, pathlist)
     return dpath.path.set(obj, pathobj, value, create_missing=True)
 
 def delete(obj, glob, separator="/", afilter=None):
@@ -27,7 +54,8 @@ def delete(obj, glob, separator="/", afilter=None):
     """
     deleted = 0
     paths = []
-    for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator):
+    globlist = __safe_path__(glob, separator)
+    for path in _inner_search(obj, globlist, separator):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
@@ -55,7 +83,8 @@ def set(obj, glob, value, separator="/", afilter=None):
     to the given value. Returns the number of elements changed.
     """
     changed = 0
-    for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator):
+    globlist = __safe_path__(glob, separator)
+    for path in _inner_search(obj, globlist, separator):
         changed += 1
         dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
     return changed
@@ -98,7 +127,8 @@ def search(obj, glob, yielded=False, separator="/", afilter=None, dirs = True):
 
     def _search_view(obj, glob, separator, afilter, dirs):
         view = {}
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator, dirs=dirs):
+        globlist = __safe_path__(glob, separator)
+        for path in _inner_search(obj, globlist, separator, dirs=dirs):
             try:
                 val = dpath.path.get(obj, path, afilter=afilter, view=True)
                 merge(view, val)
@@ -107,7 +137,8 @@ def search(obj, glob, yielded=False, separator="/", afilter=None, dirs = True):
         return view
 
     def _search_yielded(obj, glob, separator, afilter, dirs):
-        for path in _inner_search(obj, glob.lstrip(separator).split(separator), separator, dirs=dirs):
+        globlist = __safe_path__(glob, separator)
+        for path in _inner_search(obj, globlist, separator, dirs=dirs):
             try:
                 val = dpath.path.get(obj, path, view=False, afilter=afilter)
                 yield (separator.join(map(str, dpath.path.paths_only(path))), val)
@@ -122,7 +153,7 @@ def search(obj, glob, yielded=False, separator="/", afilter=None, dirs = True):
 
 def _inner_search(obj, glob, separator, dirs=True, leaves=False):
     """Search the object paths that match the glob."""
-    for path in dpath.path.paths(obj, dirs, leaves, skip=True, separator = separator):
+    for path in dpath.path.paths(obj, dirs, leaves, skip=True):
         if dpath.path.match(path, glob):
             yield path
 

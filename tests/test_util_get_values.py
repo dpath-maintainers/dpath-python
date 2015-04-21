@@ -16,6 +16,7 @@ def test_get_explicit_single():
             }
         }
     assert(dpath.util.get(ehash, '/a/b/c/f') == 2)
+    assert(dpath.util.get(ehash, ['a', 'b', 'c', 'f']) == 2)
 
 def test_get_glob_single():
     ehash = {
@@ -30,6 +31,7 @@ def test_get_glob_single():
             }
         }
     assert(dpath.util.get(ehash, '/a/b/*/f') == 2)
+    assert(dpath.util.get(ehash, ['a', 'b', '*', 'f']) == 2)
 
 def test_get_glob_multiple():
     ehash = {
@@ -45,10 +47,12 @@ def test_get_glob_multiple():
         }
     }
     assert_raises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
+    assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
 
 def test_get_absent():
     ehash = {}
     assert_raises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
+    assert_raises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
 
 def test_values():
     ehash = {
@@ -68,6 +72,12 @@ def test_values():
     assert(1 in ret)
     assert(2 in ret)
 
+    ret = dpath.util.values(ehash, ['a', 'b', 'c', '*'])
+    assert(isinstance(ret, list))
+    assert(0 in ret)
+    assert(1 in ret)
+    assert(2 in ret)
+
 @mock.patch('dpath.util.search')
 def test_values_passes_through(searchfunc):
     searchfunc.return_value = []
@@ -75,3 +85,5 @@ def test_values_passes_through(searchfunc):
         pass
     dpath.util.values({}, '/a/b', ':', y, False)
     searchfunc.assert_called_with({}, '/a/b', dirs=False, yielded=True, separator=':', afilter=y)
+    dpath.util.values({}, ['a', 'b'], ':', y, False)
+    searchfunc.assert_called_with({}, ['a', 'b'], dirs=False, yielded=True, separator=':', afilter=y)
