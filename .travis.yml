@@ -7,15 +7,16 @@ deploy:
     tags: true
     branch: master
 
-install:
-- pip install mock
-- pip install .
 language: python
-script: nosetests
-python:
-- "2.6"
-- "2.7"
-- "3.2"
-- "3.3"
-- "3.4"
-- "pypy"
+sudo: false
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py32
+  - TOXENV=py33
+  - TOXENV=py34
+  - TOXENV=pypy
+install:
+  - travis_retry pip install tox
+script:
+  - tox
