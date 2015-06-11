@@ -6,6 +6,7 @@ import fnmatch
 import shlex
 import sys
 import traceback
+from collections import MutableSequence, MutableMapping
 
 def path_types(obj, path):
     """
@@ -15,10 +16,10 @@ def path_types(obj, path):
     #for elem in path[:-1]:
     cur = obj
     for elem in path[:-1]:
-        if ((issubclass(cur.__class__, dict) and elem in cur)):
+        if ((issubclass(cur.__class__, MutableMapping) and elem in cur)):
             result.append([elem, cur[elem].__class__])
             cur = cur[elem]
-        elif (issubclass(cur.__class__, (list, tuple)) and int(elem) < len(cur)):
+        elif (issubclass(cur.__class__, MutableSequence) and int(elem) < len(cur)):
             elem = int(elem)
             result.append([elem, cur[elem].__class__])
             cur = cur[elem]
@@ -72,7 +73,7 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
     skip -- Skip special keys beginning with '+'.
 
     """
-    if isinstance(obj, dict):
+    if isinstance(obj, MutableMapping):
         # Python 3 support
         if PY3:
             iteritems = obj.items()
@@ -94,7 +95,7 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
                 yield newpath
             for child in paths(v, dirs, leaves, newpath, skip):
                 yield child
-    elif isinstance(obj, (list, tuple)):
+    elif isinstance(obj, MutableSequence):
         for (i, v) in enumerate(obj):
             newpath = path + [[i, v.__class__]]
             if dirs:
@@ -194,12 +195,12 @@ def set(obj, path, value, create_missing=True, afilter=None):
         creator = None
         accessor = None
         assigner = None
-        if issubclass(obj.__class__, (dict)):
+        if issubclass(obj.__class__, (MutableMapping)):
             tester = _presence_test_dict
             creator = _create_missing_dict
             accessor = _accessor_dict
             assigner = _assigner_dict
-        elif issubclass(obj.__class__, (list, tuple)):
+        elif issubclass(obj.__class__, MutableSequence):
             if not str(elem_value).isdigit():
                 raise TypeError("Can only create integer indexes in lists, "
                                 "not {}, in {}".format(type(obj),
@@ -256,22 +257,22 @@ def get(obj, path, view=False, afilter=None):
         target = target[key]
 
         if view:
-            if isinstance(tail, dict):
-                if issubclass(pair[1], (list, dict)) and index != path_count:
+            if isinstance(tail, MutableMapping):
+                if issubclass(pair[1], (MutableSequence, MutableMapping)) and index != path_count:
                     tail[key] = pair[1]()
                 else:
                     tail[key] = target
                 up = tail
                 tail = tail[key]
-            elif issubclass(tail.__class__, (list, tuple)):
-                if issubclass(pair[1], (list, tuple, dict)) and index != path_count:
+            elif issubclass(tail.__class__, MutableSequence):
+                if issubclass(pair[1], (MutableSequence, MutableMapping)) and index != path_count:
                     tail.append(pair[1]())
                 else:
                     tail.append(target)
                 up = tail
                 tail = tail[-1]
 
-        if not issubclass(target.__class__, (list, dict)):
+        if not issubclass(target.__class__, (MutableSequence, MutableMapping)):
             if (afilter and (not afilter(target))):
                 raise dpath.exceptions.FilteredValue
 
