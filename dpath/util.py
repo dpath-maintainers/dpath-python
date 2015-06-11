@@ -1,6 +1,7 @@
 import dpath.path
 import dpath.exceptions
 import traceback
+from collections import MutableSequence, MutableMapping
 
 MERGE_REPLACE=(1 << 1)
 MERGE_ADDITIVE=(1 << 2)
@@ -16,7 +17,7 @@ def __safe_path__(path, separator):
     ignored, and is assumed to be part of each key glob. It will not be
     stripped.
     """
-    if issubclass(path.__class__, (list)):
+    if issubclass(path.__class__, (MutableSequence)):
         return path
     path = path.lstrip(separator).split(separator)
     validated = []
@@ -188,19 +189,19 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
         elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             obj1.pop(key)
 
-    if isinstance(src, dict):
+    if isinstance(src, MutableMapping):
         for (i, v) in enumerate(src):
             _check_typesafe(dst, src, v, separator.join([_path, str(v)]))
 
             if not v in dst:
                 dst[v] = src[v]
             else:
-                if not isinstance(src[v], (dict, list)):
+                if not isinstance(src[v], (MutableMapping, MutableSequence)):
                     dst[v] = src[v]
                 else:
                     merge(dst[v], src[v], afilter=afilter, flags=flags,
                           _path=separator.join([_path, str(v)]), separator=separator)
-    elif isinstance(src, list):
+    elif isinstance(src, MutableSequence):
         for (i, v) in enumerate(src):
             _check_typesafe(dst, src, i, separator.join([_path, str(i)]))
             dsti = i
@@ -211,7 +212,7 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
             if dst[dsti] == None:
                 dst[dsti] = src[i]
             else:
-                if not isinstance(src[i], (dict, list)):
+                if not isinstance(src[i], (MutableMapping, MutableSequence)):
                     dst[dsti] = src[i]
                 else:
                     merge(dst[i], src[i], afilter=afilter, flags=flags,
