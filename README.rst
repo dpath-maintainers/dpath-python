@@ -441,3 +441,19 @@ of it. You have been warned!
 
 .. |Build Status| image:: https://travis-ci.org/akesterson/dpath-python.svg?branch=travisci
    :target: https://travis-ci.org/akesterson/dpath-python
+
+Contributors
+============
+
+We would like to thank the community for their interest and involvement. You have all made this project significantly better than the sum of its parts, and your continued feedback makes it better every day. Thank you so much!
+
+The following authors have contributed to this project, in varying capacities:
+
+Caleb Case <calebcase@gmail.com>
+Andrew Kesterson <andrew@aklabs.net>
+Marc Abramowitz <marc@marc-abramowitz.com>
+xhh2a <xhh2a@berkeley.edu>
+Stanislav Ochotnicky <sochotnicky@redhat.com>
+Misja Hoebe <misja@conversify.com>
+Gagandeep Singh <gagandeep.2020@gmail.com>
+Alan Gibson <alan.gibson@gmail.com>
