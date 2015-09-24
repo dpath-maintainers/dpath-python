@@ -106,3 +106,19 @@ def test_merge_typesafe():
             ]
         }
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
+
+def test_merge_none():
+    src = {
+        None: {
+            '123': 'hi'
+        }
+    }
+    dst = {
+        'hello': {
+            '456': 'hi'
+        }
+    }
+    dpath.util.merge(src, dst)
+    assert(len(src.keys()) == 2)
+    nose.tools.eq_(src[None], {'123': 'hi'})
+    nose.tools.eq_(src['hello'], {'456': 'hi'})

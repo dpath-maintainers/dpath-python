@@ -1,6 +1,6 @@
 import dpath.path
 import dpath.exceptions
-import traceback
+from dpath.common import *
 from collections import MutableSequence, MutableMapping
 
 MERGE_REPLACE=(1 << 1)
@@ -158,6 +158,7 @@ def _inner_search(obj, glob, separator, dirs=True, leaves=False):
         if dpath.path.match(path, glob):
             yield path
 
+
 def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
     deep merging.
@@ -173,47 +174,48 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
           types, raise a TypeError exception. By default, the source
           replaces the destination in this situation.
     """
-
+    separator = try_decode(separator)
+    _path = try_decode(_path)
     if afilter:
         # Having merge do its own afiltering is dumb, let search do the
         # heavy lifting for us.
         src = search(src, '**', afilter=afilter)
-        return merge(dst, src)
+        return merge(dst, src, separator, None, flags, _path)
 
     def _check_typesafe(obj1, obj2, key, path):
-        if not key in obj1:
+        if key not in obj1:
             return
-        elif ( (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
+        elif (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key])):
             raise TypeError("Cannot merge objects of type {0} and {1} at {2}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
-        elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
+        elif (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key])):
             obj1.pop(key)
 
     if isinstance(src, MutableMapping):
         for (i, v) in enumerate(src):
-            _check_typesafe(dst, src, v, separator.join([_path, str(v)]))
+            _check_typesafe(dst, src, try_decode(v), get_subpath(_path, v, separator))
 
-            if not v in dst:
+            if v not in dst:
                 dst[v] = src[v]
             else:
                 if not isinstance(src[v], (MutableMapping, MutableSequence)):
                     dst[v] = src[v]
                 else:
                     merge(dst[v], src[v], afilter=afilter, flags=flags,
-                          _path=separator.join([_path, str(v)]), separator=separator)
+                          _path=get_subpath(_path, v, separator), separator=separator)
     elif isinstance(src, MutableSequence):
         for (i, v) in enumerate(src):
-            _check_typesafe(dst, src, i, separator.join([_path, str(i)]))
+            _check_typesafe(dst, src, try_decode(i), get_subpath(_path, v, separator))
             dsti = i
-            if ( flags & MERGE_ADDITIVE):
+            if flags & MERGE_ADDITIVE:
                 dsti = len(dst)
             if dsti >= len(dst):
                 dst += [None] * (dsti - (len(dst) - 1))
-            if dst[dsti] == None:
+            if dst[dsti] is None:
                 dst[dsti] = src[i]
             else:
                 if not isinstance(src[i], (MutableMapping, MutableSequence)):
                     dst[dsti] = src[i]
                 else:
                     merge(dst[i], src[i], afilter=afilter, flags=flags,
-                          _path=separator.join([_path, str(i)]), separator=separator)
+                          _path=get_subpath(_path, v, separator), separator=separator)

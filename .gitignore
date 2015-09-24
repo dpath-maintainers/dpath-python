@@ -1,2 +1,5 @@
 .tox
 MANIFEST
+*.iml
+*.pyc
+.idea/*
