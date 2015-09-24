@@ -158,7 +158,6 @@ def _inner_search(obj, glob, separator, dirs=True, leaves=False):
         if dpath.path.match(path, glob):
             yield path
 
-
 def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path=""):
     """Merge source into destination. Like dict.update() but performs
     deep merging.
@@ -179,7 +178,7 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
     if afilter:
         # Having merge do its own afiltering is dumb, let search do the
         # heavy lifting for us.
-        src = search(src, '**', afilter=afilter)
+        src = search(src, '**', afilter=afilter, separator=separator)
         return merge(dst, src, separator, None, flags, _path)
 
     def _check_typesafe(obj1, obj2, key, path):
