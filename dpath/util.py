@@ -99,13 +99,12 @@ def get(obj, glob, separator="/"):
     not found, KeyError is raised.
     """
     ret = None
-    for item in search(obj, glob, yielded=True, separator=separator):
-        if ret is not None:
-            raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)
-        ret = item[1]
-    if ret is None:
+    matches = list(search(obj, glob, yielded=True, separator=separator))
+    if len(matches) == 0:
         raise KeyError(glob)
-    return ret
+    elif len(matches) > 1:
+        raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)
+    return matches[0][1]
 
 def values(obj, glob, separator="/", afilter=None, dirs=True):
     """
