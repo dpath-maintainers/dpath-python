@@ -422,15 +422,15 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> dpath.util.get(['a', 'b/c'])
    0
 
-dpath.path : The Undocumented Backend
+dpath.segments : The Undocumented Backend
 =====================================
 
 dpath.util is where you want to spend your time: this library has the
 friendly functions that will understand simple string globs, afilter
 functions, etc.
 
-dpath.path is the backend pathing library - it is currently
-undocumented, and not meant to be used directly! It passes around lists
+dpath.segments is the backend pathing library - it is currently
+undocumented, and not meant to be used directly! It passes around tuples
 of path components instead of string globs, and just generally does
 things in a way that you (as a frontend user) might not expect. Stay out
 of it. You have been warned!
@@ -452,7 +452,7 @@ The following authors have contributed to this project, in varying capacities:
 + Caleb Case <calebcase@gmail.com>
 + Andrew Kesterson <andrew@aklabs.net>
 + Marc Abramowitz <marc@marc-abramowitz.com>
-+ xhh2a <xhh2a@berkeley.edu>
++ Richard Han <xhh2a@berkeley.edu>
 + Stanislav Ochotnicky <sochotnicky@redhat.com>
 + Misja Hoebe <misja@conversify.com>
 + Gagandeep Singh <gagandeep.2020@gmail.com>

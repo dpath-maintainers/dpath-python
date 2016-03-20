@@ -84,6 +84,12 @@ def test_values_passes_through(searchfunc):
     def y():
         pass
     dpath.util.values({}, '/a/b', ':', y, False)
-    searchfunc.assert_called_with({}, '/a/b', dirs=False, yielded=True, separator=':', afilter=y)
+    searchfunc.assert_called_with({}, '/a/b', True, ':', y, False)
     dpath.util.values({}, ['a', 'b'], ':', y, False)
-    searchfunc.assert_called_with({}, ['a', 'b'], dirs=False, yielded=True, separator=':', afilter=y)
+    searchfunc.assert_called_with({}, ['a', 'b'], True, ':', y, False)
+
+
+def test_none_values():
+    d = {'p': {'a': {'t': {'h': None}}}}
+    v = dpath.util.get(d, 'p/a/t/h')
+    assert(v is None)
