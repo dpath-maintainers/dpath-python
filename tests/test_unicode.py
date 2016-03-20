@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import nose
-import dpath.path
 import dpath.util
+
 
 def test_unicode_merge():
     a = {'中': ['zhong']}
