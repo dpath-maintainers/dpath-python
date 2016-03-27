@@ -29,7 +29,7 @@ def test_set_new_list():
     dpath.util.new(dict, '/a/1', 1)
     assert(dict['a'][1] == 1)
     assert(dict['a'][0] == None)
-    dpath.util.new(dict, ['a', '1'], 1)
+    dpath.util.new(dict, ['a', 1], 1)
     assert(dict['a'][1] == 1)
     assert(dict['a'][0] == None)
 

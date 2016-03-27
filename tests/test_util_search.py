@@ -172,12 +172,12 @@ def test_search_return_list_globbed():
         }
     res = dpath.util.search(tdict, '/a/b/[02]')
     assert(isinstance(res['a']['b'], list))
-    assert(len(res['a']['b']) == 2)
-    assert(res['a']['b'] == [0, 2])
+    assert(len(res['a']['b']) == 3)
+    assert(res['a']['b'] == [0, None, 2])
     res = dpath.util.search(tdict, ['a', 'b', '[02]'])
     assert(isinstance(res['a']['b'], list))
-    assert(len(res['a']['b']) == 2)
-    assert(res['a']['b'] == [0, 2])
+    assert(len(res['a']['b']) == 3)
+    assert(res['a']['b'] == [0, None, 2])
 
 
 def test_search_list_key_with_separator():

@@ -28,7 +28,7 @@ class TestMapping(MutableMapping):
 
 class TestSequence(MutableSequence):
     def __init__(self, data=list()):
-        self._list = data
+        self._list = [] + data
 
     def __len__(self):
         return len(self._list)
@@ -75,7 +75,7 @@ def test_types_get_list_of_dicts():
                 {0: 2}])
             })
         })
-    res = dpath.path.get(tdict, dpath.path.path_types(tdict, ['a', 'b', 0, 0]), view=True)
+    res = dpath.segments.view(tdict, ['a', 'b', 0, 0])
     assert(isinstance(res['a']['b'], TestSequence))
     assert(len(res['a']['b']) == 1)
     assert(res['a']['b'][0][0] == 0)

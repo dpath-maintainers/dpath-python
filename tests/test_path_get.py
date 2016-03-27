@@ -1,6 +1,6 @@
 import nose
 from nose.tools import raises
-import dpath.path
+import dpath.segments
 import dpath.exceptions
 
 def test_path_get_list_of_dicts():
@@ -12,7 +12,8 @@ def test_path_get_list_of_dicts():
                 {0: 2}]
             }
         }
-    res = dpath.path.get(tdict, dpath.path.path_types(tdict, ['a', 'b', 0, 0]), view=True)
+    segments = ['a', 'b', 0, 0]
+    res = dpath.segments.view(tdict, segments)
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 1)
     assert(res['a']['b'][0][0] == 0)
