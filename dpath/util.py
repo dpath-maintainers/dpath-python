@@ -90,7 +90,7 @@ def set(obj, glob, value, separator="/", afilter=None):
         dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
     return changed
 
-def get(obj, glob, separator="/"):
+def get(obj, glob, separator="/", default=None):
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
@@ -104,6 +104,8 @@ def get(obj, glob, separator="/"):
             raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)
         ret = item[1]
     if ret is None:
+        if default is not None:
+            return default
         raise KeyError(glob)
     return ret
 
