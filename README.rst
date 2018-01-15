@@ -435,8 +435,8 @@ of path components instead of string globs, and just generally does
 things in a way that you (as a frontend user) might not expect. Stay out
 of it. You have been warned!
 
-.. |PyPI| image:: https://pypip.in/version/dpath/badge.svg?style=flat
-    :target: https://pypi.python.org/pypi/dpath/
+.. |PyPI| image:: https://badge.fury.io/py/dpath.svg
+    :target: https://badge.fury.io/py/dpath
     :alt: PyPI: Latest Version
 
 .. |Build Status| image:: https://travis-ci.org/akesterson/dpath-python.svg?branch=travisci
