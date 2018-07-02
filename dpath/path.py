@@ -84,9 +84,10 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
 
         for (k, v) in iteritems:
             if issubclass(k.__class__, (string_class)):
-                if (not k) and (not dpath.options.ALLOW_EMPTY_STRING_KEYS):
-                    raise dpath.exceptions.InvalidKeyName("Empty string keys not allowed without "
-                                                          "dpath.options.ALLOW_EMPTY_STRING_KEYS=True")
+                if not k:
+                    if not dpath.options.ALLOW_EMPTY_STRING_KEYS:
+                        raise dpath.exceptions.InvalidKeyName("Empty string keys not allowed without "
+                                                              "dpath.options.ALLOW_EMPTY_STRING_KEYS=True")
                 elif (skip and k[0] == '+'):
                     continue
             newpath = path + [[k, v.__class__]]
