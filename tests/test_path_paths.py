@@ -16,7 +16,7 @@ def test_path_paths_empty_key_disallowed():
     for x in dpath.path.paths(tdict):
         pass
 
-def test_path_paths_empty_key_allowed():
+def test_path_paths_empty_key_allowed_skip_false():
     tdict = {
         "Empty": {
             "": {
@@ -26,7 +26,25 @@ def test_path_paths_empty_key_allowed():
     }
     parts=[]
     dpath.options.ALLOW_EMPTY_STRING_KEYS=True
-    for x in dpath.path.paths(tdict, dirs=False, leaves=True):
+    for x in dpath.path.paths(tdict, dirs=False, leaves=True, skip=False):
+        path = x
+    for x in path[:-1]:
+        parts.append(x[0])
+    dpath.options.ALLOW_EMPTY_STRING_KEYS=False
+    assert("/".join(parts) == "Empty//Key")
+
+def test_path_paths_empty_key_allowed_skip_false():
+    tdict = {
+        "Empty": {
+            "": {
+                "Key": ""
+            }
+        }
+    }
+    # Confirm this works when skip=True (e.g. when coming through dpath.util.get(..)
+    parts=[]
+    dpath.options.ALLOW_EMPTY_STRING_KEYS=True
+    for x in dpath.path.paths(tdict, dirs=False, leaves=True, skip=True):
         path = x
     for x in path[:-1]:
         parts.append(x[0])
