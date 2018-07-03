@@ -8,6 +8,12 @@ else:
   python_major_version = sys.version_info[0]
 
 PY2 = ( python_major_version == 2 )
-PY3 = ( python_major_version == 3 )  
+PY3 = ( python_major_version == 3 )
+
+STRING_BASE_CLASS = None
+if PY2:
+    STRING_BASE_CLASS = basestring
+elif PY3:
+    STRING_BASE_CLASS = str
 
 from .util import *

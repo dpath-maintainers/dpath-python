@@ -1,3 +1,4 @@
+from dpath import STRING_BASE_CLASS
 from dpath import PY3
 import dpath.exceptions
 import dpath.options
@@ -48,9 +49,11 @@ def validate(path, regex=None):
     Validate that all the keys in the given list of path components are valid, given that they do not contain the separator, and match any optional regex given.
     """
     validated = []
+
     for elem in path:
         key = elem[0]
-        strkey = str(key)
+        # Avoid unicode errors if the key is already a string that contains unicode
+        strkey = safe_str(key)
         if (regex and (not regex.findall(strkey))):
             raise dpath.exceptions.InvalidKeyName("{} at {} does not match the expression {}"
                                                   "".format(strkey,
@@ -77,13 +80,11 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
         # Python 3 support
         if PY3:
             iteritems = obj.items()
-            string_class = str
         else: # Default to PY2
             iteritems = obj.iteritems()
-            string_class = basestring
 
         for (k, v) in iteritems:
-            if issubclass(k.__class__, (string_class)):
+            if issubclass(k.__class__, (STRING_BASE_CLASS)):
                 if (not k) and (not dpath.options.ALLOW_EMPTY_STRING_KEYS):
                     raise dpath.exceptions.InvalidKeyName("Empty string keys not allowed without "
                                                           "dpath.options.ALLOW_EMPTY_STRING_KEYS=True")
@@ -106,6 +107,10 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
         yield path + [[obj, obj.__class__]]
     elif not dirs:
         yield path
+
+def safe_str(value):
+    # "safe" because this avoids unicode conversion errors in the case that the value is already a unicode string
+    return str(value) if not isinstance(value, STRING_BASE_CLASS) else value
 
 def match(path, glob):
     """Match the path with the glob.
@@ -137,9 +142,9 @@ def match(path, glob):
     if path_len == len(ss_glob):
         # Python 3 support
         if PY3:
-            return all(map(fnmatch.fnmatch, list(map(str, paths_only(path))), list(map(str, ss_glob))))
+            return all(map(fnmatch.fnmatch, list(map(safe_str, paths_only(path))), list(map(safe_str, ss_glob))))
         else: # Default to Python 2
-            return all(map(fnmatch.fnmatch, map(str, paths_only(path)), map(str, ss_glob)))
+            return all(map(fnmatch.fnmatch, map(safe_str, paths_only(path)), map(safe_str, ss_glob)))
 
     return False
 

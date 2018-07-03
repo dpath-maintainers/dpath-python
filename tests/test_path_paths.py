@@ -42,3 +42,9 @@ def test_path_paths_int_keys():
             ['of', dict],
             [2, int]
             ])
+
+def test_path_paths_unicode_keys():
+    tdict = {
+        u"Key Contains Unicode \u00af\u00f5": "value does not",
+    }
+    paths = list(dpath.path.paths(tdict))
