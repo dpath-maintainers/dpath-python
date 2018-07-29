@@ -106,3 +106,25 @@ def test_merge_typesafe():
             ]
         }
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
+
+def test_merge_loosedict():
+    class tcid(dict):
+        pass
+    src = {
+        "mm" : {
+            "a" : "v1"
+            }
+        }
+    dst = {
+        "mm" : tcid([
+            ("a","v2"),
+            ("casserole","this should keep")
+            ])
+        }
+    dpath.util.merge(dst, src, flags=dpath.util.MERGE_LOOSEDICT)
+    assert(dst["mm"]["a"] == src["mm"]["a"])
+    assert("casserole" in dst["mm"])
+
+    dpath.util.merge(dst, src)
+    assert(dst["mm"]["a"] == src["mm"]["a"])
+    assert("casserole" not in dst["mm"])
