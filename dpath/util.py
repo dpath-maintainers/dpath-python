@@ -60,6 +60,7 @@ def delete(obj, glob, separator="/", afilter=None):
         # These are yielded back, don't mess up the dict.
         paths.append(path)
 
+    paths.reverse()
     for path in paths:
         cur = obj
         prev = None
