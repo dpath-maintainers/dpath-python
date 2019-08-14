@@ -247,12 +247,12 @@ object with None entries in order to make it big enough:
 
 Handy!
 
-Even more handy, your can also tell dpath.util.new to interpret integers a list indices so that you don't need to create empty lists. This is very convenient when using nested lists.
+Even more handy, you can also tell dpath.util.new to interpret integers as list indices so that new lists are automatically created. This is very convenient to create nested lists.
 
 .. code-block:: pycon
 
     >>> x={}
-    >>> dpath.util.new(x, 'a/2/3', 5, integer_as_list_index = True)
+    >>> dpath.util.new(x, 'a/2/3', 5, integer_as_list_index = False)
     >>> print json.dumps(x, indent=4, sort_keys=True)
     {
         "a": {
