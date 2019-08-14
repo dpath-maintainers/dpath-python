@@ -250,6 +250,7 @@ Handy!
 Even more handy, your can also tell dpath.util.new to interpret integers a list indices so that you don't need to create empty lists. This is very convenient when using nested lists.
 
 .. code-block:: pycon
+
     >>> x={}
     >>> dpath.util.new(x, 'a/2/3', 5, integer_as_list_index = True)
     >>> print json.dumps(x, indent=4, sort_keys=True)
