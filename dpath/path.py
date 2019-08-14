@@ -31,7 +31,7 @@ def path_types(obj, path, integer_as_list_index=None):
                 result.append([elem, list])
                 cur=None
             else:
-            result.append([elem, dict])
+                result.append([elem, dict])
                 cur=None
     if cur is None:
         result.append([path[-1], path[-1].__class__])
