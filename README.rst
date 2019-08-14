@@ -262,7 +262,7 @@ Even more handy, you can also tell dpath.util.new to interpret integers as list 
         }
     }
     >>> x={}
-    >>> dpath.util.new(x, '2/3', 5, integer_as_list_index = True)
+    >>> dpath.util.new(x, 'a/2/3', 5, integer_as_list_index = True)
     >>> print json.dumps(x, indent=4, sort_keys=True)
     {
         "a": [
