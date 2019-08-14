@@ -8,30 +8,41 @@ import sys
 import traceback
 from collections import MutableSequence, MutableMapping
 
-def path_types(obj, path):
+def path_types(obj, path, integer_as_list_index=None):
     """
     Given a list of path name elements, return anew list of [name, type] path components, given the reference object.
     """
+    if integer_as_list_index is None:
+        integer_as_list_index = dpath.options.INTEGERS_AS_LIST_INDICES
+
     result = []
     #for elem in path[:-1]:
     cur = obj
-    for elem in path[:-1]:
+    for nelem,elem in enumerate(path[:-1]):
         if ((issubclass(cur.__class__, MutableMapping) and elem in cur)):
             result.append([elem, cur[elem].__class__])
             cur = cur[elem]
-        elif (issubclass(cur.__class__, MutableSequence) and int(elem) < len(cur)):
+        elif (issubclass(cur.__class__, MutableSequence) and int(elem) < len(cur)) and not(cur[elem] is None):
             elem = int(elem)
             result.append([elem, cur[elem].__class__])
             cur = cur[elem]
         else:
+            if integer_as_list_index and (isinstance(path[nelem+1],int) or path[nelem+1].isdigit()) :
+                result.append([elem, list])
+                cur=None
+            else:
             result.append([elem, dict])
-    try:
-        try:
-            result.append([path[-1], cur[path[-1]].__class__])
-        except TypeError:
-            result.append([path[-1], cur[int(path[-1])].__class__])
-    except (KeyError, IndexError):
+                cur=None
+    if cur is None:
         result.append([path[-1], path[-1].__class__])
+    else:
+        try:
+            try:
+                result.append([path[-1], cur[path[-1]].__class__])
+            except TypeError:
+                result.append([path[-1], cur[int(path[-1])].__class__])
+        except (KeyError, IndexError):
+            result.append([path[-1], path[-1].__class__])
     return result
 
 def paths_only(path):
@@ -173,6 +184,7 @@ def set(obj, path, value, create_missing=True, afilter=None):
         idx = int(str(elem[0]))
         while (len(obj)-1) < idx:
             obj.append(None)
+        obj[idx]=elem[1]()
 
     def _accessor_dict(obj, elem):
         return obj[elem[0]]

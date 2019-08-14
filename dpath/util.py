@@ -32,7 +32,7 @@ def __safe_path__(path, separator):
         validated.append(strkey)
     return path
 
-def new(obj, path, value, separator="/"):
+def new(obj, path, value, separator="/",integer_as_list_index=None):
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -43,7 +43,7 @@ def new(obj, path, value, separator="/"):
     keys
     """
     pathlist = __safe_path__(path, separator)
-    pathobj = dpath.path.path_types(obj, pathlist)
+    pathobj = dpath.path.path_types(obj, pathlist,integer_as_list_index)
     return dpath.path.set(obj, pathobj, value, create_missing=True)
 
 def delete(obj, glob, separator="/", afilter=None):
