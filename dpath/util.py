@@ -3,6 +3,7 @@ import dpath.exceptions
 import traceback
 from collections import MutableSequence, MutableMapping
 
+_DEFAULT_SENTINAL = object()
 MERGE_REPLACE=(1 << 1)
 MERGE_ADDITIVE=(1 << 2)
 MERGE_TYPESAFE=(1 << 3)
@@ -90,13 +91,15 @@ def set(obj, glob, value, separator="/", afilter=None):
         dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
     return changed
 
-def get(obj, glob, separator="/"):
+def get(obj, glob, separator="/", default=_DEFAULT_SENTINAL):
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
+    If the glob is not found and a default is provided,
+    the default is returned.
 
     If more than one leaf matches the glob, ValueError is raised. If the glob is
-    not found, KeyError is raised.
+    not found and a default is not provided, KeyError is raised.
     """
     ret = None
     found = False
@@ -106,6 +109,8 @@ def get(obj, glob, separator="/"):
         ret = item[1]
         found = True
     if found is False:
+        if default is not _DEFAULT_SENTINAL:
+            return default
         raise KeyError(glob)
     return ret
 
