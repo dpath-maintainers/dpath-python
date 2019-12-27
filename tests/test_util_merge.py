@@ -137,6 +137,13 @@ def test_merge_loosedict():
         flags=(dpath.util.MERGE_LOOSEDICT | dpath.util.MERGE_TYPESAFE)
     )
 
+def test_merge_replace():
+    dct_a = {"a": {"b": [1,2,3]}}
+    dct_b = {"a": {"b": [1]}}
+    dpath.util.merge(dct_a, dct_b, flags=dpath.util.MERGE_REPLACE)
+    assert(len(dct_a['a']['b']) == 1)
+
+
 def test_merge_list():
     src = {"l": [1]}
     p1 = {"l": [2], "v": 1}
@@ -166,3 +173,4 @@ def test_merge_replace():
     dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
     assert(len(d1['a']) == 1)
     assert(d1['a'][0] == 'a')
+

@@ -249,7 +249,7 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
                 dst[v] = src[v]
             else:
                 if (
-                        (flags & MERGE_REPLACE == MERGE_REPLACE) or 
+                        (flags & MERGE_REPLACE == MERGE_REPLACE) or
                         (not isinstance(src[v], (MutableMapping, MutableSequence)))
                 ):
                     dst[v] = src[v]
