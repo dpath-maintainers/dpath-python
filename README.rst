@@ -416,7 +416,7 @@ The default behavior in dpath is to assume that the path given is a string, whic
 
 To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.util.* support the use of a list instead of a string as a path. So for example:
 
-.. code-block: python
+.. code-block:: python
 
    >>> x = { 'a': {'b/c': 0}}
    >>> dpath.util.get(['a', 'b/c'])
