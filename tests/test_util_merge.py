@@ -1,4 +1,5 @@
 import nose
+import copy
 from nose.tools import raises
 
 import dpath.util
@@ -135,3 +136,26 @@ def test_merge_loosedict():
         src,
         flags=(dpath.util.MERGE_LOOSEDICT | dpath.util.MERGE_TYPESAFE)
     )
+
+def test_merge_list():
+    src = {"l": [1]}
+    p1 = {"l": [2], "v": 1}
+    p2 = {"v": 2}
+
+    dst1 = {}
+    for d in [copy.deepcopy(src), copy.deepcopy(p1)]:
+        dpath.util.merge(dst1, d)
+    dst2 = {}
+    for d in [copy.deepcopy(src), copy.deepcopy(p2)]:
+        dpath.util.merge(dst2, d)
+    assert dst1["l"] == [1, 2]
+    assert dst2["l"] == [1]
+    
+    dst1 = {}
+    for d in [src, p1]:
+        dpath.util.merge(dst1, d)
+    dst2 = {}
+    for d in [src, p2]:
+        dpath.util.merge(dst2, d)
+    assert dst1["l"] == [1, 2]
+    assert dst2["l"] == [1, 2]
