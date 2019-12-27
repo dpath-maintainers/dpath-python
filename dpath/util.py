@@ -146,6 +146,9 @@ def get(obj, glob, separator='/'):
     If more than one leaf matches the glob, ValueError is raised. If the glob is
     not found, KeyError is raised.
     '''
+    if glob == '/':
+        return obj
+
     globlist = __safe_path__(glob, separator)
 
     def f(obj, pair, results):
