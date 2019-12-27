@@ -94,7 +94,7 @@ def paths(obj, dirs=True, leaves=True, path=[], skip=False):
                 if (not k) and (not dpath.options.ALLOW_EMPTY_STRING_KEYS):
                     raise dpath.exceptions.InvalidKeyName("Empty string keys not allowed without "
                                                           "dpath.options.ALLOW_EMPTY_STRING_KEYS=True")
-                elif (skip and k[0] == '+'):
+                elif (skip and k and k[0] == '+'):
                     continue
             newpath = path + [[k, v.__class__]]
             validate(newpath)
