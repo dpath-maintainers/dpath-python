@@ -179,8 +179,18 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
           of MutableMapping, continue with recursive merge even if they
           are not the exact same type. By default the destination type
           is not changed to the source type.
+
+    Note that MERGE_LOOSEDICT and MERGE_TYPESAFE are mutually exclusive,
+    setting them both will result in ValueError being thrown.
     """
 
+    if ( (flags & MERGE_LOOSEDICT == MERGE_LOOSEDICT ) and
+         (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) ):
+        raise ValueError(
+            "MERGE_LOOSEDICT and MERGE_TYPESAFE "
+            "are mutually exclusive"
+        )
+    
     if afilter:
         # Having merge do its own afiltering is dumb, let search do the
         # heavy lifting for us.
