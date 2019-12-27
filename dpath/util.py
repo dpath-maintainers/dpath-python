@@ -179,6 +179,25 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
     """Merge source into destination. Like dict.update() but performs
     deep merging.
 
+    NOTE that merge() does NOT copy objects - it REFERENCES. If you merge
+    take these two dictionaries:
+
+    >>> a = {'a': [0] }
+    >>> b = {'a': [1] }
+    
+    ... and you merge them into an empty dictionary, like so:
+
+    >>> d = {}
+    >>> dpath.util.merge(d, a)
+    >>> dpath.util.merge(d, b)
+
+    ... you might be surprised to find that a['a'] now contains [0, 1].
+    This is because merge() says (d['a'] = a['a']), and thus creates a reference.
+    This reference is then modified when b is merged, causing both d and
+    a to have ['a'][0, 1]. To avoid this, make your own deep copies of source
+    objects that you intend to merge. For further notes see
+    https://github.com/akesterson/dpath-python/issues/58
+
     flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE,
     MERGE_TYPESAFE, or MERGE_LOOSEDICT.
         * MERGE_ADDITIVE : List objects are combined onto one long
