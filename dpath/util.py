@@ -205,7 +205,7 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
         def yielder():
             for segments, found in dpath.segments.walk(obj):
                 if keeper(segments, found):
-                    yield (separator.join(segments), found)
+                    yield (separator.join(map(dpath.segments.int_str, segments)), found)
         return yielder()
     else:
         def f(obj, pair, result):
