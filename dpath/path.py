@@ -144,9 +144,9 @@ def match(path, glob):
     if path_len == len(ss_glob):
         # Python 3 support
         if PY3:
-            return all(map(fnmatch.fnmatch, list(map(str, paths_only(path))), list(map(str, ss_glob))))
+            return all(map(fnmatch.fnmatchcase, list(map(str, paths_only(path))), list(map(str, ss_glob))))
         else: # Default to Python 2
-            return all(map(fnmatch.fnmatch, map(str, paths_only(path)), map(str, ss_glob)))
+            return all(map(fnmatch.fnmatchcase, map(str, paths_only(path)), map(str, ss_glob)))
 
     return False
 
