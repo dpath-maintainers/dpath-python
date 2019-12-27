@@ -6,7 +6,14 @@ import fnmatch
 import shlex
 import sys
 import traceback
-from collections import MutableSequence, MutableMapping
+try:
+    #python3, especially 3.8
+    from collections.abc import MutableSequence
+    from collections.abc import MutableMapping
+except ImportError:
+    #python2
+    from collections import MutableSequence
+    from collections import MutableMapping
 
 def path_types(obj, path):
     """

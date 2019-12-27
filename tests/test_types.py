@@ -1,7 +1,14 @@
 import nose
 import dpath.util
 from nose.tools import assert_raises
-from collections import MutableMapping, MutableSequence
+try:
+    #python3, especially 3.8
+    from collections.abc import MutableSequence
+    from collections.abc import MutableMapping
+except ImportError:
+    #python2
+    from collections import MutableSequence
+    from collections import MutableMapping
 
 class TestMapping(MutableMapping):
     def __init__(self, data={}):
