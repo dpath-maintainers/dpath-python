@@ -93,3 +93,19 @@ def test_none_values():
     d = {'p': {'a': {'t': {'h': None}}}}
     v = dpath.util.get(d, 'p/a/t/h')
     assert(v is None)
+
+
+def test_values_list():
+    a = {
+        'actions': [
+            {
+                'type': 'correct'
+            },
+            {
+                'type': 'incorrect'
+            },
+        ],
+    }
+    ret = dpath.util.values(a, 'actions/*')
+    assert(isinstance(ret, list))
+    assert(len(ret) == 2)
