@@ -247,6 +247,21 @@ object with None entries in order to make it big enough:
 
 Handy!
 
+Example: Deleting Existing Keys
+================
+
+To delete keys in an object, use dpath.util.delete, which accepts the same globbing syntax as the other methods.
+
+.. code-block:: pycon
+
+    >>> help(dpath.util.delete)
+    
+    delete(obj, glob, separator='/', afilter=None):
+        Given a path glob, delete all elements that match the glob.
+
+        Returns the number of deleted objects. Raises PathNotFound if 
+        no paths are found to delete.
+
 Example: Merging
 ================
 
