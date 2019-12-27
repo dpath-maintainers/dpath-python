@@ -43,3 +43,25 @@ def test_set_new_list_path_with_separator():
     assert(len(dict['a']['b/c/d']) == 1)
     assert(dict['a']['b/c/d'][0] == 1)
     
+def test_set_new_list_integer_path_with_creator():
+    d = {}
+    def mycreator(obj, pathcomp, nextpathcomp):
+        print(pathcomp)
+        print(nextpathcomp)
+
+        target = pathcomp[0]
+        if isinstance(obj, list) and (target.isdigit()):
+            target = int(target)
+            
+        if nextpathcomp and nextpathcomp[0].isdigit():
+            obj[target] = [None]*(int(nextpathcomp[0])+1)
+        else:
+            obj[target] = {}
+        print(obj)
+
+    dpath.util.new(d, '/a/2', 3, creator=mycreator)
+    print(d)
+    assert(isinstance(d['a'], list))
+    assert(len(d['a']) == 3)
+    assert(d['a'][2] == 3)
+
