@@ -225,6 +225,11 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
     Merge source into destination. Like dict.update() but performs deep
     merging.
 
+    NOTE: This does not do a deep copy of the source object. Applying merge
+    will result in references to src being present in the dst tree. If you do
+    not want src to potentially be modified by other changes in dst (e.g. more
+    merge calls), then use a deep copy of src.
+
     flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE, or
     MERGE_TYPESAFE.
         * MERGE_ADDITIVE : List objects are combined onto one long
