@@ -40,7 +40,7 @@ def __safe_path__(path, separator):
         validated.append(strkey)
     return path
 
-def new(obj, path, value, separator="/"):
+def new(obj, path, value, separator="/", creator=None):
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -49,10 +49,14 @@ def new(obj, path, value, separator="/"):
     path will NOT be treated like a glob. If it has globbing
     characters in it, they will become part of the resulting
     keys
+
+    creator allows you to pass in a creator method that is 
+    responsible for creating missing keys at arbitrary levels of
+    the path (see the help for dpath.path.set)
     """
     pathlist = __safe_path__(path, separator)
     pathobj = dpath.path.path_types(obj, pathlist)
-    return dpath.path.set(obj, pathobj, value, create_missing=True)
+    return dpath.path.set(obj, pathobj, value, creator=creator)
 
 def delete(obj, glob, separator="/", afilter=None):
     """
@@ -96,7 +100,12 @@ def set(obj, glob, value, separator="/", afilter=None):
     globlist = __safe_path__(glob, separator)
     for path in _inner_search(obj, globlist, separator):
         changed += 1
-        dpath.path.set(obj, path, value, create_missing=False, afilter=afilter)
+        dpath.path.set(
+            obj,
+            path,
+            value,
+            afilter=afilter,
+            creator=dpath.path.creator_error_on_missing)
     return changed
 
 def get(obj, glob, separator="/"):

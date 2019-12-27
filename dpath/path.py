@@ -153,30 +153,77 @@ def match(path, glob):
 def is_glob(string):
     return any([c in string for c in '*?[]!'])
 
-def set(obj, path, value, create_missing=True, afilter=None):
+def creator_error_on_missing(obj, pathcomp):
+    """
+    Raise a dpath.exceptions.PathNotFound exception due to a missing path
+    in an attempt to set a value
+    """
+    raise dpath.exceptions.PathNotFound(
+        "{} does not exist in {}".format(
+            pathcomp,
+            obj
+        )
+    )
+
+def set(obj, path, value, create_missing=True, creator=None, afilter=None):
     """Set the value of the given path in the object. Path
     must be a list of specific path elements, not a glob.
     You can use dpath.util.set for globs, but the paths must
     slready exist.
 
-    If create_missing is True (the default behavior), then any
-    missing path components in the dictionary are made silently.
-    Otherwise, if False, an exception is thrown if path
-    components are missing.
+    If creator is None, then the default behavior is to create 
+    any missing path components in the target object silently.
+    You may pass a reference to a method whose job is to create
+    path components in target objects. The method should have
+    the signature of:
+
+        creator_method(obj, path, next_path)
+
+    ... obj will be the target object, path will be the current
+    path component. It will be the job of this creator method
+    to create the new object in the given target, according to 
+    whatever rules it sees fit given the path component in 
+    question. For example, your creator could forcibly create 
+    missing integer components (such as /a/b/1/3/c) as lists,
+    instead of dictionaries (the default). next_path is the 
+    next path element (if any) that will be created after the
+    current one. In the example of /a/3/c, when creating the 
+    '/a/3' path, next_path would be 'c'. This is necessary to
+    perform some black magic - for example, if your intent is
+    to create new elements which are intended to hold integer
+    sequences as lists instead of dictionaries, you must
+    not only receive ({}, 'a') when creating /a, you must receive
+    ({}, 'a', '3') to understand that you are creating 'a' in
+    {} with the intent of next creating '3' in it. If this seems
+    like an ugly hack, that's because it totally is; use with
+    extreme caution.
+
+    To avoid creating missing paths and instead raise a
+    dpath.exceptions.PathNotFound on missing paths, use 
+    creator=dpath.path.creator_error_on_missing
+
+    create_missing is now DEPRECATED. Setting it to 'true' (the
+    default) has no effect, as 'creator' is now used for that job.
+    Setting it to 'False' has the effect of forcing 'creator' to
+    use dpath.path.creator_error_on_missing.
+    This flag will be removed in 2.0.
     """
     cur = obj
     traversed = []
 
+    if create_missing == False:
+        creator = dpath.path.creator_error_on_missing
+    
     def _presence_test_dict(obj, elem):
         return (elem[0] in obj)
 
-    def _create_missing_dict(obj, elem):
+    def _create_missing_dict(obj, elem, next_elem):
         obj[elem[0]] = elem[1]()
 
     def _presence_test_list(obj, elem):
         return (int(str(elem[0])) < len(obj))
 
-    def _create_missing_list(obj, elem):
+    def _create_missing_list(obj, elem, next_elem):
         idx = int(str(elem[0]))
         while (len(obj)-1) < idx:
             obj.append(None)
@@ -194,17 +241,19 @@ def set(obj, path, value, create_missing=True, afilter=None):
         obj[int(str(elem[0]))] = value
 
     elem = None
-    for elem in path:
+    for idx, elem in enumerate(path):
         elem_value = elem[0]
         elem_type = elem[1]
 
         tester = None
-        creator = None
+        local_creator = None
         accessor = None
         assigner = None
+        next_elem = None
+        
         if issubclass(obj.__class__, (MutableMapping)):
             tester = _presence_test_dict
-            creator = _create_missing_dict
+            local_creator = _create_missing_dict
             accessor = _accessor_dict
             assigner = _assigner_dict
         elif issubclass(obj.__class__, MutableSequence):
@@ -215,22 +264,19 @@ def set(obj, path, value, create_missing=True, afilter=None):
                                                        )
                                 )
             tester = _presence_test_list
-            creator = _create_missing_list
+            local_creator = _create_missing_list
             accessor = _accessor_list
             assigner = _assigner_list
         else:
             raise TypeError("Unable to path into elements of type {} "
                             "at {}".format(obj, traversed))
 
-        if (not tester(obj, elem)) and (create_missing):
-            creator(obj, elem)
-        elif (not tester(obj, elem)):
-            raise dpath.exceptions.PathNotFound(
-                "{} does not exist in {}".format(
-                    elem,
-                    traversed
-                    )
-                )
+        if (idx+1) < len(path):
+            next_elem = path[idx+1]
+        if (not tester(obj, elem)):
+            if creator is not None:
+                local_creator = creator
+            local_creator(obj, elem, next_elem)
         traversed.append(elem_value)
         if len(traversed) < len(path):
             obj = accessor(obj, elem)
