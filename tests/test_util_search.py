@@ -1,6 +1,7 @@
 import nose
 import dpath.util
 
+
 def test_search_paths_with_separator():
     dict = {
         "a": {
@@ -26,6 +27,7 @@ def test_search_paths_with_separator():
     for (path, value) in dpath.util.search(dict, ['**'], yielded=True, separator=";"):
         assert(path in paths)
 
+
 def test_search_paths():
     dict = {
         "a": {
@@ -50,6 +52,7 @@ def test_search_paths():
         assert(path in paths)
     for (path, value) in dpath.util.search(dict, ['**'], yielded=True):
         assert(path in paths)
+
 
 def test_search_afilter():
     import json
@@ -85,6 +88,7 @@ def test_search_afilter():
     assert("view_failure" not in dpath.util.search(dict, ['**'], afilter=afilter)['a'])
     assert("d" not in dpath.util.search(dict, ['**'], afilter=afilter)['a']['b']['c'])
 
+
 def test_search_globbing():
     dict = {
         "a": {
@@ -106,6 +110,7 @@ def test_search_globbing():
     for (path, value) in dpath.util.search(dict, ['a', '**', '[df]'], yielded=True):
         assert(path in paths)
 
+
 def test_search_return_dict_head():
     tdict = {
         "a": {
@@ -125,6 +130,7 @@ def test_search_return_dict_head():
     assert(len(res['a']['b']) == 3)
     assert(res['a']['b'] == {0: 0, 1: 1, 2: 2})
 
+
 def test_search_return_dict_globbed():
     tdict = {
         "a": {
@@ -143,6 +149,7 @@ def test_search_return_dict_globbed():
     assert(len(res['a']['b']) == 2)
     assert(res['a']['b'] == {0: 0, 2: 2})
 
+
 def test_search_return_list_head():
     tdict = {
         "a": {
@@ -160,6 +167,7 @@ def test_search_return_list_head():
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 3)
     assert(res['a']['b'] == [0, 1, 2])
+
 
 def test_search_return_list_globbed():
     tdict = {
@@ -192,3 +200,24 @@ def test_search_list_key_with_separator():
     res = dpath.util.search(tdict, ['a', '/b/d'])
     assert(not 'b' in res['a'])
     assert(res['a']['/b/d'] == 'success')
+
+
+def test_search_multiple_stars():
+    testdata = {
+        'a': [
+            {
+                'b': [
+                    {'c': 1},
+                    {'c': 2},
+                    {'c': 3}
+                ]
+            }
+        ]
+    }
+    testpath = 'a/*/b/*/c'
+
+    res = dpath.util.search(testdata, testpath)
+    assert(len(res['a'][0]['b']) == 3)
+    assert(res['a'][0]['b'][0]['c'] == 1)
+    assert(res['a'][0]['b'][1]['c'] == 2)
+    assert(res['a'][0]['b'][2]['c'] == 3)

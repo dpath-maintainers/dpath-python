@@ -11,7 +11,8 @@ random_leaf = st.integers() | st.floats() | st.booleans() | st.binary() | st.tex
 
 random_thing = st.recursive(
         random_leaf,
-        lambda children: st.lists(children) | st.tuples(children) | st.dictionaries(st.binary() | st.text(), children))
+        lambda children: st.lists(children) | st.tuples(children) | st.dictionaries(st.binary() | st.text(), children),
+        max_leaves=100)
 random_node = random_thing.filter(lambda thing: isinstance(thing, (list, tuple, dict)))
 
 random_mutable_thing = st.recursive(

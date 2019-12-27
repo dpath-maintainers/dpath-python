@@ -28,7 +28,7 @@ def kvs(node):
         else:
             return iter(node.items())
     except AttributeError:
-        return izip(reversed(xrange(len(node))), reversed(node))
+        return izip(xrange(len(node)), node)
 
 
 def leaf(thing):
@@ -321,7 +321,7 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
     length = len(segments)
 
     # For everything except the last value, walk down the path and
-    # create if create_missing is True.
+    # create if creator is set.
     for (i, segment) in enumerate(segments[:-1]):
         try:
             # Optimistically try to get the next value. This makes the
