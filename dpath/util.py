@@ -131,7 +131,7 @@ def set(obj, glob, value, separator='/', afilter=None):
         selected = afilter and dpath.segments.leaf(found) and afilter(found)
 
         if (matched and not afilter) or (matched and selected):
-            dpath.segments.set(obj, segments, value, create_missing=False)
+            dpath.segments.set(obj, segments, value, creator=None)
             counter[0] += 1
 
     [changed] = dpath.segments.foldm(obj, f, [0])

@@ -279,11 +279,41 @@ def extend(thing, index, value=None):
     return thing
 
 
-def set(obj, segments, value, create_missing=True, hints=()):
+def __default_creator__(current, segments, i, hints=()):
     '''
-    Set the value in obj at the place indicated by segments. If
-    create_missing is True (default), then create any missing path
-    components (dict or list as appropriate).
+    Create missing path components. If the segment is an int or long, then it
+    will create a list. Otherwise a dictionary is created.
+
+    set(obj, segments, value) -> obj
+    '''
+    segment = segments[i]
+    length = len(segments)
+
+    if isinstance(segment, (int, long)):
+        extend(current, segment)
+
+    # Infer the type from the hints provided.
+    if i < len(hints):
+        current[segment] = hints[i][1]()
+    else:
+        # Peek at the next segment to determine if we should be
+        # creating an array for it to access or dictionary.
+        if i + 1 < length:
+            segment_next = segments[i + 1]
+        else:
+            segment_next = None
+
+        if isinstance(segment_next, (int, long)):
+            current[segment] = []
+        else:
+            current[segment] = {}
+
+
+def set(obj, segments, value, creator=__default_creator__, hints=()):
+    '''
+    Set the value in obj at the place indicated by segments. If creator is not
+    None (default __default_creator__), then call the creator function to
+    create any missing path components.
 
     set(obj, segments, value) -> obj
     '''
@@ -300,27 +330,11 @@ def set(obj, segments, value, create_missing=True, hints=()):
             # values, not keys whereas dicts check keys.
             current[segment]
         except:
-            if create_missing:
-                if isinstance(segment, (int, long)):
-                    extend(current, segment)
-
-                # Infer the type from the hints provided.
-                if i < len(hints):
-                    current[segment] = hints[i][1]()
-                else:
-                    # Peek at the next segment to determine if we should be
-                    # creating an array for it to access or dictionary.
-                    if i + 1 < length:
-                        segment_next = segments[i + 1]
-                    else:
-                        segment_next = None
-
-                    if isinstance(segment_next, (int, long)):
-                        current[segment] = []
-                    else:
-                        current[segment] = {}
+            if creator != None:
+                creator(current, segments, i, hints=hints)
             else:
                 raise
+
         current = current[segment]
         if i != length - 1 and leaf(current):
             raise PathNotFound('Path: {}[{}]'.format(segments, i))
