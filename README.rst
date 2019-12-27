@@ -133,7 +133,7 @@ don't care about the paths they were found at:
     and it is primarily a shorthand for a list comprehension over a yielded
     search call.
 
-    >>> dpath.util.values(x, '/a/b/d/\*')
+    >>> dpath.util.values(x, '/a/b/d/*')
     ['red', 'buggy', 'bumpers']
 
 Example: Setting existing keys
