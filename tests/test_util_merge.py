@@ -166,3 +166,11 @@ def test_merge_list():
         dpath.util.merge(dst2, d)
     assert dst1["l"] == [1, 2]
     assert dst2["l"] == [1, 2]
+
+def test_merge_replace():
+    d1 = {'a': [0, 1, 2]}
+    d2 = {'a': ['a']}
+    dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
+    assert(len(d1['a']) == 1)
+    assert(d1['a'][0] == 'a')
+
