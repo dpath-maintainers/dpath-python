@@ -248,7 +248,7 @@ object with None entries in order to make it big enough:
 Handy!
 
 Example: Deleting Existing Keys
-================
+===============================
 
 To delete keys in an object, use dpath.util.delete, which accepts the same globbing syntax as the other methods.
 
