@@ -3,7 +3,9 @@ from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath import options
 from fnmatch import fnmatchcase
 
+
 from . import PY2
+
 
 if PY2:
     from itertools import ifilter, izip
@@ -17,8 +19,7 @@ else:
 
 def kvs(node):
     '''
-    Return a (key, value) iterator for the node. Non-dictionary
-    sequencies are iterated in reverse.
+    Return a (key, value) iterator for the node.
 
     kvs(node) -> (generator -> (key, value))
     '''
@@ -164,6 +165,8 @@ class Star(object):
     expanding star-star globs.
     '''
     pass
+
+
 STAR = Star()
 
 
@@ -330,7 +333,7 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
             # values, not keys whereas dicts check keys.
             current[segment]
         except:
-            if creator != None:
+            if creator is not None:
                 creator(current, segments, i, hints=hints)
             else:
                 raise

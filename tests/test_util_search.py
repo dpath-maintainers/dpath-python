@@ -1,4 +1,3 @@
-import nose
 import dpath.util
 
 
@@ -9,21 +8,23 @@ def test_search_paths_with_separator():
                 "c": {
                     "d": 0,
                     "e": 1,
-                    "f": 2
-                    }
-                }
-            }
-        }
+                    "f": 2,
+                },
+            },
+        },
+    }
     paths = [
         'a',
         'a;b',
         'a;b;c',
         'a;b;c;d',
         'a;b;c;e',
-        'a;b;c;f'
-        ]
+        'a;b;c;f',
+    ]
+
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, separator=";"):
         assert(path in paths)
+
     for (path, value) in dpath.util.search(dict, ['**'], yielded=True, separator=";"):
         assert(path in paths)
 
@@ -35,28 +36,28 @@ def test_search_paths():
                 "c": {
                     "d": 0,
                     "e": 1,
-                    "f": 2
-                    }
-                }
-            }
-        }
+                    "f": 2,
+                },
+            },
+        },
+    }
     paths = [
         'a',
         'a/b',
         'a/b/c',
         'a/b/c/d',
         'a/b/c/e',
-        'a/b/c/f'
-        ]
+        'a/b/c/f',
+    ]
+
     for (path, value) in dpath.util.search(dict, '/**', yielded=True):
         assert(path in paths)
+
     for (path, value) in dpath.util.search(dict, ['**'], yielded=True):
         assert(path in paths)
 
 
 def test_search_afilter():
-    import json
-
     def afilter(x):
         if x in [1, 2]:
             return True
@@ -69,15 +70,16 @@ def test_search_afilter():
                 "c": {
                     "d": 0,
                     "e": 1,
-                    "f": 2
-                    }
-                }
-            }
-        }
+                    "f": 2,
+                },
+            },
+        },
+    }
     paths = [
         'a/b/c/e',
-        'a/b/c/f'
-        ]
+        'a/b/c/f',
+    ]
+
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, afilter=afilter):
         assert(path in paths)
     assert("view_failure" not in dpath.util.search(dict, '/**', afilter=afilter)['a'])
@@ -96,17 +98,19 @@ def test_search_globbing():
                 "c": {
                     "d": 0,
                     "e": 1,
-                    "f": 2
-                    }
-                }
-            }
-        }
+                    "f": 2,
+                },
+            },
+        },
+    }
     paths = [
         'a/b/c/d',
-        'a/b/c/f'
-        ]
+        'a/b/c/f',
+    ]
+
     for (path, value) in dpath.util.search(dict, '/a/**/[df]', yielded=True):
         assert(path in paths)
+
     for (path, value) in dpath.util.search(dict, ['a', '**', '[df]'], yielded=True):
         assert(path in paths)
 
@@ -117,9 +121,10 @@ def test_search_return_dict_head():
             "b": {
                 0: 0,
                 1: 1,
-                2: 2}
-            }
-        }
+                2: 2,
+            },
+        },
+    }
     res = dpath.util.search(tdict, '/a/b')
     assert(isinstance(res['a']['b'], dict))
     assert(len(res['a']['b']) == 3)
@@ -137,13 +142,16 @@ def test_search_return_dict_globbed():
             "b": {
                 0: 0,
                 1: 1,
-                2: 2}
-            }
-        }
+                2: 2,
+            },
+        },
+    }
+
     res = dpath.util.search(tdict, '/a/b/[02]')
     assert(isinstance(res['a']['b'], dict))
     assert(len(res['a']['b']) == 2)
     assert(res['a']['b'] == {0: 0, 2: 2})
+
     res = dpath.util.search(tdict, ['a', 'b', '[02]'])
     assert(isinstance(res['a']['b'], dict))
     assert(len(res['a']['b']) == 2)
@@ -156,13 +164,16 @@ def test_search_return_list_head():
             "b": [
                 0,
                 1,
-                2]
-            }
-        }
+                2,
+            ],
+        },
+    }
+
     res = dpath.util.search(tdict, '/a/b')
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 3)
     assert(res['a']['b'] == [0, 1, 2])
+
     res = dpath.util.search(tdict, ['a', 'b'])
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 3)
@@ -175,13 +186,16 @@ def test_search_return_list_globbed():
             "b": [
                 0,
                 1,
-                2]
-            }
+                2,
+            ]
         }
+    }
+
     res = dpath.util.search(tdict, '/a/b/[02]')
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 3)
     assert(res['a']['b'] == [0, None, 2])
+
     res = dpath.util.search(tdict, ['a', 'b', '[02]'])
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 3)
@@ -192,13 +206,14 @@ def test_search_list_key_with_separator():
     tdict = {
         "a": {
             "b": {
-                "d": 'failure'
+                "d": 'failure',
             },
-            "/b/d": 'success'
-            }
-        }
+            "/b/d": 'success',
+        },
+    }
+
     res = dpath.util.search(tdict, ['a', '/b/d'])
-    assert(not 'b' in res['a'])
+    assert('b' not in res['a'])
     assert(res['a']['/b/d'] == 'success')
 
 
@@ -209,10 +224,10 @@ def test_search_multiple_stars():
                 'b': [
                     {'c': 1},
                     {'c': 2},
-                    {'c': 3}
-                ]
-            }
-        ]
+                    {'c': 3},
+                ],
+            },
+        ],
     }
     testpath = 'a/*/b/*/c'
 
