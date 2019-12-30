@@ -13,7 +13,6 @@ except ImportError:
 MERGE_REPLACE=(1 << 1)
 MERGE_ADDITIVE=(1 << 2)
 MERGE_TYPESAFE=(1 << 3)
-MERGE_LOOSEDICT=(1 << 4)
 
 def __safe_path__(path, separator):
     """
@@ -199,7 +198,7 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
     https://github.com/akesterson/dpath-python/issues/58
 
     flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE,
-    MERGE_TYPESAFE, or MERGE_LOOSEDICT.
+    MERGE_TYPESAFE.
         * MERGE_ADDITIVE : List objects are combined onto one long
           list (NOT a set). This is the default flag.
         * MERGE_REPLACE : Instead of combining list objects, when
@@ -208,21 +207,8 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
         * MERGE_TYPESAFE : When 2 keys at equal levels are of different
           types, raise a TypeError exception. By default, the source
           replaces the destination in this situation.
-        * MERGE_LOOSEDICT : When 2 keys at equal levels are instances
-          of MutableMapping, continue with recursive merge even if they
-          are not the exact same type. By default the destination type
-          is not changed to the source type.
 
-    Note that MERGE_LOOSEDICT and MERGE_TYPESAFE are mutually exclusive,
-    setting them both will result in ValueError being thrown.
     """
-
-    if ( (flags & MERGE_LOOSEDICT == MERGE_LOOSEDICT ) and
-         (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) ):
-        raise ValueError(
-            "MERGE_LOOSEDICT and MERGE_TYPESAFE "
-            "are mutually exclusive"
-        )
     
     if afilter:
         # Having merge do its own afiltering is dumb, let search do the
@@ -233,11 +219,13 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
     def _check_typesafe(obj1, obj2, key, path):
         if not key in obj1:
             return
-        elif ( (flags & MERGE_LOOSEDICT == MERGE_LOOSEDICT) and (isinstance(obj1[key], MutableMapping)) and (isinstance(obj2[key], MutableMapping))):
-            return
         elif ( (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             raise TypeError("Cannot merge objects of type {0} and {1} at {2}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
+        elif ( (isinstance(obj1[key], MutableMapping)) and (isinstance(obj2[key], MutableMapping)) or
+               (isinstance(obj1[key], MutableSequence)) and (isinstance(obj2[key], MutableSequence))
+        ):
+            return
         elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             obj1.pop(key)
 

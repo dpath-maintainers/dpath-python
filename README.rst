@@ -279,7 +279,7 @@ does.
         deep merging.
 
         flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE
-        MERGE_TYPESAFE, or MERGE_LOOSEDICT.
+        MERGE_TYPESAFE.
             * MERGE_ADDITIVE : List objects are combined onto one long
               list (NOT a set). This is the default flag.
             * MERGE_REPLACE : Instead of combining list objects, when
@@ -288,10 +288,6 @@ does.
             * MERGE_TYPESAFE : When 2 keys at equal levels are of different
               types, raise a TypeError exception. By default, the source
               replaces the destination in this situation.
-            * MERGE_LOOSEDICT : When 2 keys at equal levels are instances
-              of MutableMapping, continue with recursive merge even if they
-              are not the exact same type. By default the destination type
-              is not changed to the source type.
 
     >>> y = {'a': {'b': { 'e': {'f': {'h': [None, 0, 1, None, 13, 14]}}}, 'c': 'RoffleWaffles'}}
     >>> print json.dumps(y, indent=4, sort_keys=True)
