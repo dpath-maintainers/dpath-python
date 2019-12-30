@@ -247,6 +247,21 @@ object with None entries in order to make it big enough:
 
 Handy!
 
+Example: Deleting Existing Keys
+===============================
+
+To delete keys in an object, use dpath.util.delete, which accepts the same globbing syntax as the other methods.
+
+.. code-block:: pycon
+
+    >>> help(dpath.util.delete)
+
+    delete(obj, glob, separator='/', afilter=None):
+        Given a path glob, delete all elements that match the glob.
+
+        Returns the number of deleted objects. Raises PathNotFound if
+        no paths are found to delete.
+
 Example: Merging
 ================
 
@@ -416,7 +431,7 @@ The default behavior in dpath is to assume that the path given is a string, whic
 
 To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.util.* support the use of a list instead of a string as a path. So for example:
 
-.. code-block: python
+.. code-block:: python
 
    >>> x = { 'a': {'b/c': 0}}
    >>> dpath.util.get(['a', 'b/c'])
@@ -435,7 +450,7 @@ of path components instead of string globs, and just generally does
 things in a way that you (as a frontend user) might not expect. Stay out
 of it. You have been warned!
 
-.. |PyPI| image:: https://pypip.in/version/dpath/badge.svg?style=flat
+.. |PyPI| image:: https://img.shields.io/pypi/v/dpath.svg?style=flat
     :target: https://pypi.python.org/pypi/dpath/
     :alt: PyPI: Latest Version
 
