@@ -19,6 +19,7 @@ def test_merge_typesafe_and_separator():
         dpath.util.merge(dst, src, flags=(dpath.util.MERGE_ADDITIVE | dpath.util.MERGE_TYPESAFE), separator=";")
     except TypeError as e:
         assert(str(e).endswith("dict;integer"))
+        
         return
     raise Exception("MERGE_TYPESAFE failed to raise an exception when merging between str and int!")
 
@@ -108,34 +109,35 @@ def test_merge_typesafe():
         }
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
-@raises(ValueError)
-def test_merge_loosedict():
+@raises(TypeError)
+def test_merge_mutables():
     class tcid(dict):
         pass
+    class tcis(list):
+        pass
+    
     src = {
         "mm" : {
             "a" : "v1"
-            }
+            },
+        "ms": [
+            0
+        ]
         }
     dst = {
         "mm" : tcid([
             ("a","v2"),
             ("casserole","this should keep")
-            ])
+            ]),
+        "ms" : tcis(['a', 'b', 'c'])
         }
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_LOOSEDICT)
-    assert(dst["mm"]["a"] == src["mm"]["a"])
-    assert("casserole" in dst["mm"])
-
     dpath.util.merge(dst, src)
+    print(dst)
     assert(dst["mm"]["a"] == src["mm"]["a"])
-    assert("casserole" not in dst["mm"])
-
-    dpath.util.merge(
-        dst,
-        src,
-        flags=(dpath.util.MERGE_LOOSEDICT | dpath.util.MERGE_TYPESAFE)
-    )
+    assert(dst['ms'][2] == 'c')
+    assert("casserole" in dst["mm"])
+    
+    dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
 def test_merge_replace():
     dct_a = {"a": {"b": [1,2,3]}}

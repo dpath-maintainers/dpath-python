@@ -233,11 +233,13 @@ def merge(dst, src, separator="/", afilter=None, flags=MERGE_ADDITIVE, _path="")
     def _check_typesafe(obj1, obj2, key, path):
         if not key in obj1:
             return
-        elif ( (flags & MERGE_LOOSEDICT == MERGE_LOOSEDICT) and (isinstance(obj1[key], MutableMapping)) and (isinstance(obj2[key], MutableMapping))):
-            return
         elif ( (flags & MERGE_TYPESAFE == MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             raise TypeError("Cannot merge objects of type {0} and {1} at {2}"
                             "".format(type(obj1[key]), type(obj2[key]), path))
+        elif ( (isinstance(obj1[key], MutableMapping)) and (isinstance(obj2[key], MutableMapping)) or
+               (isinstance(obj1[key], MutableSequence)) and (isinstance(obj2[key], MutableSequence))
+        ):
+            return
         elif ( (flags & MERGE_TYPESAFE != MERGE_TYPESAFE) and (type(obj1[key]) != type(obj2[key]))):
             obj1.pop(key)
 
