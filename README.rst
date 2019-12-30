@@ -255,11 +255,11 @@ To delete keys in an object, use dpath.util.delete, which accepts the same globb
 .. code-block:: pycon
 
     >>> help(dpath.util.delete)
-    
+
     delete(obj, glob, separator='/', afilter=None):
         Given a path glob, delete all elements that match the glob.
 
-        Returns the number of deleted objects. Raises PathNotFound if 
+        Returns the number of deleted objects. Raises PathNotFound if
         no paths are found to delete.
 
 Example: Merging
@@ -437,18 +437,14 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> dpath.util.get(['a', 'b/c'])
    0
 
-dpath.path : The Undocumented Backend
-=====================================
+dpath.segments : The Low-Level Backend
+======================================
 
-dpath.util is where you want to spend your time: this library has the
-friendly functions that will understand simple string globs, afilter
-functions, etc.
+dpath.util is where you want to spend your time: this library has the friendly
+functions that will understand simple string globs, afilter functions, etc.
 
-dpath.path is the backend pathing library - it is currently
-undocumented, and not meant to be used directly! It passes around lists
-of path components instead of string globs, and just generally does
-things in a way that you (as a frontend user) might not expect. Stay out
-of it. You have been warned!
+dpath.segments is the backend pathing library. It passes around tuples of path
+components instead of string globs.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/dpath.svg?style=flat
     :target: https://pypi.python.org/pypi/dpath/
@@ -460,15 +456,19 @@ of it. You have been warned!
 Contributors
 ============
 
-We would like to thank the community for their interest and involvement. You have all made this project significantly better than the sum of its parts, and your continued feedback makes it better every day. Thank you so much!
+We would like to thank the community for their interest and involvement. You
+have all made this project significantly better than the sum of its parts, and
+your continued feedback makes it better every day. Thank you so much!
 
 The following authors have contributed to this project, in varying capacities:
 
 + Caleb Case <calebcase@gmail.com>
 + Andrew Kesterson <andrew@aklabs.net>
 + Marc Abramowitz <marc@marc-abramowitz.com>
-+ xhh2a <xhh2a@berkeley.edu>
++ Richard Han <xhh2a@berkeley.edu>
 + Stanislav Ochotnicky <sochotnicky@redhat.com>
 + Misja Hoebe <misja@conversify.com>
 + Gagandeep Singh <gagandeep.2020@gmail.com>
 + Alan Gibson <alan.gibson@gmail.com>
+
+And many others! If we've missed you please open an PR and add your name here.

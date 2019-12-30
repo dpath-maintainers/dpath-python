@@ -1,2 +1,6 @@
-.tox
-MANIFEST
+/MANIFEST
+/.tox
+/.hypothesis
+/build
+/env
+*.pyc

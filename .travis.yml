@@ -7,12 +7,11 @@ deploy:
     tags: true
     branch: master
 
-language: python
 sudo: false
-env:
-  - TOXENV=py27
-  - TOXENV=py36
-install:
-  - travis_retry pip install tox
-script:
-  - tox
+language: python
+python:
+  - "3.6"
+  - "3.8"
+  - "pypy"
+install: travis_retry pip install tox-travis
+script: tox
