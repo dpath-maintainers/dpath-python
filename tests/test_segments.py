@@ -10,14 +10,16 @@ random_segments = st.lists(random_key)
 random_leaf = st.integers() | st.floats() | st.booleans() | st.binary() | st.text() | st.none()
 
 random_thing = st.recursive(
-        random_leaf,
-        lambda children: st.lists(children) | st.tuples(children) | st.dictionaries(st.binary() | st.text(), children),
-        max_leaves=100)
+    random_leaf,
+    lambda children: st.lists(children) | st.tuples(children) | st.dictionaries(st.binary() | st.text(), children),
+    max_leaves=100
+)
 random_node = random_thing.filter(lambda thing: isinstance(thing, (list, tuple, dict)))
 
 random_mutable_thing = st.recursive(
-        random_leaf,
-        lambda children: st.lists(children) | st.dictionaries(st.binary() | st.text(), children))
+    random_leaf,
+    lambda children: st.lists(children) | st.dictionaries(st.binary() | st.text(), children)
+)
 random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 
 
@@ -156,7 +158,7 @@ def mutate(draw, segment):
         # is necessary to work around limitations in the bytes type
         # iteration returning integers instead of byte strings of
         # length 1.
-        c = segment[i:i+1]
+        c = segment[i:i + 1]
 
         # Check for values that need to be escaped.
         if c in tuple(map(to_kind, ('*', '?', '[', ']'))):
@@ -317,6 +319,7 @@ def test_fold(thing):
     '''
     def f(o, p, a):
         a[0] += 1
+
     [count] = api.fold(thing, f, [0])
     assert count == len(tuple(api.walk(thing)))
 

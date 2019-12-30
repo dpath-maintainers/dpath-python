@@ -1,7 +1,6 @@
-import nose
-from nose.tools import raises
 import dpath.segments
 import dpath.exceptions
+
 
 def test_path_get_list_of_dicts():
     tdict = {
@@ -9,10 +8,12 @@ def test_path_get_list_of_dicts():
             "b": [
                 {0: 0},
                 {0: 1},
-                {0: 2}]
-            }
-        }
+                {0: 2},
+            ],
+        },
+    }
     segments = ['a', 'b', 0, 0]
+
     res = dpath.segments.view(tdict, segments)
     assert(isinstance(res['a']['b'], list))
     assert(len(res['a']['b']) == 1)
