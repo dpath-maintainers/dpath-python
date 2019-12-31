@@ -36,8 +36,10 @@ def test_broken_afilter():
     assert("d" not in dpath.util.search(dict, ['**'], afilter=afilter)['a']['b']['c'])
 
     def filter(x):
-        sys.stderr.write(x)
-        return x.get('type', None) == 'correct'
+        sys.stderr.write(str(x))
+        if hasattr(x, 'get'):
+            return x.get('type', None) == 'correct'
+        return False
 
     a = {
         'actions': [
@@ -51,9 +53,6 @@ def test_broken_afilter():
     }
 
     results = [[x[0], x[1]] for x in dpath.util.search(a, 'actions/*', yielded=True)]
-    print(results)
     results = [[x[0], x[1]] for x in dpath.util.search(a, 'actions/*', afilter=filter, yielded=True)]
-    print(filter)
-    print(results)
     assert(len(results) == 1)
-    assert(results[0]['type'] == 'correct')
+    assert(results[0][1]['type'] == 'correct')
