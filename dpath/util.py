@@ -1,15 +1,8 @@
-from dpath.exceptions import InvalidKeyName
+from collections.abc import MutableMapping
+from collections.abc import MutableSequence
 from dpath import options
+from dpath.exceptions import InvalidKeyName
 import dpath.segments
-
-try:
-    #python3, especially 3.8
-    from collections.abc import MutableSequence
-    from collections.abc import MutableMapping
-except ImportError:
-    #python2
-    from collections import MutableSequence
-    from collections import MutableMapping
 
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
@@ -60,7 +53,7 @@ def new(obj, path, value, separator='/', creator=None):
     characters in it, they will become part of the resulting
     keys
 
-    creator allows you to pass in a creator method that is 
+    creator allows you to pass in a creator method that is
     responsible for creating missing keys at arbitrary levels of
     the path (see the help for dpath.path.set)
     '''
@@ -133,6 +126,7 @@ def set(obj, glob, value, separator='/', afilter=None):
     to the given value. Returns the number of elements changed.
     '''
     globlist = __safe_path__(glob, separator)
+
     def f(obj, pair, counter):
         (segments, found) = pair
 
@@ -248,7 +242,7 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
 
     >>> a = {'a': [0] }
     >>> b = {'a': [1] }
-    
+
     ... and you merge them into an empty dictionary, like so:
 
     >>> d = {}
@@ -276,12 +270,14 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
     filtered_src = search(src, '**', afilter=afilter, separator='/')
 
     def are_both_mutable(o1, o2):
-        if ( (isinstance(o1, MutableMapping) and isinstance(o2, MutableMapping)) or
-             (isinstance(o1, MutableSequence) and isinstance(o2, MutableSequence))
-        ):
+        mapP = isinstance(o1, MutableMapping) and isinstance(o2, MutableMapping)
+        seqP = isinstance(o1, MutableSequence) and isinstance(o2, MutableSequence)
+
+        if mapP or seqP:
             return True
+
         return False
-    
+
     def merger(dst, src, _segments=()):
         for key, found in dpath.segments.kvs(src):
             # Our current path in the source.
@@ -298,7 +294,7 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
                     target = dpath.segments.get(dst, segments)
                     tt = type(target)
                     ft = type(found)
-                    if ( tt != ft ):
+                    if tt != ft:
                         path = separator.join(segments)
                         raise TypeError("Cannot merge objects of type"
                                         "{0} and {1} at {2}"
@@ -313,9 +309,7 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
             target = dpath.segments.get(dst, segments)
 
             # If the types don't match, replace it.
-            if ( (type(found) != type(target)) and
-                 (not are_both_mutable(found, target))
-            ):
+            if ((type(found) != type(target)) and (not are_both_mutable(found, target))):
                 dpath.segments.set(dst, segments, found)
                 continue
 
