@@ -2,16 +2,15 @@ deploy:
   provider: pypi
   user: akesterson
   password:
-    secure: H0XRotyZm7xxpkR5bTxyjWSnwrUQUscKIj9Miqn9l1aROZN3GQ4oLLP8Epa590UQ/VLSlKQ28oalejlbDHG452K1726NAytO3r/0Oy/htuBf5DoR3VCa+aivOjeCVd2Axgc0385BB2ouG8aYJOL7Lc0sJ9fFUG7pQ2f3lZlzZLo=
-  on:
+    secure: RlZ3kw0x7/5QNBUIqj5wjkpS11TuSdH7o1S41m4Vea8HiryQjB2+CFf+uBXj8nb1OtYDRaeKTSnk3qVlUvaUglFd7sV+Hh2DDo4pYomd0xDFHnK2LB+hzbYftkOptmwdS2bc0X7vr+xdY+7b2DPTlyowrs3Xp2WvzRWM4hWnA3Q=
+  true:
     tags: true
     branch: master
-
 sudo: false
 language: python
 python:
-  - "3.6"
-  - "3.8"
-  - "pypy3"
+- '3.6'
+- '3.8'
+- pypy3
 install: travis_retry pip install tox-travis
 script: tox
