@@ -133,7 +133,7 @@ don't care about the paths they were found at:
     and it is primarily a shorthand for a list comprehension over a yielded
     search call.
 
-    >>> dpath.util.values(x, '/a/b/d/\*')
+    >>> dpath.util.values(x, '/a/b/d/*')
     ['red', 'buggy', 'bumpers']
 
 Example: Setting existing keys
@@ -247,6 +247,21 @@ object with None entries in order to make it big enough:
 
 Handy!
 
+Example: Deleting Existing Keys
+===============================
+
+To delete keys in an object, use dpath.util.delete, which accepts the same globbing syntax as the other methods.
+
+.. code-block:: pycon
+
+    >>> help(dpath.util.delete)
+
+    delete(obj, glob, separator='/', afilter=None):
+        Given a path glob, delete all elements that match the glob.
+
+        Returns the number of deleted objects. Raises PathNotFound if
+        no paths are found to delete.
+
 Example: Merging
 ================
 
@@ -263,7 +278,7 @@ does.
         Merge source into destination. Like dict.update() but performs
         deep merging.
 
-        flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE, or
+        flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE
         MERGE_TYPESAFE.
             * MERGE_ADDITIVE : List objects are combined onto one long
               list (NOT a set). This is the default flag.
@@ -416,26 +431,22 @@ The default behavior in dpath is to assume that the path given is a string, whic
 
 To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.util.* support the use of a list instead of a string as a path. So for example:
 
-.. code-block: python
+.. code-block:: python
 
    >>> x = { 'a': {'b/c': 0}}
    >>> dpath.util.get(['a', 'b/c'])
    0
 
-dpath.path : The Undocumented Backend
-=====================================
+dpath.segments : The Low-Level Backend
+======================================
 
-dpath.util is where you want to spend your time: this library has the
-friendly functions that will understand simple string globs, afilter
-functions, etc.
+dpath.util is where you want to spend your time: this library has the friendly
+functions that will understand simple string globs, afilter functions, etc.
 
-dpath.path is the backend pathing library - it is currently
-undocumented, and not meant to be used directly! It passes around lists
-of path components instead of string globs, and just generally does
-things in a way that you (as a frontend user) might not expect. Stay out
-of it. You have been warned!
+dpath.segments is the backend pathing library. It passes around tuples of path
+components instead of string globs.
 
-.. |PyPI| image:: https://pypip.in/version/dpath/badge.svg?style=flat
+.. |PyPI| image:: https://img.shields.io/pypi/v/dpath.svg?style=flat
     :target: https://pypi.python.org/pypi/dpath/
     :alt: PyPI: Latest Version
 
@@ -445,15 +456,19 @@ of it. You have been warned!
 Contributors
 ============
 
-We would like to thank the community for their interest and involvement. You have all made this project significantly better than the sum of its parts, and your continued feedback makes it better every day. Thank you so much!
+We would like to thank the community for their interest and involvement. You
+have all made this project significantly better than the sum of its parts, and
+your continued feedback makes it better every day. Thank you so much!
 
 The following authors have contributed to this project, in varying capacities:
 
 + Caleb Case <calebcase@gmail.com>
 + Andrew Kesterson <andrew@aklabs.net>
 + Marc Abramowitz <marc@marc-abramowitz.com>
-+ xhh2a <xhh2a@berkeley.edu>
++ Richard Han <xhh2a@berkeley.edu>
 + Stanislav Ochotnicky <sochotnicky@redhat.com>
 + Misja Hoebe <misja@conversify.com>
 + Gagandeep Singh <gagandeep.2020@gmail.com>
 + Alan Gibson <alan.gibson@gmail.com>
+
+And many others! If we've missed you please open an PR and add your name here.
