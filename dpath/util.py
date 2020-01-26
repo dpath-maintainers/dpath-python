@@ -4,10 +4,10 @@ from dpath import options
 from dpath.exceptions import InvalidKeyName
 import dpath.segments
 
+_DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
 MERGE_TYPESAFE = (1 << 3)
-
 
 def __safe_path__(path, separator):
     '''
@@ -145,13 +145,15 @@ def set(obj, glob, value, separator='/', afilter=None):
     return changed
 
 
-def get(obj, glob, separator='/'):
+def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
     '''
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
+    If the glob is not found and a default is provided,
+    the default is returned.
 
     If more than one leaf matches the glob, ValueError is raised. If the glob is
-    not found, KeyError is raised.
+    not found and a default is not provided, KeyError is raised.
     '''
     if glob == '/':
         return obj
@@ -169,6 +171,9 @@ def get(obj, glob, separator='/'):
     results = dpath.segments.fold(obj, f, [])
 
     if len(results) == 0:
+        if default  is not _DEFAULT_SENTINAL:
+            return default
+
         raise KeyError(glob)
     elif len(results) > 1:
         raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)

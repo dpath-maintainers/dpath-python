@@ -28,6 +28,9 @@ def test_get_explicit_single():
 
     assert(dpath.util.get(ehash, '/a/b/c/f') == 2)
     assert(dpath.util.get(ehash, ['a', 'b', 'c', 'f']) == 2)
+    assert(dpath.util.get(ehash, ['a', 'b', 'c', 'f'], default=5) == 2)
+    assert(dpath.util.get(ehash, ['does', 'not', 'exist'], default=None) is None)
+    assert(dpath.util.get(ehash, ['doesnt', 'exist'], default=5) == 5)
 
 
 def test_get_glob_single():
@@ -45,6 +48,8 @@ def test_get_glob_single():
 
     assert(dpath.util.get(ehash, '/a/b/*/f') == 2)
     assert(dpath.util.get(ehash, ['a', 'b', '*', 'f']) == 2)
+    assert(dpath.util.get(ehash, ['a', 'b', '*', 'f'], default=5) == 2)
+    assert(dpath.util.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6)
 
 
 def test_get_glob_multiple():
@@ -63,6 +68,7 @@ def test_get_glob_multiple():
 
     assert_raises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
     assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
+    assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'], default=3)
 
 
 def test_get_absent():
