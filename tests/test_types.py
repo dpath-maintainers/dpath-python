@@ -1,12 +1,13 @@
 import nose
 import dpath.util
 from nose.tools import assert_raises
+
 try:
-    #python3, especially 3.8
+    # python3, especially 3.8
     from collections.abc import MutableSequence
     from collections.abc import MutableMapping
 except ImportError:
-    #python2
+    # python2
     from collections import MutableSequence
     from collections import MutableMapping
 

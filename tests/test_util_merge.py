@@ -22,7 +22,7 @@ def test_merge_typesafe_and_separator():
         dpath.util.merge(dst, src, flags=(dpath.util.MERGE_ADDITIVE | dpath.util.MERGE_TYPESAFE), separator=";")
     except TypeError as e:
         assert(str(e).endswith("dict;integer"))
-        
+
         return
     raise Exception("MERGE_TYPESAFE failed to raise an exception when merging between str and int!")
 
@@ -125,42 +125,53 @@ def test_merge_typesafe():
 
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
+
 @raises(TypeError)
 def test_merge_mutables():
     class tcid(dict):
         pass
+
     class tcis(list):
         pass
-    
+
     src = {
-        "mm" : {
-            "a" : "v1"
-            },
+        "mm": {
+            "a": "v1",
+        },
         "ms": [
-            0
-        ]
-        }
+            0,
+        ],
+    }
     dst = {
-        "mm" : tcid([
-            ("a","v2"),
-            ("casserole","this should keep")
-            ]),
-        "ms" : tcis(['a', 'b', 'c'])
-        }
-    
+        "mm": tcid([
+            ("a", "v2"),
+            ("casserole", "this should keep"),
+        ]),
+        "ms": tcis(['a', 'b', 'c']),
+    }
+
     dpath.util.merge(dst, src)
     print(dst)
     assert(dst["mm"]["a"] == src["mm"]["a"])
     assert(dst['ms'][2] == 'c')
     assert("casserole" in dst["mm"])
-    
+
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
-def test_merge_replace():
-    dct_a = {"a": {"b": [1,2,3]}}
+
+def test_merge_replace_1():
+    dct_a = {"a": {"b": [1, 2, 3]}}
     dct_b = {"a": {"b": [1]}}
     dpath.util.merge(dct_a, dct_b, flags=dpath.util.MERGE_REPLACE)
     assert(len(dct_a['a']['b']) == 1)
+
+
+def test_merge_replace_2():
+    d1 = {'a': [0, 1, 2]}
+    d2 = {'a': ['a']}
+    dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
+    assert(len(d1['a']) == 1)
+    assert(d1['a'][0] == 'a')
 
 
 def test_merge_list():
@@ -176,7 +187,7 @@ def test_merge_list():
         dpath.util.merge(dst2, d)
     assert dst1["l"] == [1, 2]
     assert dst2["l"] == [1]
-    
+
     dst1 = {}
     for d in [src, p1]:
         dpath.util.merge(dst1, d)
@@ -185,11 +196,3 @@ def test_merge_list():
         dpath.util.merge(dst2, d)
     assert dst1["l"] == [1, 2]
     assert dst2["l"] == [1, 2]
-
-def test_merge_replace():
-    d1 = {'a': [0, 1, 2]}
-    d2 = {'a': ['a']}
-    dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
-    assert(len(d1['a']) == 1)
-    assert(d1['a'][0] == 'a')
-

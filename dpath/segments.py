@@ -4,19 +4,6 @@ from dpath import options
 from fnmatch import fnmatchcase
 
 
-from . import PY2
-
-
-if PY2:
-    from itertools import ifilter, izip
-else:
-    ifilter = filter
-    izip = zip
-    xrange = range
-    unicode = str
-    long = int
-
-
 def kvs(node):
     '''
     Return a (key, value) iterator for the node.
@@ -24,12 +11,9 @@ def kvs(node):
     kvs(node) -> (generator -> (key, value))
     '''
     try:
-        if PY2:
-            return node.iteritems()
-        else:
-            return iter(node.items())
+        return iter(node.items())
     except AttributeError:
-        return izip(xrange(len(node)), node)
+        return zip(range(len(node)), node)
 
 
 def leaf(thing):
@@ -38,10 +22,8 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    if PY2:
-        leaves = (str, unicode, int, long, float, bool, type(None))
-    else:
-        leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None))
+
     return isinstance(thing, leaves)
 
 
@@ -140,7 +122,7 @@ def leaves(obj):
 
     leaves(obj) -> (generator -> (segment, value))
     '''
-    return ifilter(lambda p: leafy(p[1]), walk(obj))
+    return filter(lambda p: leafy(p[1]), walk(obj))
 
 
 def int_str(segment):
@@ -154,7 +136,7 @@ def int_str(segment):
 
     int_str(segment) -> str
     '''
-    if isinstance(segment, (int, long)):
+    if isinstance(segment, int):
         return str(segment)
     return segment
 
@@ -270,7 +252,7 @@ def extend(thing, index, value=None):
         # Using this rather than the multiply notation in order to support a
         # wider variety of sequence like things.
         extra = (index + 1) - len(thing)
-        for i in xrange(extra):
+        for i in range(extra):
             expansion += [value]
         thing.extend(expansion)
     except TypeError:
@@ -284,15 +266,15 @@ def extend(thing, index, value=None):
 
 def __default_creator__(current, segments, i, hints=()):
     '''
-    Create missing path components. If the segment is an int or long, then it
-    will create a list. Otherwise a dictionary is created.
+    Create missing path components. If the segment is an int, then it will
+    create a list. Otherwise a dictionary is created.
 
     set(obj, segments, value) -> obj
     '''
     segment = segments[i]
     length = len(segments)
 
-    if isinstance(segment, (int, long)):
+    if isinstance(segment, int):
         extend(current, segment)
 
     # Infer the type from the hints provided.
@@ -306,7 +288,7 @@ def __default_creator__(current, segments, i, hints=()):
         else:
             segment_next = None
 
-        if isinstance(segment_next, (int, long)):
+        if isinstance(segment_next, int):
             current[segment] = []
         else:
             current[segment] = {}
@@ -342,7 +324,7 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
         if i != length - 1 and leaf(current):
             raise PathNotFound('Path: {}[{}]'.format(segments, i))
 
-    if isinstance(segments[-1], (int, long)):
+    if isinstance(segments[-1], int):
         extend(current, segments[-1])
 
     current[segments[-1]] = value

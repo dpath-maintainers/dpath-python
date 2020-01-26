@@ -53,9 +53,11 @@ def test_set_new_list_path_with_separator():
     assert(len(dict['a']) == 1)
     assert(len(dict['a']['b/c/d']) == 1)
     assert(dict['a']['b/c/d'][0] == 1)
-    
+
+
 def test_set_new_list_integer_path_with_creator():
     d = {}
+
     def mycreator(obj, pathcomp, nextpathcomp, hints):
         print(hints)
         print(pathcomp)
@@ -65,11 +67,9 @@ def test_set_new_list_integer_path_with_creator():
         target = pathcomp[0]
         if isinstance(obj, list) and (target.isdigit()):
             target = int(target)
-            
-        if ( ( nextpathcomp is not None) and 
-             ( isinstance(nextpathcomp, int) or str(nextpathcomp).isdigit())
-        ):
-            obj[target] = [None]*(int(nextpathcomp)+1)
+
+        if ((nextpathcomp is not None) and (isinstance(nextpathcomp, int) or str(nextpathcomp).isdigit())):
+            obj[target] = [None] * (int(nextpathcomp) + 1)
             print("Created new list in target")
         else:
             print("Created new dict in target")

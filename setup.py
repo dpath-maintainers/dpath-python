@@ -1,7 +1,7 @@
 from distutils.core import setup
 import dpath.version
 import os
-import sys
+
 
 long_description = open(
     os.path.join(
@@ -36,4 +36,3 @@ if __name__ == "__main__":
             'Topic :: Software Development :: Libraries :: Python Modules',
         ],
     )
-
