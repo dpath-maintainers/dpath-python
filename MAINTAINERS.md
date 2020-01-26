@@ -75,3 +75,44 @@ The more complete process goes:
 5. Complete and push your work on your fork. Use tox to test your work against the test suites. Features MUST ship with at least one new unit test that covers the new functionality. Bugfixes MUST ship with one new test (or an updated old test) that guards against regression.
 6. Send your pull request
 7. If accepted, the maintainers will merge your pull request and close the issue.
+
+
+Cutting a New Release
+=====================
+
+Releases for dpath occur automatically from travis-ci based on tags on the master branch.
+
+    akesterson@akesterson:~/dpath-python$ git tag
+    1.0-0
+    1.1
+    1.2-66
+    1.2-68
+    1.2-70
+    build,1.2,70
+    build,1.2,71
+    build,1.2,72
+    build,1.3,0
+    build,1.3,1
+    build,1.3,2
+    build,1.3,3
+    build,1.4,0
+    build,1.4,1
+    build,1.4,3
+    build,1.5,0
+    build,2.0,0
+
+Once upon a time, the version string was automatially computed based on the content of these tags. Now, however, the version string is stored statically in dpath/version.py
+
+    akesterson@akesterson:~/dpath-python$ cat dpath/version.py
+    VERSION = "2.0.0"
+
+To cut a new release, follow this procedure:
+
+1. Commit a new dpath/version.py on the master branch with the format "MAJOR.MINOR.RELEASE"
+2. Add a new tag of the form "build,MAJOR.MINOR,RELEASE" to the master branch. This tag must have the same version number as the one commmited in dpath/version.py or we will fill your desk drawers with cockroaches.
+3. Push the new master version and the associated tag to github.
+4. travis-ci SHOULD push the new release to pypi.
+
+If travis-ci fails to update pypi, follow the instructions on manually creating a release, here:
+
+https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives
