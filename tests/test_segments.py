@@ -1,7 +1,11 @@
 from dpath import options
-from hypothesis import given, assume
+from hypothesis import given, assume, settings, HealthCheck
 import dpath.segments as api
 import hypothesis.strategies as st
+import os
+
+settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
+settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
 
 random_key_int = st.integers(0, 1000)
 random_key_str = st.binary() | st.text()
