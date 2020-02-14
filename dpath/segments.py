@@ -1,3 +1,4 @@
+from collections import MutableSequence, MutableMapping, Set
 from copy import deepcopy
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath import options
@@ -22,9 +23,7 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    leaves = (bytes, str, int, float, bool, type(None))
-
-    return isinstance(thing, leaves)
+    return not isinstance(thing, (MutableSequence, MutableMapping, Set, tuple))
 
 
 def leafy(thing):
