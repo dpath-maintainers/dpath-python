@@ -13,7 +13,15 @@ def kvs(node):
     try:
         return iter(node.items())
     except AttributeError:
-        return zip(range(len(node)), node)
+        try:
+            return zip(range(len(node)), node)
+        except TypeError:
+            # we have a mappable object that doesn't implement
+            # items and doesn't have a len either 
+            # Hence we can't actually walk across it
+            # We should still be able to index it
+            return enumerate([])
+
 
 
 def leaf(thing):
@@ -24,7 +32,31 @@ def leaf(thing):
     '''
     leaves = (bytes, str, int, float, bool, type(None))
 
-    return isinstance(thing, leaves)
+    if isinstance(thing, leaves):
+        return True
+
+    try:
+        # we use 0 since this will work on lists and dicts
+        # while using a string will cause the list to 
+        # throw a TypeError too
+        thing[0]
+    except TypeError:
+        # does not implement __getitem__
+        return True
+
+    except (KeyError, IndexError) as e:
+        # this means this has worked but failed at the execution
+        # since key doesn't quite work
+        return False
+    except Exception:
+        # We are probably catching a custom exception
+        # from a custom class that does actually map
+        # and we might want to explore
+        return False
+    else:
+        # if this worked, then it's not a leaf node
+        return False
+
 
 
 def leafy(thing):

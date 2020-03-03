@@ -4,6 +4,7 @@ from dpath import options
 from dpath.exceptions import InvalidKeyName
 import dpath.segments
 
+
 _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
