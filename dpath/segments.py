@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath import options
 from fnmatch import fnmatchcase
@@ -22,7 +23,7 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None), datetime)
 
     return isinstance(thing, leaves)
 
