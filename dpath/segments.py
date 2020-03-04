@@ -4,6 +4,7 @@ from datetime import datetime
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath import options
 from fnmatch import fnmatchcase
+import six
 
 
 def kvs(node):
