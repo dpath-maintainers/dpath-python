@@ -1,3 +1,4 @@
+import collections
 from copy import deepcopy
 from datetime import datetime
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
