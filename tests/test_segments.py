@@ -1,3 +1,5 @@
+import datetime
+import decimal
 from dpath import options
 from hypothesis import given, assume, settings, HealthCheck
 import dpath.segments as api
@@ -339,3 +341,20 @@ def test_view(walkable):
 
     view = api.view(node, segments)
     assert api.get(view, segments) == api.get(node, segments)
+
+
+def test_leaves_passed():
+    '''
+    Test if a value is correctly classified as a leaf
+    '''
+    for thing in [
+        'a', 1, True, None, datetime.datetime(2020, 1, 1), decimal.Decimal(1.99)]:
+        assert api.leaf(thing) == True
+
+
+def test_leaves_failed():
+    '''
+    Test if a value is correctly classified as a leaf
+    '''
+    for thing in ['a', 1, True, None, datetime.datetime(2020, 1, 1)]:
+        assert api.leaf(thing) == True
