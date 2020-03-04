@@ -25,8 +25,10 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    return not isinstance(thing, collections.abc.Container) or isinstance(
-        thing, six.string_types
+    return (
+        not isinstance(thing, collections.abc.Container)
+        or isinstance(thing, six.string_types)
+        or isinstance(thing, six.binary_type)
     )
 
 
