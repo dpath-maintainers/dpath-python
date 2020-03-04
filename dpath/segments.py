@@ -23,9 +23,9 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    leaves = (bytes, str, int, float, bool, type(None), datetime)
-
-    return isinstance(thing, leaves)
+    return not isinstance(thing, collections.abc.Container) or isinstance(
+        thing, six.string_types
+    )
 
 
 def leafy(thing):
