@@ -1,10 +1,13 @@
 import datetime
 import decimal
-from dpath import options
-from hypothesis import given, assume, settings, HealthCheck
-import dpath.segments as api
-import hypothesis.strategies as st
 import os
+
+import dpath.segments as api
+from dpath import options
+
+import hypothesis.strategies as st
+from hypothesis import HealthCheck, assume, given, settings
+
 
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
@@ -348,7 +351,13 @@ def test_leaves_passed():
     Test if a value is correctly classified as a leaf
     '''
     for thing in [
-        'a', 1, True, None, datetime.datetime(2020, 1, 1), decimal.Decimal(1.99)]:
+        'a',
+        1,
+        True,
+        None,
+        datetime.datetime(2020, 1, 1),
+        decimal.Decimal(1.99)
+    ]:
         assert api.leaf(thing) == True
 
 
@@ -356,5 +365,5 @@ def test_leaves_failed():
     '''
     Test if a value is correctly classified as a leaf
     '''
-    for thing in ['a', 1, True, None, datetime.datetime(2020, 1, 1)]:
-        assert api.leaf(thing) == True
+    for thing in [set(), [], {'cat': 'dog'}]:
+        assert api.leaf(thing) == False
