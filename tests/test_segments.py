@@ -257,7 +257,6 @@ def test_match_nonmatching(pair):
     '''
     Given segments and a known bad glob, match should be False.
     '''
-    print(pair)
     (segments, glob) = pair
     assert api.match(segments, glob) is False
 
@@ -339,3 +338,15 @@ def test_view(walkable):
 
     view = api.view(node, segments)
     assert api.get(view, segments) == api.get(node, segments)
+
+def test_inverse_view():
+    x = api.inverse_view(
+        {'a': {'b': 1, 'c': 2, 'd': {'b': 4}}},
+        ['**', 'b']
+    )
+
+    assert(not api.has(x, ['a', 'b']))
+    assert(not api.has(x, ['a', 'd', 'b']))
+    assert(api.has(x, ['a', 'c']))
+    assert(api.has(x, ['a', 'd']))
+    assert(len(x['a']['d'].keys()) == 0)

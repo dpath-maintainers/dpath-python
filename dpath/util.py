@@ -83,34 +83,7 @@ def delete(obj, glob, separator='/', afilter=None):
         selected = afilter and dpath.segments.leaf(value) and afilter(value)
 
         if (matched and not afilter) or selected:
-            key = segments[-1]
-            parent = dpath.segments.get(obj, segments[:-1])
-
-            try:
-                # Attempt to treat parent like a sequence.
-                parent[0]
-
-                if len(parent) - 1 == key:
-                    # Removing the last element of a sequence. It can be
-                    # truly removed without affecting the ordering of
-                    # remaining items.
-                    #
-                    # Note: In order to achieve proper behavior we are
-                    # relying on the reverse iteration of
-                    # non-dictionaries from dpath.segments.kvs().
-                    # Otherwise we'd be unable to delete all the tails
-                    # of a list and end up with None values when we
-                    # don't need them.
-                    del parent[key]
-                else:
-                    # This key can't be removed completely because it
-                    # would affect the order of items that remain in our
-                    # result.
-                    parent[key] = None
-            except:
-                # Attempt to treat parent like a dictionary instead.
-                del parent[key]
-
+            dpath.segments.delete(obj, segments)
             counter[0] += 1
 
     [deleted] = dpath.segments.foldm(obj, f, [0])

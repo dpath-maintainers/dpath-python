@@ -293,6 +293,38 @@ def __default_creator__(current, segments, i, hints=()):
         else:
             current[segment] = {}
 
+def delete(obj, segments):
+    '''
+    Remove the given segments from the object
+    '''
+    key = segments[-1]
+    parent = get(obj, segments[:-1])
+
+    try:
+        # Attempt to treat parent like a sequence.
+        parent[0]
+        
+        if len(parent) - 1 == key:
+            # Removing the last element of a sequence. It can be
+            # truly removed without affecting the ordering of
+            # remaining items.
+            #
+            # Note: In order to achieve proper behavior we are
+            # relying on the reverse iteration of
+            # non-dictionaries from dpath.segments.kvs().
+            # Otherwise we'd be unable to delete all the tails
+            # of a list and end up with None values when we
+            # don't need them.
+            del parent[key]
+        else:
+            # This key can't be removed completely because it
+            # would affect the order of items that remain in our
+            # result.
+            parent[key] = None
+    except:
+        # Attempt to treat parent like a dictionary instead.
+        del parent[key]
+
 
 def set(obj, segments, value, creator=__default_creator__, hints=()):
     '''
@@ -383,3 +415,23 @@ def view(obj, glob):
             if not has(result, segments):
                 set(result, segments, deepcopy(value), hints=types(obj, segments))
     return fold(obj, f, type(obj)())
+
+def inverse_view(obj, glob):
+    '''
+    Return a view of the object where the glob DOES NOT MATCH. A view retains
+    the same form as the obj, but is limited to only the paths that
+    matched. Views are new objects (a deepcopy of the matching values).
+
+    view(obj, glob) -> obj'
+    '''
+    def f(obj, pair, result):
+        (segments, value) = pair
+        if match(segments, glob):
+            if has(result, segments):
+                delete(result, segments)
+                return
+            
+        set(result, segments, deepcopy(value), hints=types(obj, segments))
+            
+    return fold(obj, f, type(obj)())
+    
