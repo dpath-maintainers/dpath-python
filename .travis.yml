@@ -3,9 +3,11 @@ deploy:
   user: akesterson
   password:
     secure: RlZ3kw0x7/5QNBUIqj5wjkpS11TuSdH7o1S41m4Vea8HiryQjB2+CFf+uBXj8nb1OtYDRaeKTSnk3qVlUvaUglFd7sV+Hh2DDo4pYomd0xDFHnK2LB+hzbYftkOptmwdS2bc0X7vr+xdY+7b2DPTlyowrs3Xp2WvzRWM4hWnA3Q=
-  true:
+  on:
     tags: true
-    branch: master
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^master$|^version/[0-9].[0-9]$
+    
 sudo: false
 language: python
 python:
