@@ -16,22 +16,27 @@ def test_path_paths_empty_key_disallowed():
     for x in dpath.path.paths(tdict):
         pass
 
+@raises(dpath.exceptions.InvalidKeyName)
 def test_path_paths_empty_key_allowed():
     tdict = {
         "Empty": {
             "": {
-                "Key": ""
+                "Key": "something"
             }
         }
     }
     parts=[]
     dpath.options.ALLOW_EMPTY_STRING_KEYS=True
+    assert(dpath.util.get(tdict, "/Empty//Key") == "something")
+
     for x in dpath.path.paths(tdict, dirs=False, leaves=True):
         path = x
     for x in path[:-1]:
         parts.append(x[0])
-    dpath.options.ALLOW_EMPTY_STRING_KEYS=False
     assert("/".join(parts) == "Empty//Key")
+
+    dpath.options.ALLOW_EMPTY_STRING_KEYS=False
+    dpath.util.get(tdict, "/Empty//Key")
 
 def test_path_paths_int_keys():
     dpath.path.validate([

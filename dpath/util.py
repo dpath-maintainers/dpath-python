@@ -15,23 +15,25 @@ MERGE_ADDITIVE=(1 << 2)
 MERGE_TYPESAFE=(1 << 3)
 MERGE_LOOSEDICT=(1 << 4)
 
+try:
+    basestrtype = basestring
+except NameError:
+    basestrtype = str
+
 def __safe_path__(path, separator):
     """
-    Given a path and separator, return a list of path components. If path
-    is already a list, return it.
+    Given a STRING path and separator, return a list of path components. 
+    If path is already a list, return it.
 
     Note that a string path with the separator at index[0] will have the
-    separator stripped off. If you pass a list path, the separator is
-    ignored, and is assumed to be part of each key glob. It will not be
-    stripped.
+    separator stripped off. 
     """
     if issubclass(path.__class__, (MutableSequence)):
         return path
     path = path.lstrip(separator).split(separator)
     validated = []
     for elem in path:
-        key = elem[0]
-        strkey = str(key)
+        strkey = str(elem)
         if (separator and (separator in strkey)):
             raise dpath.exceptions.InvalidKeyName("{0} at {1} contains the separator {2}"
                                                   "".format(strkey,
