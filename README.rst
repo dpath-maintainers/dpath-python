@@ -14,6 +14,8 @@ provides some facility for filtering those results.
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
+DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
+
 Installing
 ==========
 
@@ -455,6 +457,8 @@ components instead of string globs.
 
 Contributors
 ============
+
+DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
 
 We would like to thank the community for their interest and involvement. You
 have all made this project significantly better than the sum of its parts, and

@@ -5,6 +5,8 @@ dpath is primarily maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb 
 
 There are several individuals in the community who have taken an active role in helping to maintain the project and submit fixes. Those individuals are shown in the git changelog.
 
+DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
+
 Becoming a Maintainer
 =====================
 
