@@ -120,7 +120,7 @@ def delete(obj, glob, separator='/', afilter=None):
     return deleted
 
 
-def set(obj, glob, value, separator='/', afilter=None):
+def set(obj, glob, value, separator='/', afilter=None, only_leaves=True, update_dict=False):
     '''
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -135,9 +135,15 @@ def set(obj, glob, value, separator='/', afilter=None):
             return
 
         matched = dpath.segments.match(segments, globlist)
-        selected = afilter and dpath.segments.leaf(found) and afilter(found)
+        if only_leaves:
+            selected = afilter and dpath.segments.leaf(found) and afilter(found)
+        else:
+            selected = afilter and afilter(found)
 
         if (matched and not afilter) or (matched and selected):
+            nonlocal value
+            if update_dict and isinstance(value, dict):
+                value = {**found, **value}
             dpath.segments.set(obj, segments, value, creator=None)
             counter[0] += 1
 
