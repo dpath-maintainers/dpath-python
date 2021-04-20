@@ -13,17 +13,37 @@ random_key = random_key_str | random_key_int
 random_segments = st.lists(random_key)
 random_leaf = st.integers() | st.floats() | st.booleans() | st.binary() | st.text() | st.none()
 
-random_thing = st.recursive(
-    random_leaf,
-    lambda children: st.lists(children) | st.tuples(children) | st.dictionaries(st.binary() | st.text(), children),
-    max_leaves=100
-)
+if options.ALLOW_EMPTY_STRING_KEYS:
+    random_thing = st.recursive(
+        random_leaf,
+        lambda children: st.lists(children) | st.tuples(children) |
+                         st.dictionaries(st.binary() | st.text(), children),
+        max_leaves=100
+    )
+else:
+    random_thing = st.recursive(
+        random_leaf,
+        lambda children: st.lists(children) | st.tuples(children) |
+                         st.dictionaries( st.binary(min_size=1) | st.text(min_size=1),
+                                          children),
+        max_leaves=100
+    )
+    
 random_node = random_thing.filter(lambda thing: isinstance(thing, (list, tuple, dict)))
 
-random_mutable_thing = st.recursive(
-    random_leaf,
-    lambda children: st.lists(children) | st.dictionaries(st.binary() | st.text(), children)
-)
+if options.ALLOW_EMPTY_STRING_KEYS:
+    random_mutable_thing = st.recursive(
+        random_leaf,
+        lambda children: st.lists(children) | st.dictionaries(st.binary() | st.text(),
+                                                              children))
+else:
+    random_mutable_thing = st.recursive(
+        random_leaf,
+        lambda children: st.lists(children) |
+                         st.dictionaries(st.binary(min_size=1) | st.text(min_size=1),
+                                         children))
+    
+
 random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 
 

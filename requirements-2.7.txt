@@ -1,0 +1,4 @@
+attrs==20.3.0
+enum34==1.1.10
+hypothesis==4.57.1
+sortedcontainers==2.3.0

@@ -1,8 +1,23 @@
-from collections.abc import MutableMapping
-from collections.abc import MutableSequence
+try:
+    from collections.abc import MutableMapping
+    from collections.abc import MutableSequence
+except ImportError:
+    from collections import MutableMapping
+    from collections import MutableSequence
+    
 from dpath import options
 from dpath.exceptions import InvalidKeyName
 import dpath.segments
+import sys
+
+
+import re
+try:
+    RE_PATTERN_TYPE = re.Pattern
+except AttributeError:
+    RE_PATTERN_TYPE = re._pattern_type
+
+
 
 _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
@@ -34,12 +49,19 @@ def __safe_path__(path, separator):
         # Attempt to convert integer segments into actual integers.
         final = []
         for segment in segments:
-            try:
-                final.append(int(segment))
-            except:
+            if isinstance(segment, str) and segment[0] == '{' and segment[-1] == '}':
+                rex = re.compile(segment[1:-1])
+                final.append(rex)
+            elif isinstance(segment, RE_PATTERN_TYPE):
                 final.append(segment)
+            else:
+                try:
+                    final.append(int(segment))
+                except:
+                    final.append(segment)
         segments = final
 
+    # print(f" __safe_path__({path},{separator}) to return {segments}", file = sys.stderr )
     return segments
 
 
@@ -171,7 +193,7 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
     results = dpath.segments.fold(obj, f, [])
 
     if len(results) == 0:
-        if default  is not _DEFAULT_SENTINAL:
+        if default is not _DEFAULT_SENTINAL:
             return default
 
         raise KeyError(glob)
