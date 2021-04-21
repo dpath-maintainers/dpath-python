@@ -35,23 +35,23 @@ random_key_int = st.integers(0, 100)
 random_key_str = st.text(alphabet=ALPHABETK, min_size=2)
 random_key = random_key_str | random_key_int
 random_segments = st.lists(random_key, max_size=4)
-random_leaf = random_key_int | st.text(alphabet=ALPHABET,min_size=2)
+random_leaf = random_key_int | st.text(alphabet=ALPHABET, min_size=2)
 
 
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children,max_size=3)
+        lambda children: (st.lists(children, max_size=3)
                           | st.dictionaries(st.binary(max_size=5)
                           | st.text(alphabet=ALPHABET), children)),
         max_leaves=MAX_LEAVES)
 else:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children,max_size=3) 
-                          | st.dictionaries(st.binary(min_size=1,max_size=5)
+        lambda children: (st.lists(children, max_size=3)
+                          | st.dictionaries(st.binary(min_size=1, max_size=5)
                           | st.text(min_size=1, alphabet=ALPHABET),
-                            children)),
+                          children)),
         max_leaves=MAX_LEAVES)
 
 random_node = random_thing.filter(lambda thing: isinstance(thing, (list, dict)))
@@ -59,13 +59,13 @@ random_node = random_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children,max_size=3) | st.text(alphabet=ALPHABET),
+        lambda children: (st.lists(children, max_size=3) | st.text(alphabet=ALPHABET),
                           children), max_leaves=MAX_LEAVES)
 else:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children,max_size=3)
-                          | st.dictionaries( st.text(alphabet=ALPHABET, min_size=1),
+        lambda children: (st.lists(children, max_size=3)
+                          | st.dictionaries(st.text(alphabet=ALPHABET, min_size=1),
                           children)),
         max_leaves=MAX_LEAVES)
 
@@ -155,8 +155,10 @@ def random_segments_with_glob(draw):
 
     return (segments, glob)
 
-    
-rex_translate = re.compile("([*?])")    
+
+rex_translate = re.compile("([*?])")
+
+
 @st.composite
 def random_segments_with_re_glob(draw):
     (segments, glob) = draw(random_segments_with_glob())
@@ -166,10 +168,10 @@ def random_segments_with_re_glob(draw):
             glob1.append(g)
             continue
         try:
-            g0 = rex_translate.sub(".\\1",g)
+            g0 = rex_translate.sub(".\\1", g)
             g1 = re.compile("^" + g0 + "$")
         except Exception:
-            print(f"Unable to re.compile:({type(g)}){g}", file=sys.stderr)
+            sys.stderr.write("Unable to re.compile:({}){}\n".format(type(g), g))
             g1 = g
         glob1.append(g1)
 
@@ -208,14 +210,15 @@ def random_segments_with_nonmatching_re_glob(draw):
             glob1.append(g)
             continue
         try:
-            g0 = rex_translate.sub(".\\1",g)    
-            g1 = re.compile("^"+g0+"$")
+            g0 = rex_translate.sub(".\\1", g)
+            g1 = re.compile("^" + g0 + "$")
         except Exception:
-            print(f"(non-matching):Unable to re.compile:({type(g)}){g}", file=sys.stderr )
+            sys.stderr.write("(non-matching):Unable to re.compile:({}){}".format(type(g), g))
             g1 = g
         glob1.append(g1)
             
     return (segments, glob1)
+
 
 def setup():
     # Allow empty strings in segments.
@@ -244,8 +247,8 @@ class TestEncoding(unittest.TestCase):
             assert node[k] is v
 
 
-    @settings(max_examples=MAX_SAMPLES)        
-    @given(thing=random_thing )
+    @settings(max_examples=MAX_SAMPLES)
+    @given(thing=random_thing)
     def test_fold(self, thing):
         '''
         Given a thing, count paths with fold.
@@ -257,7 +260,7 @@ class TestEncoding(unittest.TestCase):
         assert count == len(tuple(api.walk(thing)))
 
 
-    @settings(max_examples=MAX_SAMPLES)        
+    @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_glob())
     def test_match(self, pair):
         '''
@@ -266,8 +269,8 @@ class TestEncoding(unittest.TestCase):
         (segments, glob) = pair
         assert api.match(segments, glob) is True
         if TestEncoding.DO_DEBUG_PRINT:
-            print(f"api.match: segments:{segments} , glob:{glob}", file=sys.stderr)
-        
+            sys.stderr.write("api.match: segments:{}, glob:{}\n".format(segments, glob))
+
     @settings(max_examples=MAX_SAMPLES)        
     @given(random_segments_with_re_glob())
     def test_match_re(self, pair):
@@ -277,8 +280,8 @@ class TestEncoding(unittest.TestCase):
         (segments, glob) = pair
         assert api.match(segments, glob) is True
         if TestEncoding.DO_DEBUG_PRINT:
-            print(f"api.match: segments:{segments} , glob:{glob}", file=sys.stderr)
-        
+            sys.stderr.write("api.match: segments:{} , glob:{}\n".format(segments, glob))
+
     
     @given(random_segments_with_nonmatching_re_glob())
     def test_match_nonmatching_re(self, pair):
@@ -288,7 +291,7 @@ class TestEncoding(unittest.TestCase):
         (segments, glob) = pair
         assert api.match(segments, glob) is False
         if TestEncoding.DO_DEBUG_PRINT:
-            print(f"api.match:non match OK: segments:{segments} , glob:{glob}", file=sys.stderr)
+            sys.stderr.write("api.match:non match OK: segments:{}, glob:{}\n".format(segments, glob))
 
 
 if __name__ == "__main__":
@@ -308,6 +311,6 @@ Flags:
     if "-v" in sys.argv:
         sys.argv = [x for x in sys.argv if x != "-v"]
         TestEncoding.DO_DEBUG_PRINT = True
-        print("Set verbose mode", file=sys.stderr)
-        
+        sys.stderr.write("Set verbose mode\n")
+
     unittest.main()

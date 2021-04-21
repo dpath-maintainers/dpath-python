@@ -360,6 +360,5 @@ def test_view(walkable):
     ag1 = api.get(view, segments)
     ag2 = api.get(node, segments)
     if ag1 != ag2:
-        print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}",
-              file=sys.stderr)
+        print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}")
     assert ag1 == ag2

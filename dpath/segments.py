@@ -30,7 +30,12 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    leaves = (bytes, str, int, float, bool, type(None))
+    # resolve unicode issue in Python2.7, see test/test_unicode.py
+    #                                         (TestEncoding.test_reproduce*)
+    if sys.version_info < (3, 0):
+        leaves = (bytes, str, unicode, int, float, bool, type(None))
+    else:
+        leaves = (bytes, str, int, float, bool, type(None))
 
     return isinstance(thing, leaves)
 
@@ -62,7 +67,6 @@ def walk(obj, location=()):
                 pass
 
             if length is not None and length == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
-                print(f"ABOUT TO RAISE : walking {obj}, k={k}, v={v}", file=sys.stderr)
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
                                      "{}".format(location + (k,)))
@@ -235,10 +239,8 @@ def match(segments, glob):
             # exception while attempting to match into a False for the
             # match.
             try:
-                # print( f"About to fnmatchcase '{s}' and '{g}'", file=sys.stderr)
                 if isinstance(g, RE_PATTERN_TYPE):
                     mobj = g.match(s)
-                    # print( f"re.match '{s}' and '{g}' returned {mobj}", file = sys.stderr )
                     if mobj is None:
                         return False
                 elif not fnmatchcase(s, g):
