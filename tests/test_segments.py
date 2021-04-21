@@ -3,6 +3,7 @@ from hypothesis import given, assume, settings, HealthCheck
 import dpath.segments as api
 import hypothesis.strategies as st
 import os
+import sys
 
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
@@ -16,19 +17,17 @@ random_leaf = st.integers() | st.floats() | st.booleans() | st.binary() | st.tex
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: st.lists(children) | st.tuples(children) |
-                         st.dictionaries(st.binary() | st.text(), children),
-        max_leaves=100
-    )
+        lambda children: (st.lists(children) | st.tuples(children)
+                          | st.dictionaries(st.binary() | st.text(), children)),
+        max_leaves=100)
 else:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: st.lists(children) | st.tuples(children) |
-                         st.dictionaries( st.binary(min_size=1) | st.text(min_size=1),
-                                          children),
-        max_leaves=100
-    )
-    
+        lambda children: (st.lists(children) | st.tuples(children)
+                          | st.dictionaries(st.binary(min_size=1) | st.text(min_size=1),
+                                            children)),
+        max_leaves=100)
+
 random_node = random_thing.filter(lambda thing: isinstance(thing, (list, tuple, dict)))
 
 if options.ALLOW_EMPTY_STRING_KEYS:
@@ -39,10 +38,10 @@ if options.ALLOW_EMPTY_STRING_KEYS:
 else:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: st.lists(children) |
-                         st.dictionaries(st.binary(min_size=1) | st.text(min_size=1),
-                                         children))
-    
+        lambda children: (st.lists(children)
+                          | st.dictionaries(st.binary(min_size=1) | st.text(min_size=1),
+                                            children)))
+
 
 random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 
@@ -358,4 +357,9 @@ def test_view(walkable):
     assume(found == found)  # Hello, nan! We don't want you here.
 
     view = api.view(node, segments)
-    assert api.get(view, segments) == api.get(node, segments)
+    ag1 = api.get(view, segments)
+    ag2 = api.get(node, segments)
+    if ag1 != ag2:
+        print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}",
+              file=sys.stderr)
+    assert ag1 == ag2

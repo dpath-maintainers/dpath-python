@@ -4,11 +4,10 @@ try:
 except ImportError:
     from collections import MutableMapping
     from collections import MutableSequence
-    
+
 from dpath import options
 from dpath.exceptions import InvalidKeyName
 import dpath.segments
-import sys
 
 
 import re
@@ -18,11 +17,11 @@ except AttributeError:
     RE_PATTERN_TYPE = re._pattern_type
 
 
-
 _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
 MERGE_TYPESAFE = (1 << 3)
+
 
 def __safe_path__(path, separator):
     '''
@@ -61,7 +60,6 @@ def __safe_path__(path, separator):
                     final.append(segment)
         segments = final
 
-    # print(f" __safe_path__({path},{separator}) to return {segments}", file = sys.stderr )
     return segments
 
 

@@ -439,6 +439,44 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> dpath.util.get(['a', 'b/c'])
    0
 
+Need more expressive regular expressions in paths ?
+===================================================
+
+We propose the following:
+  - a path component may also be specified as ::
+      {<re.regexpr>}
+     
+    where `<re.regexpr>` is a regular expression accepted by the standard Python module `re`
+
+  - when using the list form for a path, a list element can also
+    be expressed as
+    
+    -  a string as above
+       
+    -  the output of ::
+
+         re.compile( args )
+
+
+Example:
+
+.. code-block:: python
+
+      js = loadJson()
+      selPath = 'Config/{(Env|Cmd)}'
+      x = dpath.util.search(js.lod, selPath)
+      print(x)
+
+      selPath = [ re.compile('(Config|Graph)') , re.compile('(Env|Cmd|Data)') ]
+      x = dpath.util.search(js.lod, selPath)
+      print(x)        
+
+      selPath = '{(Config|Graph)}/{(Env|Cmd|Data)}'
+      x = dpath.util.search(js.lod, selPath)
+      print(x)
+
+      
+    
 dpath.segments : The Low-Level Backend
 ======================================
 
