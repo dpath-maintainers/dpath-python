@@ -1,5 +1,11 @@
-from collections.abc import MutableMapping
-from collections.abc import MutableSequence
+# deal with Python2.7 / Python3 difference
+try:
+    from collections.abc import MutableMapping
+    from collections.abc import MutableSequence
+except ImportError:
+    from collections import MutableMapping
+    from collections import MutableSequence
+
 from dpath import options
 from dpath.exceptions import InvalidKeyName
 import dpath.segments

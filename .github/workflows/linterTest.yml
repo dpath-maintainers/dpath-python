@@ -1,0 +1,56 @@
+name: LinterTest
+    # ------------------------------------------------------------
+    # (C) Alain Lichnewsky, 2021
+    #
+    # For running under Github's Actions
+    #
+    # Script performs basic static test of the package under Python-3,
+    # including added functionality.
+    # ------------------------------------------------------------
+
+# Controls when the action will run. 
+on:
+  #
+  ## Not enabled, would triggers the workflow on push or pull request events but only
+  ## for the AL-addRegexp branch.
+  #push:
+  #  branches: [ AL-addRegexp ]
+  
+  # Allows to run this workflow manually from the Github Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "super-lint"
+  super-lint:
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    # Name the Job
+    name: Lint code base
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell, in practice it is useful
+      # to figure out some of the environment setup
+      - name: Use shell to figure out environment
+        run: echo Hello from Github Actions !!;
+             bash --version | head -1 ;
+             echo LANG=${LANG} SHELL=${SHELL} ;
+             echo PATH=${PATH}  ;
+             pwd;
+             ls -ltha;
+
+      # Runs the Super-Linter action
+      - name: Run Super-Linter
+        uses: github/super-linter@v3
+      #
+      # this script requires some environment variables
+      #
+        env:
+          DEFAULT_BRANCH: AL-addRegexp
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 

@@ -2,7 +2,7 @@ from copy import deepcopy
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath import options
 from fnmatch import fnmatchcase
-
+import sys
 
 def kvs(node):
     '''
@@ -22,7 +22,12 @@ def leaf(thing):
 
     leaf(thing) -> bool
     '''
-    leaves = (bytes, str, int, float, bool, type(None))
+    # resolve unicode issue in Python2.7, see test/test_unicode.py
+    #                                         (TestEncoding.test_reproduce*)
+    if sys.version_info < (3, 0):
+        leaves = (bytes, str, unicode, int, float, bool, type(None))
+    else:
+        leaves = (bytes, str, int, float, bool, type(None))
 
     return isinstance(thing, leaves)
 
