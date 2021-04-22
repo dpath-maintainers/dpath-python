@@ -21,13 +21,14 @@ MAX_SAMPLES = None
 if __name__ == "__main__":
     if "-v" in sys.argv:
         MAX_SAMPLES = 50
+        MAX_LEAVES = 20
 
 
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
-MAX_LEAVES = 3
 if MAX_SAMPLES is None:
-    MAX_SAMPLES = 1000
+    MAX_LEAVES = 50
+    MAX_SAMPLES = 500
 ALPHABET = ('A', 'B', 'C', ' ')
 ALPHABETK = ('a', 'b', 'c', '-')
 
@@ -216,7 +217,7 @@ def random_segments_with_nonmatching_re_glob(draw):
             sys.stderr.write("(non-matching):Unable to re.compile:({}){}".format(type(g), g))
             g1 = g
         glob1.append(g1)
-            
+
     return (segments, glob1)
 
 
@@ -246,7 +247,6 @@ class TestEncoding(unittest.TestCase):
         for k, v in api.kvs(node):
             assert node[k] is v
 
-
     @settings(max_examples=MAX_SAMPLES)
     @given(thing=random_thing)
     def test_fold(self, thing):
@@ -271,7 +271,7 @@ class TestEncoding(unittest.TestCase):
         if TestEncoding.DO_DEBUG_PRINT:
             sys.stderr.write("api.match: segments:{}, glob:{}\n".format(segments, glob))
 
-    @settings(max_examples=MAX_SAMPLES)        
+    @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_re_glob())
     def test_match_re(self, pair):
         '''
@@ -282,7 +282,8 @@ class TestEncoding(unittest.TestCase):
         if TestEncoding.DO_DEBUG_PRINT:
             sys.stderr.write("api.match: segments:{} , glob:{}\n".format(segments, glob))
 
-    
+
+
     @given(random_segments_with_nonmatching_re_glob())
     def test_match_nonmatching_re(self, pair):
         '''
@@ -304,6 +305,11 @@ and may select test cases.
 Flags:
     -h print this help and quit
     -v print information messages on stderr; also reduces MAX_SAMPLES to 50
+
+Autonomous CLI syntax:
+    python3 [-h] [-v] [TestEncoding[.<testname>]]
+
+    e.g.     python3 TestEncoding.test_match_re
 """
         print(description)
         sys.exit(0)
