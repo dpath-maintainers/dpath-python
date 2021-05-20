@@ -4,6 +4,8 @@
 #
 # (C) Alain Lichnewsky, 2021
 #
+#     Much code copied from test_segments.py
+#
 import os
 import sys
 import re
@@ -15,13 +17,15 @@ import hypothesis.strategies as st
 
 from dpath import options
 import dpath.segments as api
+import dpath.options
+dpath.options.DPATH_ACCEPT_RE_REGEXP = True #enable re.regexp support in path expr.
 
 # enables to modify some globals
 MAX_SAMPLES = None
 if __name__ == "__main__":
     if "-v" in sys.argv:
-        MAX_SAMPLES = 50
-        MAX_LEAVES = 20
+        MAX_SAMPLES = 20
+        MAX_LEAVES = 7
 
 
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
@@ -29,10 +33,11 @@ settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
 if MAX_SAMPLES is None:
     MAX_LEAVES = 50
     MAX_SAMPLES = 500
+
 ALPHABET = ('A', 'B', 'C', ' ')
 ALPHABETK = ('a', 'b', 'c', '-')
 
-random_key_int = st.integers(0, 100)
+random_key_int = st.integers(0, 10)
 random_key_str = st.text(alphabet=ALPHABETK, min_size=2)
 random_key = random_key_str | random_key_int
 random_segments = st.lists(random_key, max_size=4)
@@ -42,16 +47,16 @@ random_leaf = random_key_int | st.text(alphabet=ALPHABET, min_size=2)
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children, max_size=3)
-                          | st.dictionaries(st.binary(max_size=5)
-                          | st.text(alphabet=ALPHABET), children)),
+        lambda children: (  st.lists(children, max_size=3)
+                          | st.dictionaries(  st.binary(max_size=5)
+                                            | st.text(alphabet=ALPHABET), children)),
         max_leaves=MAX_LEAVES)
 else:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children, max_size=3)
-                          | st.dictionaries(st.binary(min_size=1, max_size=5)
-                          | st.text(min_size=1, alphabet=ALPHABET),
+        lambda children: (  st.lists(children, max_size=3)
+                          | st.dictionaries( st.binary(min_size=1, max_size=5)
+                                            | st.text(min_size=1, alphabet=ALPHABET),
                           children)),
         max_leaves=MAX_LEAVES)
 
@@ -60,18 +65,20 @@ random_node = random_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children, max_size=3) | st.text(alphabet=ALPHABET),
-                          children), max_leaves=MAX_LEAVES)
+        lambda children: ( st.lists(children, max_size=3) | st.text(alphabet=ALPHABET),
+                           children),
+        max_leaves=MAX_LEAVES)
 else:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: (st.lists(children, max_size=3)
+        lambda children: (  st.lists(children, max_size=3)
                           | st.dictionaries(st.text(alphabet=ALPHABET, min_size=1),
                           children)),
         max_leaves=MAX_LEAVES)
 
 
-random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing, (list, dict)))
+random_mutable_node = random_mutable_thing.filter( lambda thing: isinstance(thing,
+                                                                            (list, dict)))
 
 
 @st.composite
@@ -123,6 +130,7 @@ def mutate(draw, segment):
             if len(c) != 1:
                 result.append(c)
             else:
+                # here the character is mutated to ? or * with 1/3 proba
                 result.append(draw(st.sampled_from((c, to_kind('?'), to_kind('*')))))
 
     combined = kind().join(result)
@@ -157,28 +165,6 @@ def random_segments_with_glob(draw):
     return (segments, glob)
 
 
-rex_translate = re.compile("([*?])")
-
-
-@st.composite
-def random_segments_with_re_glob(draw):
-    (segments, glob) = draw(random_segments_with_glob())
-    glob1 = []
-    for g in glob:
-        if g == "**" or not isinstance(g, str):
-            glob1.append(g)
-            continue
-        try:
-            g0 = rex_translate.sub(".\\1", g)
-            g1 = re.compile("^" + g0 + "$")
-        except Exception:
-            sys.stderr.write("Unable to re.compile:({}){}\n".format(type(g), g))
-            g1 = g
-        glob1.append(g1)
-
-    return (segments, glob1)
-
-
 @st.composite
 def random_segments_with_nonmatching_glob(draw):
     (segments, glob) = draw(random_segments_with_glob())
@@ -202,8 +188,69 @@ def random_segments_with_nonmatching_glob(draw):
 
     return (segments, glob)
 
+
+
+def checkSegGlob(segments, glob):
+    """ simple minded check that the translation done in random_segments_with_re_glob
+        does not suppress matching; just do not inspect in the case where a "**" has been
+        put in glob.
+    """
+    if "**" in glob:
+       return
+    zipped = zip(segments, glob)
+    for (s,g) in zipped:
+        #print(f"s={s}\tg={g}", file=sys.stderr)
+        if isinstance(s,int):
+            #print("Integer s", file=sys.stderr)
+            continue
+        if isinstance(g, re.Pattern):
+            m = g.match(s)
+        elif isinstance(g, str) and not g=="**":
+            m = re.match(g,s)
+        else:
+            raise NotImplementedError(f"unexpected type for g=({type(g)}){g}")
+        if not m:
+            print(f"Failure in checkSegGlob {(s,g)} type(g)={type(g)}", file=sys.stderr)
+            raise RuntimeError("{repr(s)}' does not match regexp:{repr(g)}")
+
+# exclude translation if too many *, to avoid too large cost in matching
+# '*' -> '.*'  # see glob
+# '?' -> '.'   # see glob
+#                Recall that bash globs are described at URL:
+#                  https://man7.org/linux/man-pages/man7/glob.7.html
+    
+rex_translate = re.compile("([*])[*]*") # 
+rex_translate2 = re.compile("([?])") #
+rex_isnumber = re.compile("\d+")
+@st.composite
+def random_segments_with_re_glob(draw):
+    """ Transform some globs with equivalent re.regexprs, to test the use of regexprs
+    """
+    (segments, glob) = draw(random_segments_with_glob())
+    glob1 = []
+    for g in glob:
+        if g == "**" or not isinstance(g, str) or rex_isnumber.match(g):
+            glob1.append(g)
+            continue
+        try:
+            g0 = rex_translate.sub(".\\1", g)
+            g0 = rex_translate2.sub(".", g0)
+            g1 = re.compile("^" + g0 + "$")
+            if not g1.match(g):                
+               g1 = g
+        except Exception:
+            sys.stderr.write("Unable to re.compile:({})'{}' from '{}'\n".format(type(g1),g1, g))
+            g1 = g
+        glob1.append(g1)
+
+    checkSegGlob(segments,glob1)
+    return (segments, glob1)
+
+
 @st.composite
 def random_segments_with_nonmatching_re_glob(draw):
+    """ Transform some globs with equivalent re.regexprs, to test the use of regexprs
+    """
     (segments, glob) = draw(random_segments_with_nonmatching_glob())
     glob1 = []
     for g in glob:
@@ -212,6 +259,7 @@ def random_segments_with_nonmatching_re_glob(draw):
             continue
         try:
             g0 = rex_translate.sub(".\\1", g)
+            g0 = rex_translate2.sub(".", g0)
             g1 = re.compile("^" + g0 + "$")
         except Exception:
             sys.stderr.write("(non-matching):Unable to re.compile:({}){}".format(type(g), g))
@@ -238,40 +286,6 @@ class TestEncoding(unittest.TestCase):
     DO_DEBUG_PRINT = False
 
     @settings(max_examples=MAX_SAMPLES)
-    @given(random_node)
-    def test_kvs(self, node):
-        '''
-        Given a node, kvs should produce a key that when used to extract
-        from the node renders the exact same value given.
-        '''
-        for k, v in api.kvs(node):
-            assert node[k] is v
-
-    @settings(max_examples=MAX_SAMPLES)
-    @given(thing=random_thing)
-    def test_fold(self, thing):
-        '''
-        Given a thing, count paths with fold.
-        '''
-        def f(o, p, a):
-            a[0] += 1
-
-        [count] = api.fold(thing, f, [0])
-        assert count == len(tuple(api.walk(thing)))
-
-
-    @settings(max_examples=MAX_SAMPLES)
-    @given(random_segments_with_glob())
-    def test_match(self, pair):
-        '''
-        Given segments and a known good glob, match should be True.
-        '''
-        (segments, glob) = pair
-        assert api.match(segments, glob) is True
-        if TestEncoding.DO_DEBUG_PRINT:
-            sys.stderr.write("api.match: segments:{}, glob:{}\n".format(segments, glob))
-
-    @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_re_glob())
     def test_match_re(self, pair):
         '''
@@ -284,6 +298,7 @@ class TestEncoding(unittest.TestCase):
 
 
 
+    @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_nonmatching_re_glob())
     def test_match_nonmatching_re(self, pair):
         '''

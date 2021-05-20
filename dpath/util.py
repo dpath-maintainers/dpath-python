@@ -11,6 +11,7 @@ import dpath.segments
 
 
 import re
+import sys
 try:
     RE_PATTERN_TYPE = re.Pattern
 except AttributeError:
@@ -48,10 +49,18 @@ def __safe_path__(path, separator):
         # Attempt to convert integer segments into actual integers.
         final = []
         for segment in segments:
-            if isinstance(segment, str) and segment[0] == '{' and segment[-1] == '}':
-                rex = re.compile(segment[1:-1])
+            if ( options.DPATH_ACCEPT_RE_REGEXP and  isinstance(segment, str)
+                 and segment[0] == '{' and segment[-1] == '}'):
+                try:
+                    rs = segment[1:-1]
+                    rex = re.compile(rs)
+                except Exception as reErr:
+                    print(f"Error in segment '{segment}' string '{rs}' not accepted"
+                          + f"as re.regexp:\n\t{reErr}",
+                          file=sys.stderr)
+                    raise reErr
                 final.append(rex)
-            elif isinstance(segment, RE_PATTERN_TYPE):
+            elif options.DPATH_ACCEPT_RE_REGEXP and isinstance(segment, RE_PATTERN_TYPE):
                 final.append(segment)
             else:
                 try:

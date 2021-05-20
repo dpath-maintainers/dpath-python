@@ -457,10 +457,16 @@ We propose the following:
 
          re.compile( args )
 
+  - for backwards compatibility, this facility must be enabled ::
 
+         import dpath
+	 dpath.options.DPATH_ACCEPT_RE_REGEXP = True
+      
 Example:
 
 .. code-block:: python
+      import dpath
+      dpath.options.DPATH_ACCEPT_RE_REGEXP = True
 
       js = loadJson()
       selPath = 'Config/{(Env|Cmd)}'
