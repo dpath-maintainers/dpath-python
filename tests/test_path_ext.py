@@ -18,7 +18,7 @@ import hypothesis.strategies as st
 from dpath import options
 import dpath.segments as api
 import dpath.options
-dpath.options.DPATH_ACCEPT_RE_REGEXP = True #enable re.regexp support in path expr.
+dpath.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
 
 # enables to modify some globals
 MAX_SAMPLES = None
@@ -31,8 +31,8 @@ if __name__ == "__main__":
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
 if MAX_SAMPLES is None:
-    MAX_LEAVES = 50
-    MAX_SAMPLES = 500
+    MAX_LEAVES = 20
+    MAX_SAMPLES = 300
 
 ALPHABET = ('A', 'B', 'C', ' ')
 ALPHABETK = ('a', 'b', 'c', '-')
@@ -77,8 +77,8 @@ else:
         max_leaves=MAX_LEAVES)
 
 
-random_mutable_node = random_mutable_thing.filter( lambda thing: isinstance(thing,
-                                                                            (list, dict)))
+random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing,
+                                                                           (list, dict)))
 
 
 @st.composite
@@ -196,17 +196,15 @@ def checkSegGlob(segments, glob):
         put in glob.
     """
     if "**" in glob:
-       return
+        return
     zipped = zip(segments, glob)
-    for (s,g) in zipped:
-        #print(f"s={s}\tg={g}", file=sys.stderr)
-        if isinstance(s,int):
-            #print("Integer s", file=sys.stderr)
+    for (s, g) in zipped:
+        if isinstance(s, int):
             continue
         if isinstance(g, re.Pattern):
             m = g.match(s)
-        elif isinstance(g, str) and not g=="**":
-            m = re.match(g,s)
+        elif isinstance(g, str) and not g == "**":
+            m = re.match(g, s)
         else:
             raise NotImplementedError(f"unexpected type for g=({type(g)}){g}")
         if not m:
@@ -218,9 +216,9 @@ def checkSegGlob(segments, glob):
 # '?' -> '.'   # see glob
 #                Recall that bash globs are described at URL:
 #                  https://man7.org/linux/man-pages/man7/glob.7.html
-    
-rex_translate = re.compile("([*])[*]*") # 
-rex_translate2 = re.compile("([?])") #
+
+rex_translate = re.compile("([*])[*]*")
+rex_translate2 = re.compile("([?])")
 rex_isnumber = re.compile("\d+")
 @st.composite
 def random_segments_with_re_glob(draw):
@@ -236,14 +234,14 @@ def random_segments_with_re_glob(draw):
             g0 = rex_translate.sub(".\\1", g)
             g0 = rex_translate2.sub(".", g0)
             g1 = re.compile("^" + g0 + "$")
-            if not g1.match(g):                
+            if not g1.match(g):
                g1 = g
         except Exception:
-            sys.stderr.write("Unable to re.compile:({})'{}' from '{}'\n".format(type(g1),g1, g))
+            sys.stderr.write("Unable to re.compile:({})'{}' from '{}'\n".format(type(g1), g1, g))
             g1 = g
         glob1.append(g1)
 
-    checkSegGlob(segments,glob1)
+    checkSegGlob(segments, glob1)
     return (segments, glob1)
 
 
@@ -267,6 +265,22 @@ def random_segments_with_nonmatching_re_glob(draw):
         glob1.append(g1)
 
     return (segments, glob1)
+
+
+@st.composite
+def random_walk(draw):
+    """ return a (node, (segment, value))
+        where node is arbitrary tree,
+             (segment, value) is a valid  pair drawn from the return of
+             api.walk(node), wich generates them    all.
+    """
+    node = draw(random_mutable_node)
+    found = tuple(api.walk(node))
+    assume(len(found) > 0)
+    (cr,dr) = draw(st.sampled_from(found))
+    if dr in (int, str):
+        dr= (dr,)
+    return (node, (cr,dr))
 
 
 def setup():
@@ -298,6 +312,25 @@ class TestEncoding(unittest.TestCase):
 
 
 
+
+    @settings(max_examples=MAX_SAMPLES)
+    @given(random_walk())
+    def test_view(self, walkable):
+        '''
+        Given a walkable location, view that location.
+        '''
+        (node, (segments, found)) = walkable
+        assume(found == found)  # Hello, nan! We don't want you here.
+
+        view = api.view(node, segments)
+        ag1 = api.get(view, segments)
+        ag2 = api.get(node, segments)
+        if ag1 != ag2:
+            print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}",
+                  file=sys.stderr)
+        assert ag1 == ag2
+
+
     @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_nonmatching_re_glob())
     def test_match_nonmatching_re(self, pair):
@@ -319,8 +352,8 @@ and may select test cases.
 
 Flags:
     -h print this help and quit
-    -v print information messages on stderr; also reduces MAX_SAMPLES to 50
-
+    -V print information messages on stderr; also reduces MAX_SAMPLES to 50
+    -v handled by unittest framework
 Autonomous CLI syntax:
     python3 [-h] [-v] [TestEncoding[.<testname>]]
 
@@ -329,9 +362,10 @@ Autonomous CLI syntax:
         print(description)
         sys.exit(0)
 
-    if "-v" in sys.argv:
-        sys.argv = [x for x in sys.argv if x != "-v"]
+    if "-V" in sys.argv:
+        sys.argv = [x for x in sys.argv if x != "-V"]
         TestEncoding.DO_DEBUG_PRINT = True
         sys.stderr.write("Set verbose mode\n")
 
+    sys.stderr.write(f"Starting tests in test_path_exts with args {sys.argv}")
     unittest.main()
