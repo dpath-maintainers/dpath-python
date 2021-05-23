@@ -8,7 +8,9 @@ name: Test python package dpath-python
     # including added functionality.
     # ------------------------------------------------------------
 
-on: #[push]
+on:
+    # [push]
+
     workflow_dispatch:
 
 jobs:
@@ -42,21 +44,21 @@ jobs:
                 echo LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}
                 echo PYTHONPATH: \'${PYTHONPATH}\'
 
-                #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                #    ** here (it is expected that) **
-                #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
-                #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
-                #  Working dir /home/runner/work/dpath-python/dpath-python
-                #  HOME: /home/runner
-                #  LANG: C.UTF-8
-                #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #    ** here (it is expected that) **
+              #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
+              #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
+              #  Working dir /home/runner/work/dpath-python/dpath-python
+              #  HOME: /home/runner
+              #  LANG: C.UTF-8
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             - name: Install dependencies
 
-                #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                #  requirements install the test framework, which is not
-                #  required by the package in setup.py
-                #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  requirements install the test framework, which is not
+              #  required by the package in setup.py
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               run: |
                 python -m pip install --upgrade pip setuptools wheel
                 if [ -f requirements.txt ]; then
@@ -68,6 +70,23 @@ jobs:
                 echo which nose2-3.6: $(which nose2-3.6)
                 echo which nose2-3.8: $(which nose2-3.8)
 
-            - name: Test
+            - name: Tox testing
+
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  move to tox testing, otherwise will have to parametrize
+              #  nose in more details; here tox.ini will apply
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               run: |
-                nose2
+                pip install tox
+                echo "Installed tox"
+                tox
+                echo "Ran tox"
+
+            - name: Nose2 testing
+
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  Last try... with a nose2.cfg file
+              #
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              run: |
+                nose2 -c nose2.cfg
