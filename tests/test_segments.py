@@ -4,6 +4,7 @@
 #
 from dpath import options
 import dpath.segments as api
+import dpath
 
 from hypothesis import given, assume, settings, HealthCheck
 import hypothesis.strategies as st
@@ -20,7 +21,16 @@ if __name__ == "__main__":
     if "-v" in sys.argv:
         MAX_SAMPLES = 30
         MAX_LEAVES = 20
-
+        
+    # ..............................................................................
+    # This allows checking that we did not break things by setting
+    # dpath.options.DPATH_ACCEPT_RE_REGEXP = True
+    # ..............................................................................
+    if "--re" in sys.argv:
+        dpath.options.DPATH_ACCEPT_RE_REGEXP = True
+             # enable re.regexp support in path expr.
+             # default is disable
+        
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
 if MAX_SAMPLES is None:
@@ -442,8 +452,9 @@ Autonomous CLI syntax:
         sys.exit(0)
 
     if "-v" in sys.argv:
-        sys.argv = [x for x in sys.argv if x != "-v"]
         TestSegments.DO_DEBUG_PRINT = True
         sys.stderr.write("Set verbose mode\n")
 
+    sys.argv = [x for x in sys.argv if x not in ("--re", "-v")]
+        
     unittest.main()

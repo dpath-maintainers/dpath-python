@@ -311,26 +311,6 @@ class TestEncoding(unittest.TestCase):
             sys.stderr.write("api.match: segments:{} , glob:{}\n".format(segments, glob))
 
 
-
-
-    @settings(max_examples=MAX_SAMPLES)
-    @given(random_walk())
-    def test_view(self, walkable):
-        '''
-        Given a walkable location, view that location.
-        '''
-        (node, (segments, found)) = walkable
-        assume(found == found)  # Hello, nan! We don't want you here.
-
-        view = api.view(node, segments)
-        ag1 = api.get(view, segments)
-        ag2 = api.get(node, segments)
-        if ag1 != ag2:
-            print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}",
-                  file=sys.stderr)
-        assert ag1 == ag2
-
-
     @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_nonmatching_re_glob())
     def test_match_nonmatching_re(self, pair):

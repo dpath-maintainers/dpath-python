@@ -12,6 +12,10 @@ It allows you to specify globs (ala the bash eglob syntax, through some
 advanced fnmatch.fnmatch magic) to access dictionary elements, and
 provides some facility for filtering those results.
 
+An extension is proposed  :ref:`regexprs`
+that permits to use Python's
+re regular expressions for globing matches. 
+
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
 DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
@@ -439,6 +443,8 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> dpath.util.get(['a', 'b/c'])
    0
 
+.. :: _regexprs:
+   
 Need more expressive regular expressions in paths ?
 ===================================================
 
@@ -465,6 +471,7 @@ We propose the following:
 Example:
 
 .. code-block:: python
+		
       import dpath
       dpath.options.DPATH_ACCEPT_RE_REGEXP = True
 
