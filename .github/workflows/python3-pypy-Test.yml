@@ -42,7 +42,7 @@ jobs:
                   python-version: 'pypy-3.7'
                   architecture: 'x64'
 
-                  
+
             - name: Ascertain configuration
               #
               #    Collect information concerning $HOME and the location of

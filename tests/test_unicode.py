@@ -56,10 +56,12 @@ class TestEncoding(unittest.TestCase):
 # RuntimeError: maximum recursion depth exceeded while calling a Python object
 # ......................................................................
 
+
     def test_reproduce_issue(self):
-        
+
         def f(o, p, a):
             a[0] += 1
+
         for thing in ("AA", u"UU"):
             if TestEncoding.DO_DEBUG_PRINT:
                 sys.stderr.write("About to call api.fold with thing=(%s)%s f=adder\n"
@@ -106,4 +108,3 @@ Flags:
         sys.stderr.write("Set verbose mode\n")
 
     unittest.main()
-

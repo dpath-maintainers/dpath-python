@@ -21,16 +21,16 @@ if __name__ == "__main__":
     if "-v" in sys.argv:
         MAX_SAMPLES = 30
         MAX_LEAVES = 20
-        
+
     # ..............................................................................
     # This allows checking that we did not break things by setting
     # dpath.options.DPATH_ACCEPT_RE_REGEXP = True
     # ..............................................................................
     if "--re" in sys.argv:
         dpath.options.DPATH_ACCEPT_RE_REGEXP = True
-             # enable re.regexp support in path expr.
-             # default is disable
-        
+        # enable re.regexp support in path expr.
+        # default is disable
+
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
 if MAX_SAMPLES is None:
@@ -210,10 +210,13 @@ def teardown():
     # Revert back to default.
     options.ALLOW_EMPTY_STRING_KEYS = False
 
+
 #
 # Run under unittest
 #
 class TestSegments(unittest.TestCase):
+
+
     DO_DEBUG_PRINT = False
 
 
@@ -398,18 +401,19 @@ class TestSegments(unittest.TestCase):
         [count] = api.fold(thing, f, [0])
         assert count == len(tuple(api.walk(thing)))
 
-    # ..............................................................................    
+    # ..............................................................................
     # This allows to handle rare case documented in file: issues/err_walk.py
     #
-    rex_rarecase=re.compile("\[[^[]+\]")
+    rex_rarecase = re.compile(r"\[[^[]+\]")
+
     def excuseRareCase(segments):
         for s in segments:
-            if rex_rarecase.match(s):
+            if TestSegments.rex_rarecase.match(s):
                 return True
         return False
     #
-    # ..............................................................................    
-    
+    # ..............................................................................
+
     @settings(max_examples=MAX_SAMPLES)
     @given(walkable=random_walk())
     def test_view(self, walkable):
@@ -423,15 +427,15 @@ class TestSegments(unittest.TestCase):
         ag1 = api.get(view, segments)
         ag2 = api.get(node, segments)
         if ag1 != ag2:
-            if excuseRareCase(segments):
+            if TestSegments.excuseRareCase(segments):
                 print("Might be in a generated segment has a bash glob component\n"
-                      +f"accepting mismatch for segments={segments}\n\tag1={ag1}\n\tag2={ag2}")
+                      + f"accepting mismatch for segments={segments}\n\tag1={ag1}\n\tag2={ag2}")
                 return
 
             print("Error for segments={segments}\n\tag1={ag1}\n\tag2={ag2}")
         assert ag1 == ag2
 
-        
+
 if __name__ == "__main__":
     if "-h" in sys.argv:
         description = """\
@@ -445,7 +449,7 @@ Flags:
 
 Autonomous CLI syntax:
     python3 [-h] [-v] [TestSegments[.<testname>]]
-   
+
     e.g.     python3 TestSegments.test_match_re
 """
         print(description)
@@ -456,5 +460,5 @@ Autonomous CLI syntax:
         sys.stderr.write("Set verbose mode\n")
 
     sys.argv = [x for x in sys.argv if x not in ("--re", "-v")]
-        
+
     unittest.main()

@@ -49,7 +49,7 @@ def __safe_path__(path, separator):
         # Attempt to convert integer segments into actual integers.
         final = []
         for segment in segments:
-            if ( options.DPATH_ACCEPT_RE_REGEXP and  isinstance(segment, str)
+            if (options.DPATH_ACCEPT_RE_REGEXP and isinstance(segment, str)
                  and segment[0] == '{' and segment[-1] == '}'):
                 try:
                     rs = segment[1:-1]

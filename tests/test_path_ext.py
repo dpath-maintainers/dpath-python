@@ -217,9 +217,12 @@ def checkSegGlob(segments, glob):
 #                Recall that bash globs are described at URL:
 #                  https://man7.org/linux/man-pages/man7/glob.7.html
 
+
 rex_translate = re.compile("([*])[*]*")
 rex_translate2 = re.compile("([?])")
-rex_isnumber = re.compile("\d+")
+rex_isnumber = re.compile(r"\d+")
+
+
 @st.composite
 def random_segments_with_re_glob(draw):
     """ Transform some globs with equivalent re.regexprs, to test the use of regexprs
@@ -235,7 +238,7 @@ def random_segments_with_re_glob(draw):
             g0 = rex_translate2.sub(".", g0)
             g1 = re.compile("^" + g0 + "$")
             if not g1.match(g):
-               g1 = g
+                g1 = g
         except Exception:
             sys.stderr.write("Unable to re.compile:({})'{}' from '{}'\n".format(type(g1), g1, g))
             g1 = g
@@ -277,10 +280,10 @@ def random_walk(draw):
     node = draw(random_mutable_node)
     found = tuple(api.walk(node))
     assume(len(found) > 0)
-    (cr,dr) = draw(st.sampled_from(found))
+    (cr, dr) = draw(st.sampled_from(found))
     if dr in (int, str):
-        dr= (dr,)
-    return (node, (cr,dr))
+        dr = (dr,)
+    return (node, (cr, dr))
 
 
 def setup():
