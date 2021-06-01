@@ -4,13 +4,19 @@ name: Test python package dpath-python
     #
     # For running under Github's Actions
     #
-    # Script performs basic test of the Python-3 version of the package
-    # including added functionality.
+    # Here the idea is to use tox for testing and test on python 3.8 and
+    # pypy-3.7.
+    #
+    # There are numerous issues that must be understood with the predefined
+    # features of Github's preloaded containers.
+    # Here :
+    #       - try and load in 2 separate steps
+    #       - probably not optimal in viexw of preloaded configurations
+    #
     # ------------------------------------------------------------
 
 on:
-    # [push]
-
+    # manual dispatch, this script will not be started automagically
     workflow_dispatch:
 
 jobs:
@@ -27,9 +33,16 @@ jobs:
             - name: Set up Python 3.8
               uses: actions/setup-python@v2
               with:
-                  python-version: [ '3.8' , 'pypy-3.7' ]
+                  python-version: '3.8'
                   architecture: 'x64'
 
+            - name: Set up Pypy 3.7
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 'pypy-3.7'
+                  architecture: 'x64'
+
+                  
             - name: Ascertain configuration
               #
               #    Collect information concerning $HOME and the location of
