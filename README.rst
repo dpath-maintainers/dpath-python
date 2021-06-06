@@ -14,8 +14,6 @@ provides some facility for filtering those results.
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
-DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
-
 Installing
 ==========
 
