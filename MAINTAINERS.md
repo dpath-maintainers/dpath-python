@@ -1,18 +1,11 @@
 Who Maintains DPATH
 ===================
 
-dpath is primarily maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. These two individuals collectively govern the project.
+dpath was created by and originally maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. In July
+of 2020 they put out a call for new maintainers. [@bigsablept](https://github.com/bigsablept) and 
+[@moomoohk](https://github.com/moomoohk) stepped up to become the new maintainers.
 
 There are several individuals in the community who have taken an active role in helping to maintain the project and submit fixes. Those individuals are shown in the git changelog.
-
-DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
-
-Becoming a Maintainer
-=====================
-
-Nobody has to become a maintainer to submit a patch against dpath. Simply send the pull request on github.
-
-If you would like to help triage issues, attend monthly meetings, and become a regular part of the team working on the roadmap, send an email to andrew@aklabs.net and/or calebcase@gmail.com.
 
 Where and How do we communicate
 ===============================
@@ -21,7 +14,9 @@ The dpath maintainers communcate in 3 primary ways:
 
 1. Email, directly to each other.
 2. Github via issue and pull request comments
-3. A monthly maintainers meeting via telephone
+3. A monthly maintainers meeting via Zoom
+
+The remainder of this document is subject to change after further discussion among the new maintainers.
 
 What is the roadmap
 ===================

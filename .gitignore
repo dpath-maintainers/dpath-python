@@ -4,3 +4,5 @@
 /build
 /env
 *.pyc
+.vscode
+venv_39

@@ -456,8 +456,6 @@ components instead of string globs.
 Contributors
 ============
 
-DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
-
 We would like to thank the community for their interest and involvement. You
 have all made this project significantly better than the sum of its parts, and
 your continued feedback makes it better every day. Thank you so much!
