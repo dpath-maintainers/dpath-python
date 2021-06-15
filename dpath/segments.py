@@ -44,7 +44,7 @@ def leafy(thing):
     try:
         return leaf(thing) or len(thing) == 0
     except:
-        return false
+        return False
 
 
 def walk(obj, location=()):
