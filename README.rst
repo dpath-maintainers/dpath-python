@@ -157,10 +157,10 @@ value 'Waffles'.
     {
         "a": {
             "b": {
-            "3": 2,
-            "43": 30,
-            "c": "Waffles",
-            "d": "Waffles"
+                "3": 2,
+                "43": 30,
+                "c": "Waffles",
+                "d": "Waffles"
             }
         }
     }
