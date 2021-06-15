@@ -43,7 +43,8 @@ def leafy(thing):
 
     try:
         return leaf(thing) or len(thing) == 0
-    except:
+    except TypeError:
+        # In case thing has no len()
         return False
 
 
