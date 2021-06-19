@@ -13,7 +13,13 @@ def kvs(node):
     try:
         return iter(node.items())
     except AttributeError:
-        return zip(range(len(node)), node)
+        try:
+            return zip(range(len(node)), node)
+        except TypeError:
+            # This can happen in cases where the node isn't leaf(node) == True,
+            # but also isn't actually iterable. Instead of this being an error
+            # we will treat this node as if it has no children.
+            return enumerate([])
 
 
 def leaf(thing):
@@ -34,7 +40,12 @@ def leafy(thing):
 
     leafy(thing) -> bool
     '''
-    return leaf(thing) or len(thing) == 0
+
+    try:
+        return leaf(thing) or len(thing) == 0
+    except TypeError:
+        # In case thing has no len()
+        return False
 
 
 def walk(obj, location=()):
