@@ -23,8 +23,8 @@ def leaf(thing):
     leaf(thing) -> bool
     '''
     leaves = (bytes, str, int, float, bool, type(None))
-
-    return isinstance(thing, leaves)
+    non_leaves = (list, dict)
+    return not isinstance(thing, non_leaves)
 
 
 def leafy(thing):
