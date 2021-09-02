@@ -1,16 +1,14 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Deploy to PyPI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on new releases
   release:
     types: [published]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  # This workflow contains a single job called "deploy"
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -21,16 +19,12 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: PyPI Deployment
-        # You may pin to the exact commit or the version.
-        # uses: casperdcl/deploy-pypi@bb869aafd89f657ceaafe9561d3b5584766c0f95
         uses: casperdcl/deploy-pypi@v2
         with:
           # PyPI username
           user: ${{ secrets.PYPI_USER }}
           # PyPI password or API token
           password: ${{ secrets.TEST_PYPI_PASS }}
-          # Build requirements
-          # requirements: # optional, default is twine wheel
           # `setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
           build: clean sdist -d dist/
           # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")

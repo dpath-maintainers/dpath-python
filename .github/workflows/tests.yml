@@ -1,11 +1,14 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Run tests
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
+    # Only run if source code or test configurations are changed
+    paths:
+      - "dpath/"
+      - "**.py"
+      - "tox.ini"
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
@@ -34,8 +37,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # Instead of installing and running tox and tox-gh-actions,
-    # you can simply use this composite run steps action.
     - name: Run tox with tox-gh-actions
       uses: ymyzk/run-tox-gh-actions@main
       with:
