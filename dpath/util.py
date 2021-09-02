@@ -9,6 +9,7 @@ MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
 MERGE_TYPESAFE = (1 << 3)
 
+
 def __safe_path__(path, separator):
     '''
     Given a path and separator, return a tuple of segments. If path is
@@ -171,7 +172,7 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
     results = dpath.segments.fold(obj, f, [])
 
     if len(results) == 0:
-        if default  is not _DEFAULT_SENTINAL:
+        if default is not _DEFAULT_SENTINAL:
             return default
 
         raise KeyError(glob)
