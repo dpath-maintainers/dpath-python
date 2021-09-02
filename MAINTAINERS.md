@@ -1,16 +1,11 @@
 Who Maintains DPATH
 ===================
 
-dpath is primarily maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. These two individuals collectively govern the project.
+dpath was created by and originally maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. In July
+of 2020 they put out a call for new maintainers. [@bigsablept](https://github.com/bigsablept) and 
+[@moomoohk](https://github.com/moomoohk) stepped up to become the new maintainers.
 
 There are several individuals in the community who have taken an active role in helping to maintain the project and submit fixes. Those individuals are shown in the git changelog.
-
-Becoming a Maintainer
-=====================
-
-Nobody has to become a maintainer to submit a patch against dpath. Simply send the pull request on github.
-
-If you would like to help triage issues, attend monthly meetings, and become a regular part of the team working on the roadmap, send an email to andrew@aklabs.net and/or calebcase@gmail.com.
 
 Where and How do we communicate
 ===============================
@@ -19,7 +14,9 @@ The dpath maintainers communcate in 3 primary ways:
 
 1. Email, directly to each other.
 2. Github via issue and pull request comments
-3. A monthly maintainers meeting via telephone
+3. A monthly maintainers meeting via Zoom
+
+The remainder of this document is subject to change after further discussion among the new maintainers.
 
 What is the roadmap
 ===================
@@ -76,11 +73,21 @@ The more complete process goes:
 6. Send your pull request
 7. If accepted, the maintainers will merge your pull request and close the issue.
 
+Branching Strategy
+==================
+
+We run a clean bleeding edge master. Long term support for major version numbers are broken out into version branches.
+
+* master : Current 3.x (bleeding edge) development
+* version/1.x : 1.x series bugfixes
+* version/2.x : 2.x series features and bugfixes
+
+We name bugfixes as "bugfix/ISSUENUMBER_shortname"; features are named "feature/ISSUENUMBER_shortname". All branches representing work against an issue must have the issue number in the branch name.
 
 Cutting a New Release
 =====================
 
-Releases for dpath occur automatically from travis-ci based on tags on the master branch.
+Releases for dpath occur automatically from travis-ci based on tags on the master branch, or on the version/[0-9].x branches for major version LTS.
 
     akesterson@akesterson:~/dpath-python$ git tag
     1.0-0
@@ -108,9 +115,9 @@ Once upon a time, the version string was automatially computed based on the cont
 
 To cut a new release, follow this procedure:
 
-1. Commit a new dpath/version.py on the master branch with the format "MAJOR.MINOR.RELEASE"
-2. Add a new tag of the form "build,MAJOR.MINOR,RELEASE" to the master branch. This tag must have the same version number as the one commmited in dpath/version.py or we will fill your desk drawers with cockroaches.
-3. Push the new master version and the associated tag to github.
+1. Commit a new dpath/version.py on the appropriate branch with the format "MAJOR.MINOR.RELEASE"
+2. Add a new tag of the form "build,MAJOR.MINOR,RELEASE" to the appropriate branch. This tag must have the same version number as the one commmited in dpath/version.py or we will fill your desk drawers with cockroaches.
+3. Push the new branch version and the associated tag to github.
 4. travis-ci SHOULD push the new release to pypi.
 
 If travis-ci fails to update pypi, follow the instructions on manually creating a release, here:

@@ -8,3 +8,4 @@
 venv_39
 .idea/
 dpath.egg-info/
+dist/
