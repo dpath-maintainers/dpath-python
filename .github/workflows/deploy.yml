@@ -1,4 +1,4 @@
-name: Deploy to PyPI
+name: Deploy and Release
 
 # Controls when the workflow will run
 on:
