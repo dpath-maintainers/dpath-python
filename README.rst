@@ -3,6 +3,7 @@ dpath-python
 
 |PyPI|
 |Build Status|
+|Gitter|
 
 A python library for accessing and searching dictionaries via
 /slashed/paths ala xpath
@@ -452,6 +453,10 @@ components instead of string globs.
 
 .. |Build Status| image:: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml/badge.svg
    :target: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml
+   
+.. |Gitter| image:: https://badges.gitter.im/dpath-python/chat.svg
+   :target: https://gitter.im/dpath-python/chat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+   :alt: Gitter
 
 Contributors
 ============
