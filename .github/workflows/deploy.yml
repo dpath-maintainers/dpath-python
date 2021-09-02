@@ -2,9 +2,10 @@ name: Deploy to PyPI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on new releases
-  release:
-    types: [published]
+  # Triggers the workflow on tag push
+  push:
+    tags:
+      - "v*"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -29,3 +30,8 @@ jobs:
           build: clean sdist -d dist/
           # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")
           pip: true
+          
+      - name: Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
