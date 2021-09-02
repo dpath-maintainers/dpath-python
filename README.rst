@@ -450,8 +450,8 @@ components instead of string globs.
     :target: https://pypi.python.org/pypi/dpath/
     :alt: PyPI: Latest Version
 
-.. |Build Status| image:: https://travis-ci.org/akesterson/dpath-python.svg?branch=travisci
-   :target: https://travis-ci.org/akesterson/dpath-python
+.. |Build Status| image:: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml
 
 Contributors
 ============
