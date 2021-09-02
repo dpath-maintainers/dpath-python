@@ -25,7 +25,7 @@ jobs:
           # PyPI username
           user: ${{ secrets.PYPI_USER }}
           # PyPI password or API token
-          password: ${{ secrets.TEST_PYPI_PASS }}
+          password: ${{ secrets.PYPI_PASS }}
           # `setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
           build: clean sdist -d dist/
           # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")
