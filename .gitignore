@@ -1,8 +1,8 @@
 /MANIFEST
 /.tox
-/.hypothesis
 /build
 /env
+.hypothesis
 *.pyc
 .vscode
 venv_39
