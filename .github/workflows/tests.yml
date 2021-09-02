@@ -4,7 +4,10 @@ name: Run tests
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    # Only run if source code or test configurations are changed
+    # Ignore tags
+    # https://github.community/t/dont-run-on-tag-creation/137469/7
+    branches:
+      - "**"
     paths:
       - "dpath/"
       - "**.py"
