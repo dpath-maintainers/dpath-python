@@ -128,6 +128,8 @@ If the Github workflow fails to update pypi, follow the instructions on manually
 
 https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives
 
+Deployment CI was previously implemented using [Travis CI](https://travis-ci.org/github/akesterson/dpath-python).
+
 Running Tests
 =============
 
