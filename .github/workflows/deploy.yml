@@ -4,8 +4,10 @@ name: Deploy and Release
 on:
   # Triggers the workflow on version change
   push:
+    branches: 
+      - master
     paths:
-      - "dpath/version.py"
+      - dpath/version.py
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -33,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Tag
-        if: ${{ steps.check-tag.outputs.exists }} == "false"
+        if: steps.check-tag.outputs.exists == 'false'
         uses: negz/create-tag@v1
         with:
           version: ${{ steps.get-version.outputs.version }}
