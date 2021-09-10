@@ -139,11 +139,7 @@ def leaves(obj):
 def int_str(segment):
     '''
     If the segment is an integer, return the string conversion.
-    Otherwise return the segment unchanged. The conversion uses 'str'
-    which means that:
-
-        * in Python 2.x: 0 -> b'0'
-        * in Python 3.x: 0 -> u'0'
+    Otherwise return the segment unchanged. The conversion uses 'str'.
 
     int_str(segment) -> str
     '''
@@ -179,15 +175,6 @@ def match(segments, glob):
     A segment is considered to match a glob if the function
     fnmatch.fnmatchcase returns True. If fnmatchcase returns False or
     throws an exception the result will be False.
-
-    A Word of Caution:
-
-    *** Globs can have different results between Python 2.x and 3.x. ***
-
-    fnmatchcase differs in behavior between Python 2.x and 3.x with
-    regard to handling comparison between different types (e.g. bytes
-    and unicode). In 2.x it will attempt the comparison implicitly
-    converting, but in 3.x it will throw an exception.
 
     match(segments, glob) -> bool
     '''
