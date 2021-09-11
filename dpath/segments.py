@@ -5,11 +5,11 @@ from fnmatch import fnmatchcase
 
 
 def kvs(node):
-    '''
+    """
     Return a (key, value) iterator for the node.
 
     kvs(node) -> (generator -> (key, value))
-    '''
+    """
     try:
         return iter(node.items())
     except AttributeError:
@@ -23,23 +23,23 @@ def kvs(node):
 
 
 def leaf(thing):
-    '''
+    """
     Return True if thing is a leaf, otherwise False.
 
     leaf(thing) -> bool
-    '''
+    """
     leaves = (bytes, str, int, float, bool, type(None))
 
     return isinstance(thing, leaves)
 
 
 def leafy(thing):
-    '''
+    """
     Same as leaf(thing), but also treats empty sequences and
     dictionaries as True.
 
     leafy(thing) -> bool
-    '''
+    """
 
     try:
         return leaf(thing) or len(thing) == 0
@@ -49,12 +49,12 @@ def leafy(thing):
 
 
 def walk(obj, location=()):
-    '''
+    """
     Yield all valid (segments, value) pairs (from a breadth-first
     search, right-to-left on sequences).
 
     walk(obj) -> (generator -> (segments, value))
-    '''
+    """
     if not leaf(obj):
         for k, v in kvs(obj):
             length = None
@@ -75,11 +75,11 @@ def walk(obj, location=()):
 
 
 def get(obj, segments):
-    '''
+    """
     Return the value at the path indicated by segments.
 
     get(obj, segments) -> value
-    '''
+    """
     current = obj
     for (i, segment) in enumerate(segments):
         if leaf(current):
@@ -90,11 +90,11 @@ def get(obj, segments):
 
 
 def has(obj, segments):
-    '''
+    """
     Return True if the path exists in the obj. Otherwise return False.
 
     has(obj, segments) -> bool
-    '''
+    """
     try:
         get(obj, segments)
         return True
@@ -103,12 +103,12 @@ def has(obj, segments):
 
 
 def expand(segments):
-    '''
+    """
     Yield a tuple of segments for each possible length of segments.
     Starting from the shortest length of segments and increasing by 1.
 
     expand(keys) -> (..., keys[:-2], keys[:-1])
-    '''
+    """
     index = 0
     for segment in segments:
         index += 1
@@ -116,11 +116,11 @@ def expand(segments):
 
 
 def types(obj, segments):
-    '''
+    """
     For each segment produce a tuple of (segment, type(value)).
 
     types(obj, segments) -> ((segment[0], type0), (segment[1], type1), ...)
-    '''
+    """
     result = []
     for depth in expand(segments):
         result.append((depth[-1], type(get(obj, depth))))
@@ -128,31 +128,31 @@ def types(obj, segments):
 
 
 def leaves(obj):
-    '''
+    """
     Yield all leaves as (segment, value) pairs.
 
     leaves(obj) -> (generator -> (segment, value))
-    '''
+    """
     return filter(lambda p: leafy(p[1]), walk(obj))
 
 
 def int_str(segment):
-    '''
+    """
     If the segment is an integer, return the string conversion.
     Otherwise return the segment unchanged. The conversion uses 'str'.
 
     int_str(segment) -> str
-    '''
+    """
     if isinstance(segment, int):
         return str(segment)
     return segment
 
 
 class Star(object):
-    '''
+    """
     Used to create a global STAR symbol for tracking stars added when
     expanding star-star globs.
-    '''
+    """
     pass
 
 
@@ -160,7 +160,7 @@ STAR = Star()
 
 
 def match(segments, glob):
-    '''
+    """
     Return True if the segments match the given glob, otherwise False.
 
     For the purposes of matching, integers are converted to their string
@@ -177,7 +177,7 @@ def match(segments, glob):
     throws an exception the result will be False.
 
     match(segments, glob) -> bool
-    '''
+    """
     segments = tuple(segments)
     glob = tuple(glob)
 
@@ -238,12 +238,12 @@ def match(segments, glob):
 
 
 def extend(thing, index, value=None):
-    '''
+    """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
 
     extend(thing, int) -> [thing..., None, ...]
-    '''
+    """
     try:
         expansion = (type(thing)())
 
@@ -263,12 +263,12 @@ def extend(thing, index, value=None):
 
 
 def __default_creator__(current, segments, i, hints=()):
-    '''
+    """
     Create missing path components. If the segment is an int, then it will
     create a list. Otherwise a dictionary is created.
 
     set(obj, segments, value) -> obj
-    '''
+    """
     segment = segments[i]
     length = len(segments)
 
@@ -293,13 +293,13 @@ def __default_creator__(current, segments, i, hints=()):
 
 
 def set(obj, segments, value, creator=__default_creator__, hints=()):
-    '''
+    """
     Set the value in obj at the place indicated by segments. If creator is not
     None (default __default_creator__), then call the creator function to
     create any missing path components.
 
     set(obj, segments, value) -> obj
-    '''
+    """
     current = obj
     length = len(segments)
 
@@ -331,7 +331,7 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
 
 
 def fold(obj, f, acc):
-    '''
+    """
     Walk obj applying f to each path and returning accumulator acc.
 
     The function f will be called, for each result in walk(obj):
@@ -343,7 +343,7 @@ def fold(obj, f, acc):
     retrieved from the walk.
 
     fold(obj, f(obj, (segments, value), acc) -> bool, acc) -> acc
-    '''
+    """
     for pair in walk(obj):
         if f(obj, pair, acc) is False:
             break
@@ -351,14 +351,14 @@ def fold(obj, f, acc):
 
 
 def foldm(obj, f, acc):
-    '''
+    """
     Same as fold(), but permits mutating obj.
 
     This requires all paths in walk(obj) to be loaded into memory
     (whereas fold does not).
 
     foldm(obj, f(obj, (segments, value), acc) -> bool, acc) -> acc
-    '''
+    """
     pairs = tuple(walk(obj))
     for pair in pairs:
         (segments, value) = pair
@@ -368,13 +368,13 @@ def foldm(obj, f, acc):
 
 
 def view(obj, glob):
-    '''
+    """
     Return a view of the object where the glob matches. A view retains
     the same form as the obj, but is limited to only the paths that
     matched. Views are new objects (a deepcopy of the matching values).
 
     view(obj, glob) -> obj'
-    '''
+    """
     def f(obj, pair, result):
         (segments, value) = pair
         if match(segments, glob):

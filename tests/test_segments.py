@@ -39,36 +39,36 @@ def teardown():
 
 @given(random_node)
 def test_kvs(node):
-    '''
+    """
     Given a node, kvs should produce a key that when used to extract
     from the node renders the exact same value given.
-    '''
+    """
     for k, v in api.kvs(node):
         assert node[k] is v
 
 
 @given(random_leaf)
 def test_leaf_with_leaf(leaf):
-    '''
+    """
     Given a leaf, leaf should return True.
-    '''
+    """
     assert api.leaf(leaf) is True
 
 
 @given(random_node)
 def test_leaf_with_node(node):
-    '''
+    """
     Given a node, leaf should return False.
-    '''
+    """
     assert api.leaf(node) is False
 
 
 @given(random_thing)
 def test_walk(thing):
-    '''
+    """
     Given a thing to walk, walk should yield key, value pairs where key
     is a tuple of non-zero length.
-    '''
+    """
     for k, v in api.walk(thing):
         assert isinstance(k, tuple)
         assert len(k) > 0
@@ -76,19 +76,19 @@ def test_walk(thing):
 
 @given(random_node)
 def test_get(node):
-    '''
+    """
     Given a node, get should return the exact value given a key for all
     key, value pairs in the node.
-    '''
+    """
     for k, v in api.walk(node):
         assert api.get(node, k) is v
 
 
 @given(random_node)
 def test_has(node):
-    '''
+    """
     Given a node, has should return True for all paths, False otherwise.
-    '''
+    """
     for k, v in api.walk(node):
         assert api.has(node, k) is True
 
@@ -100,10 +100,10 @@ def test_has(node):
 
 @given(random_segments)
 def test_expand(segments):
-    '''
+    """
     Given segments expand should produce as many results are there were
     segments and the last result should equal the given segments.
-    '''
+    """
     count = len(segments)
     result = list(api.expand(segments))
 
@@ -115,10 +115,10 @@ def test_expand(segments):
 
 @given(random_node)
 def test_types(node):
-    '''
+    """
     Given a node, types should yield a tuple of key, type pairs and the
     type indicated should equal the type of the value.
-    '''
+    """
     for k, v in api.walk(node):
         ts = api.types(node, k)
         ta = ()
@@ -129,9 +129,9 @@ def test_types(node):
 
 @given(random_node)
 def test_leaves(node):
-    '''
+    """
     Given a node, leaves should yield only leaf key, value pairs.
-    '''
+    """
     for k, v in api.leaves(node):
         assert api.leafy(v)
 
@@ -245,18 +245,18 @@ def random_segments_with_nonmatching_glob(draw):
 
 @given(random_segments_with_glob())
 def test_match(pair):
-    '''
+    """
     Given segments and a known good glob, match should be True.
-    '''
+    """
     (segments, glob) = pair
     assert api.match(segments, glob) is True
 
 
 @given(random_segments_with_nonmatching_glob())
 def test_match_nonmatching(pair):
-    '''
+    """
     Given segments and a known bad glob, match should be False.
-    '''
+    """
     print(pair)
     (segments, glob) = pair
     assert api.match(segments, glob) is False
@@ -280,9 +280,9 @@ def random_leaves(draw):
 
 @given(walkable=random_walk(), value=random_thing)
 def test_set_walkable(walkable, value):
-    '''
+    """
     Given a walkable location, set should be able to update any value.
-    '''
+    """
     (node, (segments, found)) = walkable
     api.set(node, segments, value)
     assert api.get(node, segments) is value
@@ -294,10 +294,10 @@ def test_set_walkable(walkable, value):
        value=random_thing,
        extension=random_segments)
 def test_set_create_missing(walkable, kstr, kint, value, extension):
-    '''
+    """
     Given a walkable non-leaf, set should be able to create missing
     nodes and set a new value.
-    '''
+    """
     (node, (segments, found)) = walkable
     assume(api.leaf(found))
 
@@ -319,9 +319,9 @@ def test_set_create_missing(walkable, kstr, kint, value, extension):
 
 @given(thing=random_thing)
 def test_fold(thing):
-    '''
+    """
     Given a thing, count paths with fold.
-    '''
+    """
     def f(o, p, a):
         a[0] += 1
 
@@ -331,9 +331,9 @@ def test_fold(thing):
 
 @given(walkable=random_walk())
 def test_view(walkable):
-    '''
+    """
     Given a walkable location, view that location.
-    '''
+    """
     (node, (segments, found)) = walkable
     assume(found == found)  # Hello, nan! We don't want you here.
 

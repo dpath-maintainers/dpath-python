@@ -11,7 +11,7 @@ MERGE_TYPESAFE = (1 << 3)
 
 
 def __safe_path__(path, separator):
-    '''
+    """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
 
@@ -19,7 +19,7 @@ def __safe_path__(path, separator):
     separator stripped off. If you pass a list path, the separator is
     ignored, and is assumed to be part of each key glob. It will not be
     stripped.
-    '''
+    """
     if not dpath.segments.leaf(path):
         segments = path
     else:
@@ -45,7 +45,7 @@ def __safe_path__(path, separator):
 
 
 def new(obj, path, value, separator='/', creator=None):
-    '''
+    """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
     change existing keys).
@@ -57,7 +57,7 @@ def new(obj, path, value, separator='/', creator=None):
     creator allows you to pass in a creator method that is
     responsible for creating missing keys at arbitrary levels of
     the path (see the help for dpath.path.set)
-    '''
+    """
     segments = __safe_path__(path, separator)
     if creator:
         return dpath.segments.set(obj, segments, value, creator=creator)
@@ -65,12 +65,12 @@ def new(obj, path, value, separator='/', creator=None):
 
 
 def delete(obj, glob, separator='/', afilter=None):
-    '''
+    """
     Given a obj, delete all elements that match the glob.
 
     Returns the number of deleted objects. Raises PathNotFound if no paths are
     found to delete.
-    '''
+    """
     globlist = __safe_path__(glob, separator)
 
     def f(obj, pair, counter):
@@ -122,10 +122,10 @@ def delete(obj, glob, separator='/', afilter=None):
 
 
 def set(obj, glob, value, separator='/', afilter=None):
-    '''
+    """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
-    '''
+    """
     globlist = __safe_path__(glob, separator)
 
     def f(obj, pair, counter):
@@ -147,7 +147,7 @@ def set(obj, glob, value, separator='/', afilter=None):
 
 
 def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
-    '''
+    """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
     If the glob is not found and a default is provided,
@@ -155,7 +155,7 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
 
     If more than one leaf matches the glob, ValueError is raised. If the glob is
     not found and a default is not provided, KeyError is raised.
-    '''
+    """
     if glob == '/':
         return obj
 
@@ -183,32 +183,32 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
 
 
 def values(obj, glob, separator='/', afilter=None, dirs=True):
-    '''
+    """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
-    '''
+    """
     yielded = True
 
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
 def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
-    '''
+    """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
 
     If 'yielded' is true, then a dictionary will not be returned.
     Instead tuples will be yielded in the form of (path, value) for
     every element in the document that matched the glob.
-    '''
+    """
 
     globlist = __safe_path__(glob, separator)
 
     def keeper(segments, found):
-        '''
+        """
         Generalized test for use in both yielded and folded cases.
         Returns True if we want this result. Otherwise returns False.
-        '''
+        """
         if not dirs and not dpath.segments.leaf(found):
             return False
 
@@ -234,7 +234,7 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
 
 
 def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
-    '''
+    """
     Merge source into destination. Like dict.update() but performs deep
     merging.
 
@@ -272,7 +272,7 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
         * MERGE_TYPESAFE : When 2 keys at equal levels are of different
           types, raise a TypeError exception. By default, the source
           replaces the destination in this situation.
-    '''
+    """
     filtered_src = search(src, '**', afilter=afilter, separator='/')
 
     def are_both_mutable(o1, o2):
