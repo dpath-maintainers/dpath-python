@@ -4,7 +4,7 @@ import dpath.segments
 from dpath import options
 from dpath.exceptions import InvalidKeyName
 
-_DEFAULT_SENTINAL = object()
+_DEFAULT_SENTINEL = object()
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
 MERGE_TYPESAFE = (1 << 3)
@@ -146,7 +146,7 @@ def set(obj, glob, value, separator='/', afilter=None):
     return changed
 
 
-def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
+def get(obj, glob, separator='/', default=_DEFAULT_SENTINEL):
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
@@ -172,7 +172,7 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINAL):
     results = dpath.segments.fold(obj, f, [])
 
     if len(results) == 0:
-        if default is not _DEFAULT_SENTINAL:
+        if default is not _DEFAULT_SENTINEL:
             return default
 
         raise KeyError(glob)
