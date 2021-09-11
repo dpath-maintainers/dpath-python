@@ -1,7 +1,8 @@
 from copy import deepcopy
-from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath import options
 from fnmatch import fnmatchcase
+
+from dpath import options
+from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 
 
 def kvs(node):

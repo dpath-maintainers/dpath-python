@@ -1,7 +1,7 @@
-from distutils.core import setup
-import dpath.version
 import os
+from distutils.core import setup
 
+import dpath.version
 
 long_description = open(
     os.path.join(
