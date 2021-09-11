@@ -25,7 +25,16 @@ if __name__ == "__main__":
         scripts=[],
         packages=["dpath"],
         data_files=[],
-        python_requires=">=3",
+
+        # Type hints are great.
+        # Function annotations were added in Python 3.0.
+        # Typing module was added in Python 3.5.
+        # Variable annotations were added in Python 3.6.
+        # Python versions that are >=3.6 are more popular.
+        #   (Source: https://github.com/hugovk/pypi-tools/blob/master/README.md)
+        #
+        # Conclusion: In order to accommodate type hinting support must be limited to Python versions >=3.6.
+        python_requires=">=3.6",
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
