@@ -279,14 +279,13 @@ does.
         Merge source into destination. Like dict.update() but performs
         deep merging.
 
-        flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE
-        MERGE_TYPESAFE.
-            * MERGE_ADDITIVE : List objects are combined onto one long
+        flags is an OR'ed combination of MergeType enum members.
+            * ADDITIVE : List objects are combined onto one long
               list (NOT a set). This is the default flag.
-            * MERGE_REPLACE : Instead of combining list objects, when
+            * REPLACE : Instead of combining list objects, when
               2 list objects are at an equal depth of merge, replace
               the destination with the source.
-            * MERGE_TYPESAFE : When 2 keys at equal levels are of different
+            * TYPESAFE : When 2 keys at equal levels are of different
               types, raise a TypeError exception. By default, the source
               replaces the destination in this situation.
 

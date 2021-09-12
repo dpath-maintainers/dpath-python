@@ -1,16 +1,25 @@
 from collections.abc import MutableMapping, MutableSequence
+from enum import Flag, IntFlag, auto
+from typing import Union, List, Any, Dict
 
 import dpath.segments
 from dpath import options
 from dpath.exceptions import InvalidKeyName
 
 _DEFAULT_SENTINEL = object()
-MERGE_REPLACE = (1 << 1)
-MERGE_ADDITIVE = (1 << 2)
-MERGE_TYPESAFE = (1 << 3)
 
 
-def __safe_path__(path, separator):
+class MergeType(IntFlag):
+    REPLACE = auto()
+    ADDITIVE = auto()
+    TYPESAFE = auto()
+
+
+# Type alias for dict path segments where integers are explicitly casted
+IntAwareSegment = Union[int, Any]
+
+
+def __safe_path__(path: str, separator: str) -> Union[List[IntAwareSegment], IntAwareSegment]:
     """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
@@ -146,7 +155,7 @@ def set(obj, glob, value, separator='/', afilter=None):
     return changed
 
 
-def get(obj, glob, separator='/', default=_DEFAULT_SENTINEL):
+def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -> dict:
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
@@ -156,7 +165,7 @@ def get(obj, glob, separator='/', default=_DEFAULT_SENTINEL):
     If more than one leaf matches the glob, ValueError is raised. If the glob is
     not found and a default is not provided, KeyError is raised.
     """
-    if glob == '/':
+    if glob == "/":
         return obj
 
     globlist = __safe_path__(glob, separator)
@@ -233,7 +242,7 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
         return dpath.segments.fold(obj, f, {})
 
 
-def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
+def merge(dst, src, separator='/', afilter=None, flags=MergeType.ADDITIVE):
     """
     Merge source into destination. Like dict.update() but performs deep
     merging.
@@ -262,14 +271,13 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
     objects that you intend to merge. For further notes see
     https://github.com/akesterson/dpath-python/issues/58
 
-    flags is an OR'ed combination of MERGE_ADDITIVE, MERGE_REPLACE,
-    MERGE_TYPESAFE.
-        * MERGE_ADDITIVE : List objects are combined onto one long
+    flags is an OR'ed combination of MergeType enum members.
+        * ADDITIVE : List objects are combined onto one long
           list (NOT a set). This is the default flag.
-        * MERGE_REPLACE : Instead of combining list objects, when
+        * REPLACE : Instead of combining list objects, when
           2 list objects are at an equal depth of merge, replace
           the destination with the source.
-        * MERGE_TYPESAFE : When 2 keys at equal levels are of different
+        * TYPESAFE : When 2 keys at equal levels are of different
           types, raise a TypeError exception. By default, the source
           replaces the destination in this situation.
     """
@@ -295,7 +303,7 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
                                      "{}".format(segments))
 
             # Validate src and dst types match.
-            if flags & MERGE_TYPESAFE:
+            if flags & MergeType.TYPESAFE:
                 if dpath.segments.has(dst, segments):
                     target = dpath.segments.get(dst, segments)
                     tt = type(target)
@@ -332,11 +340,11 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
             #
             # Pretend we have a sequence and account for the flags.
             try:
-                if flags & MERGE_ADDITIVE:
+                if flags & MergeType.ADDITIVE:
                     target += found
                     continue
 
-                if flags & MERGE_REPLACE:
+                if flags & MergeType.REPLACE:
                     try:
                         target['']
                     except TypeError:

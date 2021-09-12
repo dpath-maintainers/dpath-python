@@ -106,7 +106,7 @@ def test_types_merge_simple_list_replace():
         "list": TestSequence([0, 1, 2, 3])
     })
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
+    dpath.util.merge(dst, src, flags=dpath.util.MergeType.REPLACE)
     nose.tools.eq_(dst["list"], TestSequence([7, 8, 9, 10]))
 
 
