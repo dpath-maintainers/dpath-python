@@ -49,10 +49,10 @@ Suppose we have a dictionary like this:
     x = {
         "a": {
             "b": {
-            "3": 2,
-            "43": 30,
-            "c": [],
-            "d": ['red', 'buggy', 'bumpers'],
+                "3": 2,
+                "43": 30,
+                "c": [],
+                "d": ['red', 'buggy', 'bumpers'],
             }
         }
     }
@@ -96,18 +96,18 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
 .. code-block:: pycon
 
     >>> result = dpath.util.search(x, "a/b/[cd]")
-    >>> print json.dumps(result, indent=4, sort_keys=True)
+    >>> print(json.dumps(result, indent=4, sort_keys=True))
     {
-    "a": {
-        "b": {
-        "c": [],
-        "d": [
-            "red",
-            "buggy",
-            "bumpers"
-        ]
+        "a": {
+            "b": {
+                "c": [],
+                "d": [
+                    "red",
+                    "buggy",
+                    "bumpers"
+                ]
+            }
         }
-    }
     }
 
 ... Wow that was easy. What if I want to iterate over the results, and
@@ -115,7 +115,7 @@ not get a merged view?
 
 .. code-block:: pycon
 
-    >>> for x in dpath.util.search(x, "a/b/[cd]", yielded=True): print x
+    >>> for x in dpath.util.search(x, "a/b/[cd]", yielded=True): print(x)
     ...
     ('a/b/c', [])
     ('a/b/d', ['red', 'buggy', 'bumpers'])
@@ -154,7 +154,7 @@ value 'Waffles'.
 
     >>> dpath.util.set(x, 'a/b/[cd]', 'Waffles')
     2
-    >>> print json.dumps(x, indent=4, sort_keys=True)
+    >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
             "b": {
@@ -188,7 +188,7 @@ necessary to get to the terminus.
     keys
 
     >>> dpath.util.new(x, 'a/b/e/f/g', "Roffle")
-    >>> print json.dumps(x, indent=4, sort_keys=True)
+    >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
             "b": {
@@ -213,7 +213,7 @@ object with None entries in order to make it big enough:
 
     >>> dpath.util.new(x, 'a/b/e/f/h', [])
     >>> dpath.util.new(x, 'a/b/e/f/h/13', 'Wow this is a big array, it sure is lonely in here by myself')
-    >>> print json.dumps(x, indent=4, sort_keys=True)
+    >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
             "b": {
@@ -291,59 +291,59 @@ does.
               replaces the destination in this situation.
 
     >>> y = {'a': {'b': { 'e': {'f': {'h': [None, 0, 1, None, 13, 14]}}}, 'c': 'RoffleWaffles'}}
-    >>> print json.dumps(y, indent=4, sort_keys=True)
+    >>> print(json.dumps(y, indent=4, sort_keys=True))
     {
-    "a": {
-        "b": {
-        "e": {
-            "f": {
-            "h": [
-                null,
-                0,
-                1,
-                null,
-                13,
-                14
-            ]
-            }
+        "a": {
+            "b": {
+                "e": {
+                    "f": {
+                        "h": [
+                            null,
+                            0,
+                            1,
+                            null,
+                            13,
+                            14
+                        ]
+                    }
+                }
+            },
+            "c": "RoffleWaffles"
         }
-        },
-        "c": "RoffleWaffles"
-    }
     }
     >>> dpath.util.merge(x, y)
-    >>> print json.dumps(x, indent=4, sort_keys=True)
+    >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
-    "a": {
-        "b": {
-        "3": 2,
-        "43": 30,
-        "c": "Waffles",
-        "d": "Waffles",
-        "e": {
-            "f": {
-            "g": "Roffle",
-            "h": [
-                null,
-                0,
-                1,
-                null,
-                13,
-                14,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "Wow this is a big array, it sure is lonely in here by myself"
-            ]
-            }
+        "a": {
+            "b": {
+                "3": 2,
+                "43": 30,
+                "c": "Waffles",
+                "d": "Waffles",
+                "e": {
+                    "f": {
+                        "g": "Roffle",
+                        "h": [
+                            null,
+                            0,
+                            1,
+                            null,
+                            13,
+                            14,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "Wow this is a big array, it sure is lonely in here by myself"
+                        ]
+                    }
+                }
+            },
+            "c": "RoffleWaffles"
         }
-        },
-        "c": "RoffleWaffles"
-    }
     }
 
 Now that's handy. You shouldn't try to use this as a replacement for the
@@ -370,21 +370,21 @@ them:
 
 .. code-block:: pycon
 
-    >>> print json.dumps(x, indent=4, sort_keys=True)
+    >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
-    "a": {
-        "b": {
-        "3": 2,
-        "43": 30,
-        "c": "Waffles",
-        "d": "Waffles",
-        "e": {
-            "f": {
-            "g": "Roffle"
+        "a": {
+            "b": {
+                "3": 2,
+                "43": 30,
+                "c": "Waffles",
+                "d": "Waffles",
+                "e": {
+                    "f": {
+                        "g": "Roffle"
+                    }
+                }
             }
         }
-        }
-    }
     }
     >>> def afilter(x):
     ...     if "ffle" in str(x):
@@ -392,19 +392,19 @@ them:
     ...     return False
     ...
     >>> result = dpath.util.search(x, '**', afilter=afilter)
-    >>> print json.dumps(result, indent=4, sort_keys=True)
+    >>> print(json.dumps(result, indent=4, sort_keys=True))
     {
-    "a": {
-        "b": {
-        "c": "Waffles",
-        "d": "Waffles",
-        "e": {
-            "f": {
-            "g": "Roffle"
+        "a": {
+            "b": {
+                "c": "Waffles",
+                "d": "Waffles",
+                "e": {
+                    "f": {
+                      "g": "Roffle"
+                    }
+                }
             }
         }
-        }
-    }
     }
 
 Obviously filtering functions can perform more advanced tests (regular
