@@ -19,7 +19,7 @@ class MergeType(IntFlag):
 IntAwareSegment = Union[int, Any]
 
 
-def __safe_path__(path: str, separator: str) -> Union[List[IntAwareSegment], IntAwareSegment]:
+def _split_path(path: str, separator: str) -> Union[List[IntAwareSegment], IntAwareSegment]:
     """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
@@ -67,7 +67,7 @@ def new(obj, path, value, separator='/', creator=None):
     responsible for creating missing keys at arbitrary levels of
     the path (see the help for dpath.path.set)
     """
-    segments = __safe_path__(path, separator)
+    segments = _split_path(path, separator)
     if creator:
         return dpath.segments.set(obj, segments, value, creator=creator)
     return dpath.segments.set(obj, segments, value)
@@ -80,7 +80,7 @@ def delete(obj, glob, separator='/', afilter=None):
     Returns the number of deleted objects. Raises PathNotFound if no paths are
     found to delete.
     """
-    globlist = __safe_path__(glob, separator)
+    globlist = _split_path(glob, separator)
 
     def f(obj, pair, counter):
         (segments, value) = pair
@@ -135,7 +135,7 @@ def set(obj, glob, value, separator='/', afilter=None):
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
     """
-    globlist = __safe_path__(glob, separator)
+    globlist = _split_path(glob, separator)
 
     def f(obj, pair, counter):
         (segments, found) = pair
@@ -168,7 +168,7 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
     if glob == "/":
         return obj
 
-    globlist = __safe_path__(glob, separator)
+    globlist = _split_path(glob, separator)
 
     def f(obj, pair, results):
         (segments, found) = pair
@@ -211,7 +211,7 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
     every element in the document that matched the glob.
     """
 
-    globlist = __safe_path__(glob, separator)
+    globlist = _split_path(glob, separator)
 
     def keeper(segments, found):
         """
