@@ -162,7 +162,7 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
 
     globlist = _split_path(glob, separator)
 
-    def f(obj, pair, results):
+    def f(_, pair, results):
         (path_segments, found) = pair
 
         if segments.match(path_segments, globlist):

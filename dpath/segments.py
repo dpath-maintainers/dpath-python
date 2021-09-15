@@ -111,7 +111,7 @@ def expand(segments):
     expand(keys) -> (..., keys[:-2], keys[:-1])
     """
     index = 0
-    for segment in segments:
+    for _ in segments:
         index += 1
         yield segments[:index]
 
@@ -185,13 +185,13 @@ def match(segments, glob):
     path_len = len(segments)
     glob_len = len(glob)
 
-    # Index of the star-star in the glob.
-    ss = -1
     # The star-star normalized glob ('**' has been removed).
     ss_glob = glob
 
     if '**' in glob:
+        # Index of the star-star in the glob.
         ss = glob.index('**')
+
         if '**' in glob[ss + 1:]:
             raise InvalidGlob("Invalid glob. Only one '**' is permitted per glob: {}"
                               "".format(glob))
@@ -362,7 +362,6 @@ def foldm(obj, f, acc):
     """
     pairs = tuple(walk(obj))
     for pair in pairs:
-        (segments, value) = pair
         if f(obj, pair, acc) is False:
             break
     return acc
