@@ -33,13 +33,6 @@ def _split_path(path: str, separator: str) -> Union[List[IntAwareSegment], IntAw
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-        # FIXME: This check was in the old internal library, but I can't
-        # see a way it could fail...
-        for i, segment in enumerate(split_segments):
-            if (separator and (separator in segment)):
-                raise InvalidKeyName("{} at {}[{}] contains the separator '{}'"
-                                     "".format(segment, split_segments, i, separator))
-
         # Attempt to convert integer segments into actual integers.
         final = []
         for segment in split_segments:
