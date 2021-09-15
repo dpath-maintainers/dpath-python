@@ -15,10 +15,10 @@ class MergeType(IntFlag):
 
 
 # Type alias for dict path segments where integers are explicitly casted
-IntAwareSegment = Union[int, Any]
+PathSegment = Union[int, str]
 
 
-def _split_path(path: str, separator: str) -> Union[List[IntAwareSegment], IntAwareSegment]:
+def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegment]:
     """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
@@ -45,7 +45,7 @@ def _split_path(path: str, separator: str) -> Union[List[IntAwareSegment], IntAw
     return split_segments
 
 
-def new(obj, path, value, separator='/', creator=None):
+def new(obj: Dict, path: str, value, separator="/", creator=None):
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
