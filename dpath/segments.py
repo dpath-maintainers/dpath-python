@@ -1,8 +1,10 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
+from typing import List, Sequence, Tuple
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
+from dpath.util import PathSegment
 
 
 def kvs(node):
@@ -263,7 +265,7 @@ def extend(thing, index, value=None):
     return thing
 
 
-def __default_creator__(current, segments, i, hints=()):
+def __default_creator__(current, segments: List[str], i: int, hints: Sequence[Tuple[PathSegment, type]] = ()):
     """
     Create missing path components. If the segment is an int, then it will
     create a list. Otherwise a dictionary is created.

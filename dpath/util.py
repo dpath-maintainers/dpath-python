@@ -1,6 +1,6 @@
 from collections.abc import MutableMapping, MutableSequence
 from enum import IntFlag, auto
-from typing import Union, List, Any, Dict
+from typing import Union, List, Any, Dict, Callable
 
 from dpath import options, segments
 from dpath.exceptions import InvalidKeyName, PathNotFound
@@ -16,6 +16,9 @@ class MergeType(IntFlag):
 
 # Type alias for dict path segments where integers are explicitly casted
 PathSegment = Union[int, str]
+
+# Type alias for filter functions
+Filter = Callable[[Any], bool]  # (Any) -> bool
 
 
 def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegment]:
@@ -45,7 +48,8 @@ def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegme
     return split_segments
 
 
-def new(obj: Dict, path: str, value, separator="/", creator=None):
+# todo: Type hint creator arg
+def new(obj: Dict, path: str, value, separator="/", creator=None) -> Dict:
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -65,7 +69,7 @@ def new(obj: Dict, path: str, value, separator="/", creator=None):
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj, glob, separator='/', afilter=None):
+def delete(obj: Dict, glob: str, separator='/', afilter: Filter = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -122,7 +126,7 @@ def delete(obj, glob, separator='/', afilter=None):
     return deleted
 
 
-def set(obj, glob, value, separator='/', afilter=None):
+def set(obj: Dict, glob: str, value, separator='/', afilter: Filter = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -147,7 +151,7 @@ def set(obj, glob, value, separator='/', afilter=None):
     return changed
 
 
-def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -> dict:
+def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -> Dict:
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
@@ -183,7 +187,7 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
     return results[0]
 
 
-def values(obj, glob, separator='/', afilter=None, dirs=True):
+def values(obj: Dict, glob: str, separator='/', afilter: Filter = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -193,7 +197,7 @@ def values(obj, glob, separator='/', afilter=None, dirs=True):
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
+def search(obj: Dict, glob: str, yielded=False, separator='/', afilter: Filter = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
@@ -234,7 +238,7 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
         return segments.fold(obj, f, {})
 
 
-def merge(dst, src, separator='/', afilter=None, flags=MergeType.ADDITIVE):
+def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=MergeType.ADDITIVE):
     """
     Merge source into destination. Like dict.update() but performs deep
     merging.
