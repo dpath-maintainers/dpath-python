@@ -1,10 +1,9 @@
 from collections.abc import MutableMapping, MutableSequence
-from enum import Flag, IntFlag, auto
+from enum import IntFlag, auto
 from typing import Union, List, Any, Dict
 
-import dpath.segments
-from dpath import options
-from dpath.exceptions import InvalidKeyName
+from dpath import options, segments
+from dpath.exceptions import InvalidKeyName, PathNotFound
 
 _DEFAULT_SENTINEL = object()
 
@@ -29,28 +28,28 @@ def _split_path(path: str, separator: str) -> Union[List[IntAwareSegment], IntAw
     ignored, and is assumed to be part of each key glob. It will not be
     stripped.
     """
-    if not dpath.segments.leaf(path):
-        segments = path
+    if not segments.leaf(path):
+        split_segments = path
     else:
-        segments = path.lstrip(separator).split(separator)
+        split_segments = path.lstrip(separator).split(separator)
 
         # FIXME: This check was in the old internal library, but I can't
         # see a way it could fail...
-        for i, segment in enumerate(segments):
+        for i, segment in enumerate(split_segments):
             if (separator and (separator in segment)):
                 raise InvalidKeyName("{} at {}[{}] contains the separator '{}'"
-                                     "".format(segment, segments, i, separator))
+                                     "".format(segment, split_segments, i, separator))
 
         # Attempt to convert integer segments into actual integers.
         final = []
-        for segment in segments:
+        for segment in split_segments:
             try:
                 final.append(int(segment))
             except:
                 final.append(segment)
-        segments = final
+        split_segments = final
 
-    return segments
+    return split_segments
 
 
 def new(obj, path, value, separator='/', creator=None):
@@ -67,10 +66,10 @@ def new(obj, path, value, separator='/', creator=None):
     responsible for creating missing keys at arbitrary levels of
     the path (see the help for dpath.path.set)
     """
-    segments = _split_path(path, separator)
+    split_segments = _split_path(path, separator)
     if creator:
-        return dpath.segments.set(obj, segments, value, creator=creator)
-    return dpath.segments.set(obj, segments, value)
+        return segments.set(obj, split_segments, value, creator=creator)
+    return segments.set(obj, split_segments, value)
 
 
 def delete(obj, glob, separator='/', afilter=None):
@@ -83,18 +82,18 @@ def delete(obj, glob, separator='/', afilter=None):
     globlist = _split_path(glob, separator)
 
     def f(obj, pair, counter):
-        (segments, value) = pair
+        (path_segments, value) = pair
 
         # Skip segments if they no longer exist in obj.
-        if not dpath.segments.has(obj, segments):
+        if not segments.has(obj, path_segments):
             return
 
-        matched = dpath.segments.match(segments, globlist)
-        selected = afilter and dpath.segments.leaf(value) and afilter(value)
+        matched = segments.match(path_segments, globlist)
+        selected = afilter and segments.leaf(value) and afilter(value)
 
         if (matched and not afilter) or selected:
-            key = segments[-1]
-            parent = dpath.segments.get(obj, segments[:-1])
+            key = path_segments[-1]
+            parent = segments.get(obj, path_segments[:-1])
 
             try:
                 # Attempt to treat parent like a sequence.
@@ -107,7 +106,7 @@ def delete(obj, glob, separator='/', afilter=None):
                     #
                     # Note: In order to achieve proper behavior we are
                     # relying on the reverse iteration of
-                    # non-dictionaries from dpath.segments.kvs().
+                    # non-dictionaries from segments.kvs().
                     # Otherwise we'd be unable to delete all the tails
                     # of a list and end up with None values when we
                     # don't need them.
@@ -123,9 +122,9 @@ def delete(obj, glob, separator='/', afilter=None):
 
             counter[0] += 1
 
-    [deleted] = dpath.segments.foldm(obj, f, [0])
+    [deleted] = segments.foldm(obj, f, [0])
     if not deleted:
-        raise dpath.exceptions.PathNotFound("Could not find {0} to delete it".format(glob))
+        raise PathNotFound("Could not find {0} to delete it".format(glob))
 
     return deleted
 
@@ -138,20 +137,20 @@ def set(obj, glob, value, separator='/', afilter=None):
     globlist = _split_path(glob, separator)
 
     def f(obj, pair, counter):
-        (segments, found) = pair
+        (path_segments, found) = pair
 
         # Skip segments if they no longer exist in obj.
-        if not dpath.segments.has(obj, segments):
+        if not segments.has(obj, path_segments):
             return
 
-        matched = dpath.segments.match(segments, globlist)
-        selected = afilter and dpath.segments.leaf(found) and afilter(found)
+        matched = segments.match(path_segments, globlist)
+        selected = afilter and segments.leaf(found) and afilter(found)
 
         if (matched and not afilter) or (matched and selected):
-            dpath.segments.set(obj, segments, value, creator=None)
+            segments.set(obj, path_segments, value, creator=None)
             counter[0] += 1
 
-    [changed] = dpath.segments.foldm(obj, f, [0])
+    [changed] = segments.foldm(obj, f, [0])
     return changed
 
 
@@ -171,14 +170,14 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
     globlist = _split_path(glob, separator)
 
     def f(obj, pair, results):
-        (segments, found) = pair
+        (path_segments, found) = pair
 
-        if dpath.segments.match(segments, globlist):
+        if segments.match(path_segments, globlist):
             results.append(found)
         if len(results) > 1:
             return False
 
-    results = dpath.segments.fold(obj, f, [])
+    results = segments.fold(obj, f, [])
 
     if len(results) == 0:
         if default is not _DEFAULT_SENTINEL:
@@ -213,33 +212,33 @@ def search(obj, glob, yielded=False, separator='/', afilter=None, dirs=True):
 
     globlist = _split_path(glob, separator)
 
-    def keeper(segments, found):
+    def keeper(path, found):
         """
         Generalized test for use in both yielded and folded cases.
         Returns True if we want this result. Otherwise returns False.
         """
-        if not dirs and not dpath.segments.leaf(found):
+        if not dirs and not segments.leaf(found):
             return False
 
-        matched = dpath.segments.match(segments, globlist)
+        matched = segments.match(path, globlist)
         selected = afilter and afilter(found)
 
         return (matched and not afilter) or (matched and selected)
 
     if yielded:
         def yielder():
-            for segments, found in dpath.segments.walk(obj):
-                if keeper(segments, found):
-                    yield (separator.join(map(dpath.segments.int_str, segments)), found)
+            for path, found in segments.walk(obj):
+                if keeper(path, found):
+                    yield (separator.join(map(segments.int_str, path)), found)
         return yielder()
     else:
         def f(obj, pair, result):
-            (segments, found) = pair
+            (path, found) = pair
 
-            if keeper(segments, found):
-                dpath.segments.set(result, segments, found, hints=dpath.segments.types(obj, segments))
+            if keeper(path, found):
+                segments.set(result, path, found, hints=segments.types(obj, path))
 
-        return dpath.segments.fold(obj, f, {})
+        return segments.fold(obj, f, {})
 
 
 def merge(dst, src, separator='/', afilter=None, flags=MergeType.ADDITIVE):
@@ -293,43 +292,43 @@ def merge(dst, src, separator='/', afilter=None, flags=MergeType.ADDITIVE):
         return False
 
     def merger(dst, src, _segments=()):
-        for key, found in dpath.segments.kvs(src):
+        for key, found in segments.kvs(src):
             # Our current path in the source.
-            segments = _segments + (key,)
+            current_path = _segments + (key,)
 
             if len(key) == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
-                                     "{}".format(segments))
+                                     "{}".format(current_path))
 
             # Validate src and dst types match.
             if flags & MergeType.TYPESAFE:
-                if dpath.segments.has(dst, segments):
-                    target = dpath.segments.get(dst, segments)
+                if segments.has(dst, current_path):
+                    target = segments.get(dst, current_path)
                     tt = type(target)
                     ft = type(found)
                     if tt != ft:
-                        path = separator.join(segments)
+                        path = separator.join(current_path)
                         raise TypeError("Cannot merge objects of type"
                                         "{0} and {1} at {2}"
                                         "".format(tt, ft, path))
 
             # Path not present in destination, create it.
-            if not dpath.segments.has(dst, segments):
-                dpath.segments.set(dst, segments, found)
+            if not segments.has(dst, current_path):
+                segments.set(dst, current_path, found)
                 continue
 
             # Retrieve the value in the destination.
-            target = dpath.segments.get(dst, segments)
+            target = segments.get(dst, current_path)
 
             # If the types don't match, replace it.
             if ((type(found) != type(target)) and (not are_both_mutable(found, target))):
-                dpath.segments.set(dst, segments, found)
+                segments.set(dst, current_path, found)
                 continue
 
             # If target is a leaf, the replace it.
-            if dpath.segments.leaf(target):
-                dpath.segments.set(dst, segments, found)
+            if segments.leaf(target):
+                segments.set(dst, current_path, found)
                 continue
 
             # At this point we know:
@@ -348,14 +347,14 @@ def merge(dst, src, separator='/', afilter=None, flags=MergeType.ADDITIVE):
                     try:
                         target['']
                     except TypeError:
-                        dpath.segments.set(dst, segments, found)
+                        segments.set(dst, current_path, found)
                         continue
                     except:
                         raise
             except:
                 # We have a dictionary like thing and we need to attempt to
                 # recursively merge it.
-                merger(dst, found, segments)
+                merger(dst, found, current_path)
 
     merger(dst, filtered_src)
 
