@@ -319,7 +319,7 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
             target = segments.get(dst, current_path)
 
             # If the types don't match, replace it.
-            if ((type(found) != type(target)) and (not are_both_mutable(found, target))):
+            if type(found) != type(target) and not are_both_mutable(found, target):
                 segments.set(dst, current_path, found)
                 continue
 
