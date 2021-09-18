@@ -92,7 +92,7 @@ def new(obj: Dict, path: str, value, separator="/", creator: Creator = None) -> 
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj: Dict, glob: str, separator='/', afilter: Filter = None) -> int:
+def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -144,12 +144,12 @@ def delete(obj: Dict, glob: str, separator='/', afilter: Filter = None) -> int:
 
     [deleted] = segments.foldm(obj, f, [0])
     if not deleted:
-        raise PathNotFound("Could not find {0} to delete it".format(glob))
+        raise PathNotFound(f"Could not find {glob} to delete it")
 
     return deleted
 
 
-def set(obj: Dict, glob: str, value, separator='/', afilter: Filter = None) -> int:
+def set(obj: Dict, glob: str, value, separator="/", afilter: Filter = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -205,12 +205,12 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
 
         raise KeyError(glob)
     elif len(results) > 1:
-        raise ValueError("dpath.util.get() globs must match only one leaf : %s" % glob)
+        raise ValueError(f"dpath.util.get() globs must match only one leaf: {glob}")
 
     return results[0]
 
 
-def values(obj: Dict, glob: str, separator='/', afilter: Filter = None, dirs=True):
+def values(obj: Dict, glob: str, separator="/", afilter: Filter = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -220,7 +220,7 @@ def values(obj: Dict, glob: str, separator='/', afilter: Filter = None, dirs=Tru
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj: Dict, glob: str, yielded=False, separator='/', afilter: Filter = None, dirs=True):
+def search(obj: Dict, glob: str, yielded=False, separator="/", afilter: Filter = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
@@ -249,7 +249,7 @@ def search(obj: Dict, glob: str, yielded=False, separator='/', afilter: Filter =
         def yielder():
             for path, found in segments.walk(obj):
                 if keeper(path, found):
-                    yield (separator.join(map(segments.int_str, path)), found)
+                    yield separator.join(map(segments.int_str, path)), found
         return yielder()
     else:
         def f(obj, pair, result):
@@ -261,7 +261,7 @@ def search(obj: Dict, glob: str, yielded=False, separator='/', afilter: Filter =
         return segments.fold(obj, f, {})
 
 
-def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=MergeType.ADDITIVE):
+def merge(dst: Dict, src: Dict, separator="/", afilter: Filter = None, flags=MergeType.ADDITIVE):
     """
     Merge source into destination. Like dict.update() but performs deep
     merging.
@@ -311,7 +311,7 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
             if len(key) == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
-                                     "{}".format(current_path))
+                                     f"{current_path}")
 
             # Validate src and dst types match.
             if flags & MergeType.TYPESAFE:
@@ -321,9 +321,7 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
                     ft = type(found)
                     if tt != ft:
                         path = separator.join(current_path)
-                        raise TypeError("Cannot merge objects of type"
-                                        "{0} and {1} at {2}"
-                                        "".format(tt, ft, path))
+                        raise TypeError(f"Cannot merge objects of type {tt} and {ft} at {path}")
 
             # Path not present in destination, create it.
             if not segments.has(dst, current_path):
@@ -357,7 +355,7 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
 
                 if flags & MergeType.REPLACE:
                     try:
-                        target['']
+                        target[""]
                     except TypeError:
                         segments.set(dst, current_path, found)
                         continue

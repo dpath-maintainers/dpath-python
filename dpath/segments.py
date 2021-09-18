@@ -70,7 +70,7 @@ def walk(obj, location=()):
             if length is not None and length == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
-                                     "{}".format(location + (k,)))
+                                     f"{location + (k,)}")
             yield (location + (k,)), v
 
         for k, v in make_walkable(obj):
@@ -87,7 +87,7 @@ def get(obj, segments):
     current = obj
     for (i, segment) in enumerate(segments):
         if leaf(current):
-            raise PathNotFound('Path: {}[{}]'.format(segments, i))
+            raise PathNotFound(f"Path: {segments}[{i}]")
 
         current = current[segment]
     return current
@@ -196,8 +196,7 @@ def match(segments, glob):
         ss = glob.index('**')
 
         if '**' in glob[ss + 1:]:
-            raise InvalidGlob("Invalid glob. Only one '**' is permitted per glob: {}"
-                              "".format(glob))
+            raise InvalidGlob(f"Invalid glob. Only one '**' is permitted per glob: {glob}")
 
         # Convert '**' segment into multiple '*' segments such that the
         # lengths of the path and glob match. '**' also can collapse and
@@ -249,7 +248,7 @@ def extend(thing: List, index: int, value=None):
     extend(thing, int) -> [thing..., None, ...]
     """
     try:
-        expansion = (type(thing)())
+        expansion = type(thing)()
 
         # Using this rather than the multiply notation in order to support a
         # wider variety of sequence like things.
@@ -335,7 +334,7 @@ def set(
 
         current = current[segment]
         if i != length - 1 and leaf(current):
-            raise PathNotFound('Path: {}[{}]'.format(segments, i))
+            raise PathNotFound(f"Path: {segments}[{i}]")
 
     if isinstance(segments[-1], int):
         extend(current, segments[-1])
