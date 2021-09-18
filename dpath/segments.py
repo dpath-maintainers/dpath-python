@@ -1,10 +1,10 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import List, Sequence, Tuple, Iterator, Any, Dict, Union
+from typing import List, Sequence, Tuple, Iterator, Any, Dict, Union, Optional
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.util import PathSegment
+from dpath.util import PathSegment, Creator, Hints
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -266,9 +266,9 @@ def extend(thing: List, index: int, value=None):
     return thing
 
 
-def __default_creator__(
+def _default_creator(
         current: Union[Dict, List],
-        segments: List[PathSegment],
+        segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()
 ):
@@ -301,7 +301,13 @@ def __default_creator__(
             current[segment] = {}
 
 
-def set(obj, segments, value, creator=__default_creator__, hints=()):
+def set(
+        obj,
+        segments: Sequence[PathSegment],
+        value,
+        creator: Optional[Creator] = _default_creator,
+        hints: Hints = ()
+):
     """
     Set the value in obj at the place indicated by segments. If creator is not
     None (default __default_creator__), then call the creator function to
@@ -323,7 +329,7 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
             current[segment]
         except:
             if creator is not None:
-                creator(current, segments, i, hints=hints)
+                creator(current, segments, i, hints)
             else:
                 raise
 

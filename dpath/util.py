@@ -1,6 +1,6 @@
 from collections.abc import MutableMapping, MutableSequence
 from enum import IntFlag, auto
-from typing import Union, List, Any, Dict, Callable, Sequence, Tuple
+from typing import Union, List, Any, Dict, Callable, Sequence, Tuple, Optional
 
 from dpath import options, segments
 from dpath.exceptions import InvalidKeyName, PathNotFound
@@ -9,19 +9,40 @@ _DEFAULT_SENTINEL = object()
 
 
 class MergeType(IntFlag):
-    REPLACE = auto()
     ADDITIVE = auto()
+    """List objects are combined onto one long list (NOT a set). This is the default flag."""
+
+    REPLACE = auto()
+    """Instead of combining list objects, when 2 list objects are at an equal depth of merge, replace the destination 
+    with the source."""
+
     TYPESAFE = auto()
+    """When 2 keys at equal levels are of different types, raise a TypeError exception. By default, the source 
+    replaces the destination in this situation."""
 
 
-# Type alias for dict path segments where integers are explicitly casted
 PathSegment = Union[int, str]
+"""Type alias for dict path segments where integers are explicitly casted."""
 
-# Type alias for filter functions
-Filter = Callable[[Any], bool]  # (Any) -> bool
+Filter = Callable[[Any], bool]
+"""Type alias for filter functions.
 
-# Type alias for creator functions
-Creator = Callable[[Union[Dict, List], List[PathSegment], int, Sequence[Tuple[PathSegment, type]]], None]
+(Any) -> bool"""
+
+Hints = Sequence[Tuple[PathSegment, type]]
+"""Type alias for creator function hint sequences."""
+
+Creator = Callable[[Union[Dict, List], Sequence[PathSegment], int, Optional[Hints]], None]
+"""Type alias for creator functions.
+
+Example creator function signature:
+    
+    def creator(
+        current: Union[Dict, List],
+        segments: Sequence[PathSegment],
+        i: int,
+        hints: Sequence[Tuple[PathSegment, type]] = ()
+    )"""
 
 
 def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegment]:
@@ -270,14 +291,6 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
     https://github.com/akesterson/dpath-python/issues/58
 
     flags is an OR'ed combination of MergeType enum members.
-        * ADDITIVE : List objects are combined onto one long
-          list (NOT a set). This is the default flag.
-        * REPLACE : Instead of combining list objects, when
-          2 list objects are at an equal depth of merge, replace
-          the destination with the source.
-        * TYPESAFE : When 2 keys at equal levels are of different
-          types, raise a TypeError exception. By default, the source
-          replaces the destination in this situation.
     """
     filtered_src = search(src, '**', afilter=afilter, separator='/')
 
