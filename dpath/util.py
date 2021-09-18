@@ -1,6 +1,6 @@
 from collections.abc import MutableMapping, MutableSequence
 from enum import IntFlag, auto
-from typing import Union, List, Any, Dict, Callable
+from typing import Union, List, Any, Dict, Callable, Sequence, Tuple
 
 from dpath import options, segments
 from dpath.exceptions import InvalidKeyName, PathNotFound
@@ -19,6 +19,9 @@ PathSegment = Union[int, str]
 
 # Type alias for filter functions
 Filter = Callable[[Any], bool]  # (Any) -> bool
+
+# Type alias for creator functions
+Creator = Callable[[Union[Dict, List], List[PathSegment], int, Sequence[Tuple[PathSegment, type]]], None]
 
 
 def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegment]:
@@ -48,8 +51,7 @@ def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegme
     return split_segments
 
 
-# todo: Type hint creator arg
-def new(obj: Dict, path: str, value, separator="/", creator=None) -> Dict:
+def new(obj: Dict, path: str, value, separator="/", creator: Creator = None) -> Dict:
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -289,7 +291,7 @@ def merge(dst: Dict, src: Dict, separator='/', afilter: Filter = None, flags=Mer
         return False
 
     def merger(dst, src, _segments=()):
-        for key, found in segments.kvs(src):
+        for key, found in segments.make_walkable(src):
             # Our current path in the source.
             current_path = _segments + (key,)
 

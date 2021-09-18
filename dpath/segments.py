@@ -1,17 +1,21 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import List, Sequence, Tuple
+from typing import List, Sequence, Tuple, Iterator, Any, Dict, Union
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.util import PathSegment
 
 
-def kvs(node):
+def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     """
-    Return a (key, value) iterator for the node.
+    Returns an iterator which yields tuple pairs of (node index, node value), regardless of node type.
 
-    kvs(node) -> (generator -> (key, value))
+    * For dict nodes `node.items()` will be returned.
+    * For sequence nodes (lists/tuples/etc.) a zip between index number and index value will be returned.
+    * Edge cases will result in an empty iterator being returned.
+
+    make_walkable(node) -> (generator -> (key, value))
     """
     try:
         return iter(node.items())
@@ -28,8 +32,6 @@ def kvs(node):
 def leaf(thing):
     """
     Return True if thing is a leaf, otherwise False.
-
-    leaf(thing) -> bool
     """
     leaves = (bytes, str, int, float, bool, type(None))
 
@@ -40,8 +42,6 @@ def leafy(thing):
     """
     Same as leaf(thing), but also treats empty sequences and
     dictionaries as True.
-
-    leafy(thing) -> bool
     """
 
     try:
@@ -59,20 +59,21 @@ def walk(obj, location=()):
     walk(obj) -> (generator -> (segments, value))
     """
     if not leaf(obj):
-        for k, v in kvs(obj):
+        for k, v in make_walkable(obj):
             length = None
 
             try:
                 length = len(k)
-            except:
+            except TypeError:
                 pass
 
             if length is not None and length == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
                                      "{}".format(location + (k,)))
-            yield ((location + (k,)), v)
-        for k, v in kvs(obj):
+            yield (location + (k,)), v
+
+        for k, v in make_walkable(obj):
             for found in walk(v, location + (k,)):
                 yield found
 
@@ -240,7 +241,7 @@ def match(segments, glob):
     return False
 
 
-def extend(thing, index, value=None):
+def extend(thing: List, index: int, value=None):
     """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
@@ -265,7 +266,12 @@ def extend(thing, index, value=None):
     return thing
 
 
-def __default_creator__(current, segments: List[str], i: int, hints: Sequence[Tuple[PathSegment, type]] = ()):
+def __default_creator__(
+        current: Union[Dict, List],
+        segments: List[PathSegment],
+        i: int,
+        hints: Sequence[Tuple[PathSegment, type]] = ()
+):
     """
     Create missing path components. If the segment is an int, then it will
     create a list. Otherwise a dictionary is created.
