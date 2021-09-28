@@ -85,7 +85,7 @@ def get(obj, segments):
     get(obj, segments) -> value
     """
     current = obj
-    for (i, segment) in enumerate(segments):
+    for i, segment in enumerate(segments):
         if leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
 
@@ -214,7 +214,7 @@ def match(segments, glob):
     # If we were successful in matching up the lengths, then we can
     # compare them using fnmatch.
     if path_len == len(ss_glob):
-        for (s, g) in zip(map(int_str, segments), map(int_str, ss_glob)):
+        for s, g in zip(map(int_str, segments), map(int_str, ss_glob)):
             # Match the stars we added to the glob to the type of the
             # segment itself.
             if g is STAR:
