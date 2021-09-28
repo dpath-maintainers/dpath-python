@@ -221,7 +221,7 @@ def match(segments, glob):
                 if isinstance(s, bytes):
                     g = b'*'
                 else:
-                    g = u'*'
+                    g = '*'
 
             # Let's see if the glob matches. We will turn any kind of
             # exception while attempting to match into a False for the
