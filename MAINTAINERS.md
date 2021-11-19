@@ -10,7 +10,7 @@ There are several individuals in the community who have taken an active role in 
 Where and How do we communicate
 ===============================
 
-The dpath maintainers communcate in 3 primary ways:
+The dpath maintainers communicate in 3 primary ways:
 
 1. Email, directly to each other.
 2. Github via issue and pull request comments
