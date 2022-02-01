@@ -32,14 +32,15 @@ def __safe_path__(path, separator):
                 raise InvalidKeyName("{} at {}[{}] contains the separator '{}'"
                                      "".format(segment, segments, i, separator))
 
-        # Attempt to convert integer segments into actual integers.
-        final = []
-        for segment in segments:
-            try:
-                final.append(int(segment))
-            except:
-                final.append(segment)
-        segments = final
+        if options.CONVERT_INT_LIKE_SEGMENTS:
+            # Attempt to convert integer segments into actual integers.
+            final = []
+            for segment in segments:
+                try:
+                    final.append(int(segment))
+                except:
+                    final.append(segment)
+            segments = final
 
     return segments
 
