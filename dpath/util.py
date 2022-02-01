@@ -230,7 +230,7 @@ def search(obj: Dict, glob: str, yielded=False, separator="/", afilter: Filter =
     every element in the document that matched the glob.
     """
 
-    globlist = _split_path(glob, separator)
+    split_glob = _split_path(glob, separator)
 
     def keeper(path, found):
         """
@@ -240,7 +240,7 @@ def search(obj: Dict, glob: str, yielded=False, separator="/", afilter: Filter =
         if not dirs and not segments.leaf(found):
             return False
 
-        matched = segments.match(path, globlist)
+        matched = segments.match(path, split_glob)
         selected = afilter and afilter(found)
 
         return (matched and not afilter) or (matched and selected)

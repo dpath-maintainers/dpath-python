@@ -140,7 +140,7 @@ def leaves(obj):
     return filter(lambda p: leafy(p[1]), walk(obj))
 
 
-def int_str(segment):
+def int_str(segment: PathSegment) -> PathSegment:
     """
     If the segment is an integer, return the string conversion.
     Otherwise return the segment unchanged. The conversion uses 'str'.
@@ -163,7 +163,7 @@ class Star(object):
 STAR = Star()
 
 
-def match(segments, glob):
+def match(segments: Sequence[PathSegment], glob: Sequence[str]):
     """
     Return True if the segments match the given glob, otherwise False.
 
