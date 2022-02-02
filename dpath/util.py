@@ -80,7 +80,7 @@ def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
             parent = segments.get(obj, path_segments[:-1])
 
             # Deletion behavior depends on parent type
-            if isinstance(parent, dict):
+            if isinstance(parent, MutableMapping):
                 del parent[key]
 
             else:
