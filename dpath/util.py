@@ -116,9 +116,13 @@ def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
             key = path_segments[-1]
             parent = segments.get(obj, path_segments[:-1])
 
-            try:
-                # Attempt to treat parent like a sequence.
-                parent[0]
+            # Deletion behavior depends on parent type
+            if isinstance(parent, dict):
+                del parent[key]
+
+            else:
+                # Handle sequence types
+                # TODO: Consider cases where type isn't a simple list (e.g. set)
 
                 if len(parent) - 1 == key:
                     # Removing the last element of a sequence. It can be
@@ -132,14 +136,12 @@ def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
                     # of a list and end up with None values when we
                     # don't need them.
                     del parent[key]
+
                 else:
                     # This key can't be removed completely because it
                     # would affect the order of items that remain in our
                     # result.
                     parent[key] = None
-            except:
-                # Attempt to treat parent like a dictionary instead.
-                del parent[key]
 
             counter[0] += 1
 
