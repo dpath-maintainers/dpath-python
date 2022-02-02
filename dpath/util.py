@@ -60,14 +60,15 @@ def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegme
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-        # Attempt to convert integer segments into actual integers.
-        final = []
-        for segment in split_segments:
-            try:
-                final.append(int(segment))
-            except:
-                final.append(segment)
-        split_segments = final
+        if options.CONVERT_INT_LIKE_SEGMENTS:
+            # Attempt to convert integer segments into actual integers.
+            final = []
+            for segment in split_segments:
+                try:
+                    final.append(int(segment))
+                except:
+                    final.append(segment)
+            split_segments = final
 
     return split_segments
 
