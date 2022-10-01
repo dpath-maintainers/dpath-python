@@ -1,8 +1,8 @@
-from collections.abc import MutableMapping, Sized
-from collections.abc import MutableSequence
+from collections.abc import MutableMapping, Sized, MutableSequence
+
+import dpath.segments
 from dpath import options
 from dpath.exceptions import InvalidKeyName
-import dpath.segments
 
 _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
