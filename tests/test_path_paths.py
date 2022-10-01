@@ -34,4 +34,4 @@ def test_path_paths_empty_key_allowed():
         pass
 
     dpath.options.ALLOW_EMPTY_STRING_KEYS = False
-    assert("/".join(segments) == "Empty//Key")
+    assert "/".join(segments) == "Empty//Key"
