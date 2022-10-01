@@ -286,6 +286,9 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
         return False
 
     def merger(dst, src, _segments=()):
+        if not isinstance(dst, dict) or not isinstance(src, dict):
+            raise ValueError("Merger function supports dict-like objects only")
+
         for key, found in dpath.segments.kvs(src):
             # Our current path in the source.
             segments = _segments + (key,)
