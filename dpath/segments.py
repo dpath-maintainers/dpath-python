@@ -311,6 +311,8 @@ def set(obj, segments, value, creator=__default_creator__, hints=()):
             # code agnostic to whether current is a list or a dict.
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
+            if isinstance(current, dict) and current.get(str(segment)):
+                segment = str(segment)
             current[segment]
         except:
             if creator is not None:
