@@ -29,7 +29,7 @@ def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegme
             for segment in split_segments:
                 try:
                     final.append(int(segment))
-                except:
+                except ValueError:
                     final.append(segment)
             split_segments = final
 
@@ -325,9 +325,9 @@ def merge(dst: Dict, src: Dict, separator="/", afilter: Filter = None, flags=Mer
                     except TypeError:
                         segments.set(dst, current_path, found)
                         continue
-                    except:
+                    except Exception:
                         raise
-            except:
+            except Exception:
                 # We have a dictionary like thing and we need to attempt to
                 # recursively merge it.
                 merger(dst, found, current_path)

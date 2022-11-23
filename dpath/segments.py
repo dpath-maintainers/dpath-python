@@ -326,7 +326,7 @@ def set(
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
             current[segment]
-        except:
+        except (KeyError, IndexError):
             if creator is not None:
                 creator(current, segments, i, hints)
             else:
