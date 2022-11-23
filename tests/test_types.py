@@ -72,12 +72,12 @@ def test_types_set():
     data = TestMapping({"a": TestSequence([0])})
 
     dpath.util.set(data, '/a/0', 1)
-    assert(data['a'][0] == 1)
+    assert data['a'][0] == 1
 
     data['a'][0] = 0
 
     dpath.util.set(data, ['a', '0'], 1)
-    assert(data['a'][0] == 1)
+    assert data['a'][0] == 1
 
 
 def test_types_get_list_of_dicts():
@@ -93,9 +93,9 @@ def test_types_get_list_of_dicts():
 
     res = dpath.segments.view(tdict, ['a', 'b', 0, 0])
 
-    assert(isinstance(res['a']['b'], TestSequence))
-    assert(len(res['a']['b']) == 1)
-    assert(res['a']['b'][0][0] == 0)
+    assert isinstance(res['a']['b'], TestSequence)
+    assert len(res['a']['b']) == 1
+    assert res['a']['b'][0][0] == 0
 
 
 def test_types_merge_simple_list_replace():
@@ -149,6 +149,6 @@ def test_delete_filter():
     })
 
     dpath.util.delete(data, '/a/*', afilter=afilter)
-    assert (data['a']['b'] == 0)
-    assert (data['a']['c'] == 1)
-    assert ('d' not in data['a'])
+    assert data['a']['b'] == 0
+    assert data['a']['c'] == 1
+    assert 'd' not in data['a']

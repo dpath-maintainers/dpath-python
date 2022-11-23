@@ -11,10 +11,10 @@ def test_util_get_root():
     x = {'p': {'a': {'t': {'h': 'value'}}}}
 
     ret = dpath.util.get(x, '/p/a/t/h')
-    assert(ret == 'value')
+    assert ret == 'value'
 
     ret = dpath.util.get(x, '/')
-    assert(ret == x)
+    assert ret == x
 
 
 def test_get_explicit_single():
@@ -30,11 +30,11 @@ def test_get_explicit_single():
         },
     }
 
-    assert(dpath.util.get(ehash, '/a/b/c/f') == 2)
-    assert(dpath.util.get(ehash, ['a', 'b', 'c', 'f']) == 2)
-    assert(dpath.util.get(ehash, ['a', 'b', 'c', 'f'], default=5) == 2)
-    assert(dpath.util.get(ehash, ['does', 'not', 'exist'], default=None) is None)
-    assert(dpath.util.get(ehash, ['doesnt', 'exist'], default=5) == 5)
+    assert dpath.util.get(ehash, '/a/b/c/f') == 2
+    assert dpath.util.get(ehash, ['a', 'b', 'c', 'f']) == 2
+    assert dpath.util.get(ehash, ['a', 'b', 'c', 'f'], default=5) == 2
+    assert dpath.util.get(ehash, ['does', 'not', 'exist'], default=None) is None
+    assert dpath.util.get(ehash, ['doesnt', 'exist'], default=5) == 5
 
 
 def test_get_glob_single():
@@ -50,10 +50,10 @@ def test_get_glob_single():
         },
     }
 
-    assert(dpath.util.get(ehash, '/a/b/*/f') == 2)
-    assert(dpath.util.get(ehash, ['a', 'b', '*', 'f']) == 2)
-    assert(dpath.util.get(ehash, ['a', 'b', '*', 'f'], default=5) == 2)
-    assert(dpath.util.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6)
+    assert dpath.util.get(ehash, '/a/b/*/f') == 2
+    assert dpath.util.get(ehash, ['a', 'b', '*', 'f']) == 2
+    assert dpath.util.get(ehash, ['a', 'b', '*', 'f'], default=5) == 2
+    assert dpath.util.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6
 
 
 def test_get_glob_multiple():
@@ -96,16 +96,16 @@ def test_values():
     }
 
     ret = dpath.util.values(ehash, '/a/b/c/*')
-    assert(isinstance(ret, list))
-    assert(0 in ret)
-    assert(1 in ret)
-    assert(2 in ret)
+    assert isinstance(ret, list)
+    assert 0 in ret
+    assert 1 in ret
+    assert 2 in ret
 
     ret = dpath.util.values(ehash, ['a', 'b', 'c', '*'])
-    assert(isinstance(ret, list))
-    assert(0 in ret)
-    assert(1 in ret)
-    assert(2 in ret)
+    assert isinstance(ret, list)
+    assert 0 in ret
+    assert 1 in ret
+    assert 2 in ret
 
 
 @mock.patch('dpath.util.search')
@@ -126,7 +126,7 @@ def test_none_values():
     d = {'p': {'a': {'t': {'h': None}}}}
 
     v = dpath.util.get(d, 'p/a/t/h')
-    assert(v is None)
+    assert v is None
 
 
 def test_values_list():
@@ -142,8 +142,8 @@ def test_values_list():
     }
 
     ret = dpath.util.values(a, 'actions/*')
-    assert(isinstance(ret, list))
-    assert(len(ret) == 2)
+    assert isinstance(ret, list)
+    assert len(ret) == 2
 
 
 def test_non_leaf_leaf():

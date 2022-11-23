@@ -21,7 +21,7 @@ def test_merge_typesafe_and_separator():
     try:
         dpath.util.merge(dst, src, flags=(dpath.util.MERGE_ADDITIVE | dpath.util.MERGE_TYPESAFE), separator=";")
     except TypeError as e:
-        assert(str(e).endswith("dict;integer"))
+        assert str(e).endswith("dict;integer")
 
         return
     raise Exception("MERGE_TYPESAFE failed to raise an exception when merging between str and int!")
@@ -107,9 +107,9 @@ def test_merge_filter():
     dst = {}
 
     dpath.util.merge(dst, src, afilter=afilter)
-    assert ("key2" in dst)
-    assert ("key" not in dst)
-    assert ("otherdict" not in dst)
+    assert "key2" in dst
+    assert "key" not in dst
+    assert "otherdict" not in dst
 
 
 @raises(TypeError)
@@ -152,9 +152,9 @@ def test_merge_mutables():
 
     dpath.util.merge(dst, src)
     print(dst)
-    assert(dst["mm"]["a"] == src["mm"]["a"])
-    assert(dst['ms'][2] == 'c')
-    assert("casserole" in dst["mm"])
+    assert dst["mm"]["a"] == src["mm"]["a"]
+    assert dst['ms'][2] == 'c'
+    assert "casserole" in dst["mm"]
 
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
@@ -163,15 +163,15 @@ def test_merge_replace_1():
     dct_a = {"a": {"b": [1, 2, 3]}}
     dct_b = {"a": {"b": [1]}}
     dpath.util.merge(dct_a, dct_b, flags=dpath.util.MERGE_REPLACE)
-    assert(len(dct_a['a']['b']) == 1)
+    assert len(dct_a['a']['b']) == 1
 
 
 def test_merge_replace_2():
     d1 = {'a': [0, 1, 2]}
     d2 = {'a': ['a']}
     dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
-    assert(len(d1['a']) == 1)
-    assert(d1['a'][0] == 'a')
+    assert len(d1['a']) == 1
+    assert d1['a'][0] == 'a'
 
 
 def test_merge_list():

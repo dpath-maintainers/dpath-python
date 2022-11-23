@@ -1,8 +1,8 @@
-from collections.abc import MutableMapping
-from collections.abc import MutableSequence
+from collections.abc import MutableMapping, Sized, MutableSequence
+
+import dpath.segments
 from dpath import options
 from dpath.exceptions import InvalidKeyName
-import dpath.segments
 
 _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
@@ -289,6 +289,9 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
         for key, found in dpath.segments.kvs(src):
             # Our current path in the source.
             segments = _segments + (key,)
+
+            if not isinstance(key, Sized):
+                raise ValueError("Merger function supports dict-like objects only")
 
             if len(key) == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
