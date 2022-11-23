@@ -1,10 +1,11 @@
-from nose.tools import assert_raises
-
 import datetime
 import decimal
-import dpath.util
-import mock
 import time
+
+import mock
+from nose2.tools.such import helper
+
+import dpath.util
 
 
 def test_util_get_root():
@@ -70,16 +71,16 @@ def test_get_glob_multiple():
         },
     }
 
-    assert_raises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
-    assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
-    assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'], default=3)
+    helper.assertRaises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
+    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
+    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'], default=3)
 
 
 def test_get_absent():
     ehash = {}
 
-    assert_raises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
-    assert_raises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
+    helper.assertRaises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
+    helper.assertRaises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
 
 
 def test_values():

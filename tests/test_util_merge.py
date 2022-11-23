@@ -1,6 +1,6 @@
-import nose
 import copy
-from nose.tools import raises
+
+from nose2.tools.such import helper
 
 
 import dpath.util
@@ -36,7 +36,7 @@ def test_merge_simple_int():
     }
 
     dpath.util.merge(dst, src)
-    nose.tools.eq_(dst["integer"], src["integer"])
+    assert dst["integer"] == src["integer"], "%r != %r" % (dst["integer"], src["integer"])
 
 
 def test_merge_simple_string():
@@ -48,7 +48,7 @@ def test_merge_simple_string():
     }
 
     dpath.util.merge(dst, src)
-    nose.tools.eq_(dst["string"], src["string"])
+    assert dst["string"] == src["string"], "%r != %r" % (dst["string"], src["string"])
 
 
 def test_merge_simple_list_additive():
@@ -60,7 +60,7 @@ def test_merge_simple_list_additive():
     }
 
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_ADDITIVE)
-    nose.tools.eq_(dst["list"], [0, 1, 2, 3, 7, 8, 9, 10])
+    assert dst["list"] == [0, 1, 2, 3, 7, 8, 9, 10], "%r != %r" % (dst["list"], [0, 1, 2, 3, 7, 8, 9, 10])
 
 
 def test_merge_simple_list_replace():
@@ -72,7 +72,7 @@ def test_merge_simple_list_replace():
     }
 
     dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
-    nose.tools.eq_(dst["list"], [7, 8, 9, 10])
+    assert dst["list"] == [7, 8, 9, 10], "%r != %r" % (dst["list"], [7, 8, 9, 10])
 
 
 def test_merge_simple_dict():
@@ -88,7 +88,7 @@ def test_merge_simple_dict():
     }
 
     dpath.util.merge(dst, src)
-    nose.tools.eq_(dst["dict"]["key"], src["dict"]["key"])
+    assert dst["dict"]["key"] == src["dict"]["key"], "%r != %r" % (dst["dict"]["key"], src["dict"]["key"])
 
 
 def test_merge_filter():
@@ -112,7 +112,6 @@ def test_merge_filter():
     assert "otherdict" not in dst
 
 
-@raises(TypeError)
 def test_merge_typesafe():
     src = {
         "dict": {
@@ -123,10 +122,9 @@ def test_merge_typesafe():
         ],
     }
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
+    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
 
-@raises(TypeError)
 def test_merge_mutables():
     class tcid(dict):
         pass
@@ -156,7 +154,7 @@ def test_merge_mutables():
     assert dst['ms'][2] == 'c'
     assert "casserole" in dst["mm"]
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_TYPESAFE)
+    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MERGE_TYPESAFE)
 
 
 def test_merge_replace_1():

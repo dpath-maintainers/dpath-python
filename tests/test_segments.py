@@ -1,8 +1,11 @@
-from dpath import options
-from hypothesis import given, assume, settings, HealthCheck
-import dpath.segments as api
-import hypothesis.strategies as st
 import os
+from unittest import TestCase
+
+import hypothesis.strategies as st
+from hypothesis import given, assume, settings, HealthCheck
+
+import dpath.segments as api
+from dpath import options
 
 settings.register_profile("default", suppress_health_check=(HealthCheck.too_slow,))
 settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'default'))
@@ -25,115 +28,6 @@ random_mutable_thing = st.recursive(
     lambda children: st.lists(children) | st.dictionaries(st.binary() | st.text(), children)
 )
 random_mutable_node = random_mutable_thing.filter(lambda thing: isinstance(thing, (list, dict)))
-
-
-def setup():
-    # Allow empty strings in segments.
-    options.ALLOW_EMPTY_STRING_KEYS = True
-
-
-def teardown():
-    # Revert back to default.
-    options.ALLOW_EMPTY_STRING_KEYS = False
-
-
-@given(random_node)
-def test_kvs(node):
-    '''
-    Given a node, kvs should produce a key that when used to extract
-    from the node renders the exact same value given.
-    '''
-    for k, v in api.kvs(node):
-        assert node[k] is v
-
-
-@given(random_leaf)
-def test_leaf_with_leaf(leaf):
-    '''
-    Given a leaf, leaf should return True.
-    '''
-    assert api.leaf(leaf) is True
-
-
-@given(random_node)
-def test_leaf_with_node(node):
-    '''
-    Given a node, leaf should return False.
-    '''
-    assert api.leaf(node) is False
-
-
-@given(random_thing)
-def test_walk(thing):
-    '''
-    Given a thing to walk, walk should yield key, value pairs where key
-    is a tuple of non-zero length.
-    '''
-    for k, v in api.walk(thing):
-        assert isinstance(k, tuple)
-        assert len(k) > 0
-
-
-@given(random_node)
-def test_get(node):
-    '''
-    Given a node, get should return the exact value given a key for all
-    key, value pairs in the node.
-    '''
-    for k, v in api.walk(node):
-        assert api.get(node, k) is v
-
-
-@given(random_node)
-def test_has(node):
-    '''
-    Given a node, has should return True for all paths, False otherwise.
-    '''
-    for k, v in api.walk(node):
-        assert api.has(node, k) is True
-
-        # If we are at a leaf, then we can create a value that isn't
-        # present easily.
-        if api.leaf(v):
-            assert api.has(node, k + (0,)) is False
-
-
-@given(random_segments)
-def test_expand(segments):
-    '''
-    Given segments expand should produce as many results are there were
-    segments and the last result should equal the given segments.
-    '''
-    count = len(segments)
-    result = list(api.expand(segments))
-
-    assert count == len(result)
-
-    if count > 0:
-        assert segments == result[-1]
-
-
-@given(random_node)
-def test_types(node):
-    '''
-    Given a node, types should yield a tuple of key, type pairs and the
-    type indicated should equal the type of the value.
-    '''
-    for k, v in api.walk(node):
-        ts = api.types(node, k)
-        ta = ()
-        for tk, tt in ts:
-            ta += (tk,)
-            assert type(api.get(node, ta)) is tt
-
-
-@given(random_node)
-def test_leaves(node):
-    '''
-    Given a node, leaves should yield only leaf key, value pairs.
-    '''
-    for k, v in api.leaves(node):
-        assert api.leafy(v)
 
 
 @st.composite
@@ -216,7 +110,7 @@ def random_segments_with_glob(draw):
             stop = draw(st.integers(start, len(glob)))
             glob[start:stop] = ['**']
 
-    return (segments, glob)
+    return segments, glob
 
 
 @st.composite
@@ -243,25 +137,6 @@ def random_segments_with_nonmatching_glob(draw):
     return (segments, glob)
 
 
-@given(random_segments_with_glob())
-def test_match(pair):
-    '''
-    Given segments and a known good glob, match should be True.
-    '''
-    (segments, glob) = pair
-    assert api.match(segments, glob) is True
-
-
-@given(random_segments_with_nonmatching_glob())
-def test_match_nonmatching(pair):
-    '''
-    Given segments and a known bad glob, match should be False.
-    '''
-    print(pair)
-    (segments, glob) = pair
-    assert api.match(segments, glob) is False
-
-
 @st.composite
 def random_walk(draw):
     node = draw(random_mutable_node)
@@ -278,64 +153,179 @@ def random_leaves(draw):
     return (node, draw(st.sampled_from(found)))
 
 
-@given(walkable=random_walk(), value=random_thing)
-def test_set_walkable(walkable, value):
-    '''
-    Given a walkable location, set should be able to update any value.
-    '''
-    (node, (segments, found)) = walkable
-    api.set(node, segments, value)
-    assert api.get(node, segments) is value
+class TestSegments(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Allow empty strings in segments.
+        options.ALLOW_EMPTY_STRING_KEYS = True
 
+    @classmethod
+    def tearDownClass(cls):
+        # Revert back to default.
+        options.ALLOW_EMPTY_STRING_KEYS = False
 
-@given(walkable=random_leaves(),
-       kstr=random_key_str,
-       kint=random_key_int,
-       value=random_thing,
-       extension=random_segments)
-def test_set_create_missing(walkable, kstr, kint, value, extension):
-    '''
-    Given a walkable non-leaf, set should be able to create missing
-    nodes and set a new value.
-    '''
-    (node, (segments, found)) = walkable
-    assume(api.leaf(found))
+    @given(random_node)
+    def test_kvs(self, node):
+        '''
+        Given a node, kvs should produce a key that when used to extract
+        from the node renders the exact same value given.
+        '''
+        for k, v in api.kvs(node):
+            assert node[k] is v
 
-    parent_segments = segments[:-1]
-    parent = api.get(node, parent_segments)
+    @given(random_leaf)
+    def test_leaf_with_leaf(self, leaf):
+        '''
+        Given a leaf, leaf should return True.
+        '''
+        assert api.leaf(leaf) is True
 
-    if isinstance(parent, list):
-        assume(len(parent) < kint)
-        destination = parent_segments + (kint,) + tuple(extension)
-    elif isinstance(parent, dict):
-        assume(kstr not in parent)
-        destination = parent_segments + (kstr,) + tuple(extension)
-    else:
-        raise Exception('mad mad world')
+    @given(random_node)
+    def test_leaf_with_node(self, node):
+        '''
+        Given a node, leaf should return False.
+        '''
+        assert api.leaf(node) is False
 
-    api.set(node, destination, value)
-    assert api.get(node, destination) is value
+    @given(random_thing)
+    def test_walk(self, thing):
+        '''
+        Given a thing to walk, walk should yield key, value pairs where key
+        is a tuple of non-zero length.
+        '''
+        for k, v in api.walk(thing):
+            assert isinstance(k, tuple)
+            assert len(k) > 0
 
+    @given(random_node)
+    def test_get(self, node):
+        '''
+        Given a node, get should return the exact value given a key for all
+        key, value pairs in the node.
+        '''
+        for k, v in api.walk(node):
+            assert api.get(node, k) is v
 
-@given(thing=random_thing)
-def test_fold(thing):
-    '''
-    Given a thing, count paths with fold.
-    '''
-    def f(o, p, a):
-        a[0] += 1
+    @given(random_node)
+    def test_has(self, node):
+        '''
+        Given a node, has should return True for all paths, False otherwise.
+        '''
+        for k, v in api.walk(node):
+            assert api.has(node, k) is True
 
-    [count] = api.fold(thing, f, [0])
-    assert count == len(tuple(api.walk(thing)))
+            # If we are at a leaf, then we can create a value that isn't
+            # present easily.
+            if api.leaf(v):
+                assert api.has(node, k + (0,)) is False
 
+    @given(random_segments)
+    def test_expand(self, segments):
+        '''
+        Given segments expand should produce as many results are there were
+        segments and the last result should equal the given segments.
+        '''
+        count = len(segments)
+        result = list(api.expand(segments))
 
-@given(walkable=random_walk())
-def test_view(walkable):
-    '''
-    Given a walkable location, view that location.
-    '''
-    (node, (segments, found)) = walkable
-    assume(found == found)  # Hello, nan! We don't want you here.
+        assert count == len(result)
 
-    view = api.view(node, segments)
-    assert api.get(view, segments) == api.get(node, segments)
+        if count > 0:
+            assert segments == result[-1]
+
+    @given(random_node)
+    def test_types(self, node):
+        '''
+        Given a node, types should yield a tuple of key, type pairs and the
+        type indicated should equal the type of the value.
+        '''
+        for k, v in api.walk(node):
+            ts = api.types(node, k)
+            ta = ()
+            for tk, tt in ts:
+                ta += (tk,)
+                assert type(api.get(node, ta)) is tt
+
+    @given(random_node)
+    def test_leaves(self, node):
+        '''
+        Given a node, leaves should yield only leaf key, value pairs.
+        '''
+        for k, v in api.leaves(node):
+            assert api.leafy(v)
+
+    @given(random_segments_with_glob())
+    def test_match(self, pair):
+        '''
+        Given segments and a known good glob, match should be True.
+        '''
+        (segments, glob) = pair
+        assert api.match(segments, glob) is True
+
+    @given(random_segments_with_nonmatching_glob())
+    def test_match_nonmatching(self, pair):
+        '''
+        Given segments and a known bad glob, match should be False.
+        '''
+        (segments, glob) = pair
+        assert api.match(segments, glob) is False
+
+    @given(walkable=random_walk(), value=random_thing)
+    def test_set_walkable(self, walkable, value):
+        '''
+        Given a walkable location, set should be able to update any value.
+        '''
+        (node, (segments, found)) = walkable
+        api.set(node, segments, value)
+        assert api.get(node, segments) is value
+
+    @given(walkable=random_leaves(),
+           kstr=random_key_str,
+           kint=random_key_int,
+           value=random_thing,
+           extension=random_segments)
+    def test_set_create_missing(self, walkable, kstr, kint, value, extension):
+        '''
+        Given a walkable non-leaf, set should be able to create missing
+        nodes and set a new value.
+        '''
+        (node, (segments, found)) = walkable
+        assume(api.leaf(found))
+
+        parent_segments = segments[:-1]
+        parent = api.get(node, parent_segments)
+
+        if isinstance(parent, list):
+            assume(len(parent) < kint)
+            destination = parent_segments + (kint,) + tuple(extension)
+        elif isinstance(parent, dict):
+            assume(kstr not in parent)
+            destination = parent_segments + (kstr,) + tuple(extension)
+        else:
+            raise Exception('mad mad world')
+
+        api.set(node, destination, value)
+        assert api.get(node, destination) is value
+
+    @given(thing=random_thing)
+    def test_fold(self, thing):
+        '''
+        Given a thing, count paths with fold.
+        '''
+
+        def f(o, p, a):
+            a[0] += 1
+
+        [count] = api.fold(thing, f, [0])
+        assert count == len(tuple(api.walk(thing)))
+
+    @given(walkable=random_walk())
+    def test_view(self, walkable):
+        '''
+        Given a walkable location, view that location.
+        '''
+        (node, (segments, found)) = walkable
+        assume(found == found)  # Hello, nan! We don't want you here.
+
+        view = api.view(node, segments)
+        assert api.get(view, segments) == api.get(node, segments)
