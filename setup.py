@@ -25,7 +25,7 @@ if __name__ == "__main__":
         scripts=[],
         packages=["dpath"],
         data_files=[],
-        python_requires=">=3",
+        python_requires=">=3.7",
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
