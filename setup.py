@@ -13,7 +13,7 @@ long_description = open(
 if __name__ == "__main__":
     setup(
         name="dpath",
-        url="https://www.github.com/akesterson/dpath-python",
+        url="https://github.com/dpath-maintainers/dpath-python",
         version=dpath.version.VERSION,
         description="Filesystem-like pathing and searching for dictionaries",
         long_description=long_description,
