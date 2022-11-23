@@ -4,6 +4,7 @@ from nose2.tools.such import helper
 
 
 import dpath.util
+from dpath import MergeType
 
 
 def test_merge_typesafe_and_separator():
@@ -59,7 +60,7 @@ def test_merge_simple_list_additive():
         "list": [0, 1, 2, 3],
     }
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_ADDITIVE)
+    dpath.util.merge(dst, src, flags=MergeType.ADDITIVE)
     assert dst["list"] == [0, 1, 2, 3, 7, 8, 9, 10], "%r != %r" % (dst["list"], [0, 1, 2, 3, 7, 8, 9, 10])
 
 
@@ -71,7 +72,7 @@ def test_merge_simple_list_replace():
         "list": [0, 1, 2, 3],
     }
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
+    dpath.util.merge(dst, src, flags=dpath.util.MergeType.REPLACE)
     assert dst["list"] == [7, 8, 9, 10], "%r != %r" % (dst["list"], [7, 8, 9, 10])
 
 
@@ -122,7 +123,7 @@ def test_merge_typesafe():
         ],
     }
 
-    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MERGE_TYPESAFE)
+    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MergeType.TYPESAFE)
 
 
 def test_merge_mutables():
@@ -154,20 +155,20 @@ def test_merge_mutables():
     assert dst['ms'][2] == 'c'
     assert "casserole" in dst["mm"]
 
-    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MERGE_TYPESAFE)
+    helper.assertRaises(TypeError, dpath.util.merge, dst, src, flags=dpath.util.MergeType.TYPESAFE)
 
 
 def test_merge_replace_1():
     dct_a = {"a": {"b": [1, 2, 3]}}
     dct_b = {"a": {"b": [1]}}
-    dpath.util.merge(dct_a, dct_b, flags=dpath.util.MERGE_REPLACE)
+    dpath.util.merge(dct_a, dct_b, flags=dpath.util.MergeType.REPLACE)
     assert len(dct_a['a']['b']) == 1
 
 
 def test_merge_replace_2():
     d1 = {'a': [0, 1, 2]}
     d2 = {'a': ['a']}
-    dpath.util.merge(d1, d2, flags=dpath.util.MERGE_REPLACE)
+    dpath.util.merge(d1, d2, flags=dpath.util.MergeType.REPLACE)
     assert len(d1['a']) == 1
     assert d1['a'][0] == 'a'
 

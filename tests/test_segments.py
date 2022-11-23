@@ -170,7 +170,7 @@ class TestSegments(TestCase):
         Given a node, kvs should produce a key that when used to extract
         from the node renders the exact same value given.
         '''
-        for k, v in api.kvs(node):
+        for k, v in api.make_walkable(node):
             assert node[k] is v
 
     @given(random_leaf)

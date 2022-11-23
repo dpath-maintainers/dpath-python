@@ -3,6 +3,7 @@ from collections.abc import MutableSequence, MutableMapping
 from nose2.tools.such import helper
 
 import dpath.util
+from dpath import MergeType
 
 
 class TestMapping(MutableMapping):
@@ -99,7 +100,7 @@ def test_types_merge_simple_list_replace():
         "list": TestSequence([0, 1, 2, 3])
     })
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
+    dpath.util.merge(dst, src, flags=MergeType.REPLACE)
     assert dst["list"] == TestSequence([7, 8, 9, 10]), "%r != %r" % (dst["list"], TestSequence([7, 8, 9, 10]))
 
 
