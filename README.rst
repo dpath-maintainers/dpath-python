@@ -30,7 +30,7 @@ Using Dpath
 
 .. code-block:: python
 
-    import dpath.util
+    import dpath
 
 Separators
 ==========
@@ -62,8 +62,8 @@ key '43' in the 'b' hash which is in the 'a' hash". That's easy.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.get)
-    Help on function get in module dpath.util:
+    >>> help(dpath.get)
+    Help on function get in module dpath:
 
     get(obj, glob, separator='/')
         Given an object which contains only one possible match for the given glob,
@@ -72,7 +72,7 @@ key '43' in the 'b' hash which is in the 'a' hash". That's easy.
         If more than one leaf matches the glob, ValueError is raised. If the glob is
         not found, KeyError is raised.
 
-    >>> dpath.util.get(x, '/a/b/43')
+    >>> dpath.get(x, '/a/b/43')
     30
 
 Or you could say "Give me a new dictionary with the values of all
@@ -80,8 +80,8 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.search)
-    Help on function search in module dpath.util:
+    >>> help(dpath.search)
+    Help on function search in module dpath:
 
     search(obj, glob, yielded=False)
     Given a path glob, return a dictionary containing all keys
@@ -95,7 +95,7 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
 
 .. code-block:: pycon
 
-    >>> result = dpath.util.search(x, "a/b/[cd]")
+    >>> result = dpath.search(x, "a/b/[cd]")
     >>> print(json.dumps(result, indent=4, sort_keys=True))
     {
         "a": {
@@ -115,7 +115,7 @@ not get a merged view?
 
 .. code-block:: pycon
 
-    >>> for x in dpath.util.search(x, "a/b/[cd]", yielded=True): print(x)
+    >>> for x in dpath.search(x, "a/b/[cd]", yielded=True): print(x)
     ...
     ('a/b/c', [])
     ('a/b/d', ['red', 'buggy', 'bumpers'])
@@ -125,8 +125,8 @@ don't care about the paths they were found at:
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.values)
-    Help on function values in module dpath.util:
+    >>> help(dpath.values)
+    Help on function values in module dpath:
 
     values(obj, glob, separator='/', afilter=None, dirs=True)
     Given an object and a path glob, return an array of all values which match
@@ -134,7 +134,7 @@ don't care about the paths they were found at:
     and it is primarily a shorthand for a list comprehension over a yielded
     search call.
 
-    >>> dpath.util.values(x, '/a/b/d/*')
+    >>> dpath.values(x, '/a/b/d/*')
     ['red', 'buggy', 'bumpers']
 
 Example: Setting existing keys
@@ -145,14 +145,14 @@ value 'Waffles'.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.set)
-    Help on function set in module dpath.util:
+    >>> help(dpath.set)
+    Help on function set in module dpath:
 
     set(obj, glob, value)
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
 
-    >>> dpath.util.set(x, 'a/b/[cd]', 'Waffles')
+    >>> dpath.set(x, 'a/b/[cd]', 'Waffles')
     2
     >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
@@ -175,8 +175,8 @@ necessary to get to the terminus.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.new)
-    Help on function new in module dpath.util:
+    >>> help(dpath.new)
+    Help on function new in module dpath:
 
     new(obj, path, value)
     Set the element at the terminus of path to value, and create
@@ -187,7 +187,7 @@ necessary to get to the terminus.
     characters in it, they will become part of the resulting
     keys
 
-    >>> dpath.util.new(x, 'a/b/e/f/g', "Roffle")
+    >>> dpath.new(x, 'a/b/e/f/g', "Roffle")
     >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
@@ -211,8 +211,8 @@ object with None entries in order to make it big enough:
 
 .. code-block:: pycon
 
-    >>> dpath.util.new(x, 'a/b/e/f/h', [])
-    >>> dpath.util.new(x, 'a/b/e/f/h/13', 'Wow this is a big array, it sure is lonely in here by myself')
+    >>> dpath.new(x, 'a/b/e/f/h', [])
+    >>> dpath.new(x, 'a/b/e/f/h/13', 'Wow this is a big array, it sure is lonely in here by myself')
     >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
@@ -251,11 +251,11 @@ Handy!
 Example: Deleting Existing Keys
 ===============================
 
-To delete keys in an object, use dpath.util.delete, which accepts the same globbing syntax as the other methods.
+To delete keys in an object, use dpath.delete, which accepts the same globbing syntax as the other methods.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.delete)
+    >>> help(dpath.delete)
 
     delete(obj, glob, separator='/', afilter=None):
         Given a path glob, delete all elements that match the glob.
@@ -266,14 +266,14 @@ To delete keys in an object, use dpath.util.delete, which accepts the same globb
 Example: Merging
 ================
 
-Also, check out dpath.util.merge. The python dict update() method is
+Also, check out dpath.merge. The python dict update() method is
 great and all but doesn't handle merging dictionaries deeply. This one
 does.
 
 .. code-block:: pycon
 
-    >>> help(dpath.util.merge)
-    Help on function merge in module dpath.util:
+    >>> help(dpath.merge)
+    Help on function merge in module dpath:
 
     merge(dst, src, afilter=None, flags=4, _path='')
         Merge source into destination. Like dict.update() but performs
@@ -310,7 +310,7 @@ does.
             "c": "RoffleWaffles"
         }
     }
-    >>> dpath.util.merge(x, y)
+    >>> dpath.merge(x, y)
     >>> print(json.dumps(x, indent=4, sort_keys=True))
     {
         "a": {
@@ -390,7 +390,7 @@ them:
     ...             return True
     ...     return False
     ...
-    >>> result = dpath.util.search(x, '**', afilter=afilter)
+    >>> result = dpath.search(x, '**', afilter=afilter)
     >>> print(json.dumps(result, indent=4, sort_keys=True))
     {
         "a": {
@@ -429,18 +429,18 @@ Separator got you down? Use lists as paths
 
 The default behavior in dpath is to assume that the path given is a string, which must be tokenized by splitting at the separator to yield a distinct set of path components against which dictionary keys can be individually glob tested. However, this presents a problem when you want to use paths that have a separator in their name; the tokenizer cannot properly understand what you mean by '/a/b/c' if it is possible for '/' to exist as a valid character in a key name.
 
-To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.util.* support the use of a list instead of a string as a path. So for example:
+To get around this, you can sidestep the whole "filesystem path" style, and abandon the separator entirely, by using lists as paths. All of the methods in dpath.* support the use of a list instead of a string as a path. So for example:
 
 .. code-block:: python
 
    >>> x = { 'a': {'b/c': 0}}
-   >>> dpath.util.get(['a', 'b/c'])
+   >>> dpath.get(['a', 'b/c'])
    0
 
 dpath.segments : The Low-Level Backend
 ======================================
 
-dpath.util is where you want to spend your time: this library has the friendly
+dpath is where you want to spend your time: this library has the friendly
 functions that will understand simple string globs, afilter functions, etc.
 
 dpath.segments is the backend pathing library. It passes around tuples of path
