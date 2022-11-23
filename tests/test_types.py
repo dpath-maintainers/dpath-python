@@ -1,15 +1,8 @@
-import nose
-import dpath.util
-from nose.tools import assert_raises
+from collections.abc import MutableSequence, MutableMapping
 
-try:
-    # python3, especially 3.8
-    from collections.abc import MutableSequence
-    from collections.abc import MutableMapping
-except ImportError:
-    # python2
-    from collections import MutableSequence
-    from collections import MutableMapping
+from nose2.tools.such import helper
+
+import dpath.util
 
 
 class TestMapping(MutableMapping):
@@ -72,12 +65,12 @@ def test_types_set():
     data = TestMapping({"a": TestSequence([0])})
 
     dpath.util.set(data, '/a/0', 1)
-    assert(data['a'][0] == 1)
+    assert data['a'][0] == 1
 
     data['a'][0] = 0
 
     dpath.util.set(data, ['a', '0'], 1)
-    assert(data['a'][0] == 1)
+    assert data['a'][0] == 1
 
 
 def test_types_get_list_of_dicts():
@@ -93,9 +86,9 @@ def test_types_get_list_of_dicts():
 
     res = dpath.segments.view(tdict, ['a', 'b', 0, 0])
 
-    assert(isinstance(res['a']['b'], TestSequence))
-    assert(len(res['a']['b']) == 1)
-    assert(res['a']['b'][0][0] == 0)
+    assert isinstance(res['a']['b'], TestSequence)
+    assert len(res['a']['b']) == 1
+    assert res['a']['b'][0][0] == 0
 
 
 def test_types_merge_simple_list_replace():
@@ -106,14 +99,14 @@ def test_types_merge_simple_list_replace():
         "list": TestSequence([0, 1, 2, 3])
     })
 
-    dpath.util.merge(dst, src, flags=dpath.util.MergeType.REPLACE)
-    nose.tools.eq_(dst["list"], TestSequence([7, 8, 9, 10]))
+    dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
+    assert dst["list"] == TestSequence([7, 8, 9, 10]), "%r != %r" % (dst["list"], TestSequence([7, 8, 9, 10]))
 
 
 def test_types_get_absent():
     ehash = TestMapping()
-    assert_raises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
-    assert_raises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
+    helper.assertRaises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
+    helper.assertRaises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
 
 
 def test_types_get_glob_multiple():
@@ -130,8 +123,8 @@ def test_types_get_glob_multiple():
         }),
     })
 
-    assert_raises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
-    assert_raises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
+    helper.assertRaises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
+    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
 
 
 def test_delete_filter():
@@ -149,6 +142,6 @@ def test_delete_filter():
     })
 
     dpath.util.delete(data, '/a/*', afilter=afilter)
-    assert (data['a']['b'] == 0)
-    assert (data['a']['c'] == 1)
-    assert ('d' not in data['a'])
+    assert data['a']['b'] == 0
+    assert data['a']['c'] == 1
+    assert 'd' not in data['a']

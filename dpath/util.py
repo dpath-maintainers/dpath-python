@@ -7,7 +7,7 @@ from dpath.types import Filter, Creator, MergeType
 
 
 def deprecated(func):
-    message =\
+    message = \
         "The dpath.util package is being deprecated. All util functions have been moved to dpath package top level."
 
     def wrapper(*args, **kwargs):

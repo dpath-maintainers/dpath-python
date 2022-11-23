@@ -26,14 +26,14 @@ def test_broken_afilter():
     ]
 
     for (path, value) in dpath.util.search(dict, '/**', yielded=True, afilter=afilter):
-        assert(path in paths)
-    assert("view_failure" not in dpath.util.search(dict, '/**', afilter=afilter)['a'])
-    assert("d" not in dpath.util.search(dict, '/**', afilter=afilter)['a']['b']['c'])
+        assert path in paths
+    assert "view_failure" not in dpath.util.search(dict, '/**', afilter=afilter)['a']
+    assert "d" not in dpath.util.search(dict, '/**', afilter=afilter)['a']['b']['c']
 
     for (path, value) in dpath.util.search(dict, ['**'], yielded=True, afilter=afilter):
-        assert(path in paths)
-    assert("view_failure" not in dpath.util.search(dict, ['**'], afilter=afilter)['a'])
-    assert("d" not in dpath.util.search(dict, ['**'], afilter=afilter)['a']['b']['c'])
+        assert path in paths
+    assert "view_failure" not in dpath.util.search(dict, ['**'], afilter=afilter)['a']
+    assert "d" not in dpath.util.search(dict, ['**'], afilter=afilter)['a']['b']['c']
 
     def filter(x):
         sys.stderr.write(str(x))
@@ -54,5 +54,5 @@ def test_broken_afilter():
 
     results = [[x[0], x[1]] for x in dpath.util.search(a, 'actions/*', yielded=True)]
     results = [[x[0], x[1]] for x in dpath.util.search(a, 'actions/*', afilter=filter, yielded=True)]
-    assert(len(results) == 1)
-    assert(results[0][1]['type'] == 'correct')
+    assert len(results) == 1
+    assert results[0][1]['type'] == 'correct'

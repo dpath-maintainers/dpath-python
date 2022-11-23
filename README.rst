@@ -2,6 +2,7 @@ dpath-python
 ============
 
 |PyPI|
+|Python Version|
 |Build Status|
 |Gitter|
 
@@ -450,12 +451,16 @@ components instead of string globs.
     :target: https://pypi.python.org/pypi/dpath/
     :alt: PyPI: Latest Version
 
+.. |Python Version| image:: https://img.shields.io/pypi/pyversions/dpath?style=flat
+    :target: https://pypi.python.org/pypi/dpath/
+    :alt: Supported Python Version
+
 .. |Build Status| image:: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml/badge.svg
-   :target: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml
+    :target: https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml
    
 .. |Gitter| image:: https://badges.gitter.im/dpath-python/chat.svg
-   :target: https://gitter.im/dpath-python/chat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
-   :alt: Gitter
+    :target: https://gitter.im/dpath-python/chat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+    :alt: Gitter
 
 Contributors
 ============

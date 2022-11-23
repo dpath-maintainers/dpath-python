@@ -32,10 +32,11 @@ jobs:
       - name: Generate Hashseed
         id: generate
         run: |
-          python -c "from random import randint;
+          python -c "import os
+          from random import randint
           hashseed = randint(0, 4294967295)
           print(f'{hashseed=}')
-          print(f'::set-output name=hashseed::{hashseed}')"
+          open(os.environ['GITHUB_OUTPUT'], 'a').write(f'hashseed={hashseed}')"
 
   # Tests job
   tests:
@@ -47,13 +48,13 @@ jobs:
     strategy:
       matrix:
         # Match versions specified in tox.ini
-        python-version: [3.6, 3.8, 3.9, pypy-3.7]
+        python-version: ['3.8', '3.9', '3.10', 'pypy-3.7']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@main
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@main
