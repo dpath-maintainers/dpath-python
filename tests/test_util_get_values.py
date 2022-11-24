@@ -109,12 +109,12 @@ def test_values():
     assert 2 in ret
 
 
-@mock.patch('dpath.util.search')
+@mock.patch('dpath.search')
 def test_values_passes_through(searchfunc):
     searchfunc.return_value = []
 
     def y():
-        pass
+        return False
 
     dpath.util.values({}, '/a/b', ':', y, False)
     searchfunc.assert_called_with({}, '/a/b', True, ':', y, False)
