@@ -7,11 +7,11 @@ class MergeType(IntFlag):
     """List objects are combined onto one long list (NOT a set). This is the default flag."""
 
     REPLACE = auto()
-    """Instead of combining list objects, when 2 list objects are at an equal depth of merge, replace the destination 
+    """Instead of combining list objects, when 2 list objects are at an equal depth of merge, replace the destination \
     with the source."""
 
     TYPESAFE = auto()
-    """When 2 keys at equal levels are of different types, raise a TypeError exception. By default, the source 
+    """When 2 keys at equal levels are of different types, raise a TypeError exception. By default, the source \
     replaces the destination in this situation."""
 
 
