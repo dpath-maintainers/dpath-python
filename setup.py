@@ -34,6 +34,7 @@ if __name__ == "__main__":
         #   (Source: https://github.com/hugovk/pypi-tools/blob/master/README.md)
         #
         # Conclusion: In order to accommodate type hinting support must be limited to Python versions >=3.6.
+        # 3.6 was dropped because of EOL and this issue: https://github.com/actions/setup-python/issues/544
         python_requires=">=3.7",
         classifiers=[
             'Development Status :: 5 - Production/Stable',
