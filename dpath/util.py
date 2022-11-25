@@ -42,7 +42,7 @@ def values(obj, glob, separator="/", afilter=None, dirs=True):
 
 
 @deprecated
-def search(obj, glob, yielded=False, separator="/", afilter = None, dirs=True):
+def search(obj, glob, yielded=False, separator="/", afilter=None, dirs=True):
     return dpath.search(obj, glob, yielded, separator, afilter, dirs)
 
 
