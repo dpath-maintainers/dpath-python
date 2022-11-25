@@ -1,4 +1,4 @@
-import dpath.util
+import dpath
 
 
 def test_set_new_separator():
@@ -7,10 +7,10 @@ def test_set_new_separator():
         },
     }
 
-    dpath.util.new(dict, ';a;b', 1, separator=";")
+    dpath.new(dict, ';a;b', 1, separator=";")
     assert dict['a']['b'] == 1
 
-    dpath.util.new(dict, ['a', 'b'], 1, separator=";")
+    dpath.new(dict, ['a', 'b'], 1, separator=";")
     assert dict['a']['b'] == 1
 
 
@@ -20,10 +20,10 @@ def test_set_new_dict():
         },
     }
 
-    dpath.util.new(dict, '/a/b', 1)
+    dpath.new(dict, '/a/b', 1)
     assert dict['a']['b'] == 1
 
-    dpath.util.new(dict, ['a', 'b'], 1)
+    dpath.new(dict, ['a', 'b'], 1)
     assert dict['a']['b'] == 1
 
 
@@ -33,11 +33,11 @@ def test_set_new_list():
         ],
     }
 
-    dpath.util.new(dict, '/a/1', 1)
+    dpath.new(dict, '/a/1', 1)
     assert dict['a'][1] == 1
     assert dict['a'][0] is None
 
-    dpath.util.new(dict, ['a', 1], 1)
+    dpath.new(dict, ['a', 1], 1)
     assert dict['a'][1] == 1
     assert dict['a'][0] is None
 
@@ -49,7 +49,7 @@ def test_set_new_list_path_with_separator():
         },
     }
 
-    dpath.util.new(dict, ['a', 'b/c/d', 0], 1)
+    dpath.new(dict, ['a', 'b/c/d', 0], 1)
     assert len(dict['a']) == 1
     assert len(dict['a']['b/c/d']) == 1
     assert dict['a']['b/c/d'][0] == 1
@@ -76,7 +76,7 @@ def test_set_new_list_integer_path_with_creator():
             obj[target] = {}
         print(obj)
 
-    dpath.util.new(d, '/a/2', 3, creator=mycreator)
+    dpath.new(d, '/a/2', 3, creator=mycreator)
     print(d)
     assert isinstance(d['a'], list)
     assert len(d['a']) == 3

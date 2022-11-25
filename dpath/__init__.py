@@ -186,7 +186,7 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
 
         raise KeyError(glob)
     elif len(results) > 1:
-        raise ValueError(f"dpath.util.get() globs must match only one leaf: {glob}")
+        raise ValueError(f"dpath.get() globs must match only one leaf: {glob}")
 
     return results[0]
 

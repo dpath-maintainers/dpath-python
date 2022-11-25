@@ -1,4 +1,4 @@
-import dpath.util
+import dpath
 
 
 def test_util_safe_path_list():

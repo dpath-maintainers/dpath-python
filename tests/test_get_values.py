@@ -5,16 +5,16 @@ import time
 import mock
 from nose2.tools.such import helper
 
-import dpath.util
+import dpath
 
 
 def test_util_get_root():
     x = {'p': {'a': {'t': {'h': 'value'}}}}
 
-    ret = dpath.util.get(x, '/p/a/t/h')
+    ret = dpath.get(x, '/p/a/t/h')
     assert ret == 'value'
 
-    ret = dpath.util.get(x, '/')
+    ret = dpath.get(x, '/')
     assert ret == x
 
 
@@ -31,11 +31,11 @@ def test_get_explicit_single():
         },
     }
 
-    assert dpath.util.get(ehash, '/a/b/c/f') == 2
-    assert dpath.util.get(ehash, ['a', 'b', 'c', 'f']) == 2
-    assert dpath.util.get(ehash, ['a', 'b', 'c', 'f'], default=5) == 2
-    assert dpath.util.get(ehash, ['does', 'not', 'exist'], default=None) is None
-    assert dpath.util.get(ehash, ['doesnt', 'exist'], default=5) == 5
+    assert dpath.get(ehash, '/a/b/c/f') == 2
+    assert dpath.get(ehash, ['a', 'b', 'c', 'f']) == 2
+    assert dpath.get(ehash, ['a', 'b', 'c', 'f'], default=5) == 2
+    assert dpath.get(ehash, ['does', 'not', 'exist'], default=None) is None
+    assert dpath.get(ehash, ['doesnt', 'exist'], default=5) == 5
 
 
 def test_get_glob_single():
@@ -51,10 +51,10 @@ def test_get_glob_single():
         },
     }
 
-    assert dpath.util.get(ehash, '/a/b/*/f') == 2
-    assert dpath.util.get(ehash, ['a', 'b', '*', 'f']) == 2
-    assert dpath.util.get(ehash, ['a', 'b', '*', 'f'], default=5) == 2
-    assert dpath.util.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6
+    assert dpath.get(ehash, '/a/b/*/f') == 2
+    assert dpath.get(ehash, ['a', 'b', '*', 'f']) == 2
+    assert dpath.get(ehash, ['a', 'b', '*', 'f'], default=5) == 2
+    assert dpath.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6
 
 
 def test_get_glob_multiple():
@@ -71,16 +71,16 @@ def test_get_glob_multiple():
         },
     }
 
-    helper.assertRaises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
-    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
-    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'], default=3)
+    helper.assertRaises(ValueError, dpath.get, ehash, '/a/b/*/d')
+    helper.assertRaises(ValueError, dpath.get, ehash, ['a', 'b', '*', 'd'])
+    helper.assertRaises(ValueError, dpath.get, ehash, ['a', 'b', '*', 'd'], default=3)
 
 
 def test_get_absent():
     ehash = {}
 
-    helper.assertRaises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
-    helper.assertRaises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
+    helper.assertRaises(KeyError, dpath.get, ehash, '/a/b/c/d/f')
+    helper.assertRaises(KeyError, dpath.get, ehash, ['a', 'b', 'c', 'd', 'f'])
 
 
 def test_values():
@@ -96,13 +96,13 @@ def test_values():
         },
     }
 
-    ret = dpath.util.values(ehash, '/a/b/c/*')
+    ret = dpath.values(ehash, '/a/b/c/*')
     assert isinstance(ret, list)
     assert 0 in ret
     assert 1 in ret
     assert 2 in ret
 
-    ret = dpath.util.values(ehash, ['a', 'b', 'c', '*'])
+    ret = dpath.values(ehash, ['a', 'b', 'c', '*'])
     assert isinstance(ret, list)
     assert 0 in ret
     assert 1 in ret
@@ -116,17 +116,17 @@ def test_values_passes_through(searchfunc):
     def y():
         return False
 
-    dpath.util.values({}, '/a/b', ':', y, False)
+    dpath.values({}, '/a/b', ':', y, False)
     searchfunc.assert_called_with({}, '/a/b', True, ':', y, False)
 
-    dpath.util.values({}, ['a', 'b'], ':', y, False)
+    dpath.values({}, ['a', 'b'], ':', y, False)
     searchfunc.assert_called_with({}, ['a', 'b'], True, ':', y, False)
 
 
 def test_none_values():
     d = {'p': {'a': {'t': {'h': None}}}}
 
-    v = dpath.util.get(d, 'p/a/t/h')
+    v = dpath.get(d, 'p/a/t/h')
     assert v is None
 
 
@@ -142,7 +142,7 @@ def test_values_list():
         ],
     }
 
-    ret = dpath.util.values(a, 'actions/*')
+    ret = dpath.values(a, 'actions/*')
     assert isinstance(ret, list)
     assert len(ret) == 2
 
@@ -174,18 +174,18 @@ def test_non_leaf_leaf():
     }
 
     # It should be possible to get the callables:
-    assert dpath.util.get(testdict, 'a') == func
-    assert dpath.util.get(testdict, 'b')(42) == 42
+    assert dpath.get(testdict, 'a') == func
+    assert dpath.get(testdict, 'b')(42) == 42
 
     # It should be possible to get other values:
-    assert dpath.util.get(testdict, 'c/0') == testdict['c'][0]
-    assert dpath.util.get(testdict, 'd')[0] == testdict['d'][0]
-    assert dpath.util.get(testdict, 'd/0') == testdict['d'][0]
-    assert dpath.util.get(testdict, 'd/1') == testdict['d'][1]
-    assert dpath.util.get(testdict, 'e') == testdict['e']
+    assert dpath.get(testdict, 'c/0') == testdict['c'][0]
+    assert dpath.get(testdict, 'd')[0] == testdict['d'][0]
+    assert dpath.get(testdict, 'd/0') == testdict['d'][0]
+    assert dpath.get(testdict, 'd/1') == testdict['d'][1]
+    assert dpath.get(testdict, 'e') == testdict['e']
 
     # Values should also still work:
-    assert dpath.util.values(testdict, 'f/config') == ['something']
+    assert dpath.values(testdict, 'f/config') == ['something']
 
     # Data classes should also be retrievable:
     try:
@@ -207,4 +207,4 @@ def test_non_leaf_leaf():
         ),
     }
 
-    assert dpath.util.search(testdict, 'g/my*')['g']['my-key'] == testdict['g']['my-key']
+    assert dpath.search(testdict, 'g/my*')['g']['my-key'] == testdict['g']['my-key']
