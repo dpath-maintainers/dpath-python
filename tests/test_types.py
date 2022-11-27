@@ -2,11 +2,15 @@ from collections.abc import MutableSequence, MutableMapping
 
 from nose2.tools.such import helper
 
-import dpath.util
+import dpath
+from dpath import MergeType
 
 
 class TestMapping(MutableMapping):
-    def __init__(self, data={}):
+    def __init__(self, data=None):
+        if data is None:
+            data = {}
+
         self._mapping = {}
         self._mapping.update(data)
 
@@ -30,7 +34,10 @@ class TestMapping(MutableMapping):
 
 
 class TestSequence(MutableSequence):
-    def __init__(self, data=list()):
+    def __init__(self, data=None):
+        if data is None:
+            data = list()
+
         self._list = [] + data
 
     def __len__(self):
@@ -64,12 +71,12 @@ class TestSequence(MutableSequence):
 def test_types_set():
     data = TestMapping({"a": TestSequence([0])})
 
-    dpath.util.set(data, '/a/0', 1)
+    dpath.set(data, '/a/0', 1)
     assert data['a'][0] == 1
 
     data['a'][0] = 0
 
-    dpath.util.set(data, ['a', '0'], 1)
+    dpath.set(data, ['a', '0'], 1)
     assert data['a'][0] == 1
 
 
@@ -99,14 +106,14 @@ def test_types_merge_simple_list_replace():
         "list": TestSequence([0, 1, 2, 3])
     })
 
-    dpath.util.merge(dst, src, flags=dpath.util.MERGE_REPLACE)
+    dpath.merge(dst, src, flags=MergeType.REPLACE)
     assert dst["list"] == TestSequence([7, 8, 9, 10]), "%r != %r" % (dst["list"], TestSequence([7, 8, 9, 10]))
 
 
 def test_types_get_absent():
     ehash = TestMapping()
-    helper.assertRaises(KeyError, dpath.util.get, ehash, '/a/b/c/d/f')
-    helper.assertRaises(KeyError, dpath.util.get, ehash, ['a', 'b', 'c', 'd', 'f'])
+    helper.assertRaises(KeyError, dpath.get, ehash, '/a/b/c/d/f')
+    helper.assertRaises(KeyError, dpath.get, ehash, ['a', 'b', 'c', 'd', 'f'])
 
 
 def test_types_get_glob_multiple():
@@ -123,8 +130,8 @@ def test_types_get_glob_multiple():
         }),
     })
 
-    helper.assertRaises(ValueError, dpath.util.get, ehash, '/a/b/*/d')
-    helper.assertRaises(ValueError, dpath.util.get, ehash, ['a', 'b', '*', 'd'])
+    helper.assertRaises(ValueError, dpath.get, ehash, '/a/b/*/d')
+    helper.assertRaises(ValueError, dpath.get, ehash, ['a', 'b', '*', 'd'])
 
 
 def test_delete_filter():
@@ -141,7 +148,7 @@ def test_delete_filter():
         }),
     })
 
-    dpath.util.delete(data, '/a/*', afilter=afilter)
+    dpath.delete(data, '/a/*', afilter=afilter)
     assert data['a']['b'] == 0
     assert data['a']['c'] == 1
     assert 'd' not in data['a']
