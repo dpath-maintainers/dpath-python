@@ -7,7 +7,10 @@ from dpath import MergeType
 
 
 class TestMapping(MutableMapping):
-    def __init__(self, data={}):
+    def __init__(self, data=None):
+        if data is None:
+            data = {}
+
         self._mapping = {}
         self._mapping.update(data)
 
@@ -31,7 +34,10 @@ class TestMapping(MutableMapping):
 
 
 class TestSequence(MutableSequence):
-    def __init__(self, data=list()):
+    def __init__(self, data=None):
+        if data is None:
+            data = list()
+
         self._list = [] + data
 
     def __len__(self):

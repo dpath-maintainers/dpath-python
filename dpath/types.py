@@ -1,5 +1,5 @@
 from enum import IntFlag, auto
-from typing import Union, Any, Callable, Sequence, Tuple, Dict, List, Optional
+from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
 
 class MergeType(IntFlag):
@@ -23,16 +23,22 @@ Filter = Callable[[Any], bool]
 
 (Any) -> bool"""
 
+Glob = Union[str, Sequence[str]]
+"""Type alias for glob parameters."""
+
+Path = Union[str, Sequence[PathSegment]]
+"""Type alias for path parameters."""
+
 Hints = Sequence[Tuple[PathSegment, type]]
 """Type alias for creator function hint sequences."""
 
-Creator = Callable[[Union[Dict, List], Sequence[PathSegment], int, Optional[Hints]], None]
+Creator = Callable[[Union[MutableMapping, List], Path, int, Optional[Hints]], None]
 """Type alias for creator functions.
 
 Example creator function signature:
 
     def creator(
-        current: Union[Dict, List],
+        current: Union[MutableMapping, List],
         segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()

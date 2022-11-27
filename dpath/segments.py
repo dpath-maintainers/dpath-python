@@ -1,6 +1,6 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import List, Sequence, Tuple, Iterator, Any, Dict, Union, Optional
+from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
@@ -266,7 +266,7 @@ def extend(thing: List, index: int, value=None):
 
 
 def _default_creator(
-        current: Union[Dict, List],
+        current: Union[MutableMapping, List],
         segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()
@@ -301,12 +301,12 @@ def _default_creator(
 
 
 def set(
-        obj,
+        obj: MutableMapping,
         segments: Sequence[PathSegment],
         value,
         creator: Optional[Creator] = _default_creator,
         hints: Hints = ()
-):
+) -> MutableMapping:
     """
     Set the value in obj at the place indicated by segments. If creator is not
     None (default __default_creator__), then call the creator function to

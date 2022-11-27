@@ -11,19 +11,26 @@ __all__ = [
     "segments",
     "types",
     "version",
+    "MergeType",
+    "PathSegment",
+    "Filter",
+    "Glob",
+    "Path",
+    "Hints",
+    "Creator",
 ]
 
 from collections.abc import MutableMapping, MutableSequence
-from typing import Union, List, Dict, Any
+from typing import Union, List, Any, Callable, Optional
 
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound
-from dpath.types import MergeType, PathSegment, Creator, Filter
+from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
 
 _DEFAULT_SENTINEL = object()
 
 
-def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegment]:
+def _split_path(path: Path, separator: Optional[str]) -> Union[List[PathSegment], PathSegment]:
     """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
@@ -51,7 +58,7 @@ def _split_path(path: str, separator: str) -> Union[List[PathSegment], PathSegme
     return split_segments
 
 
-def new(obj: Dict, path: str, value, separator="/", creator: Creator = None) -> Dict:
+def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -71,7 +78,7 @@ def new(obj: Dict, path: str, value, separator="/", creator: Creator = None) -> 
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
+def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -130,7 +137,7 @@ def delete(obj: Dict, glob: str, separator="/", afilter: Filter = None) -> int:
     return deleted
 
 
-def set(obj: Dict, glob: str, value, separator="/", afilter: Filter = None) -> int:
+def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -155,7 +162,12 @@ def set(obj: Dict, glob: str, value, separator="/", afilter: Filter = None) -> i
     return changed
 
 
-def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -> Dict:
+def get(
+        obj: MutableMapping,
+        glob: Glob,
+        separator="/",
+        default: Any = _DEFAULT_SENTINEL
+) -> Union[MutableMapping, object, Callable]:
     """
     Given an object which contains only one possible match for the given glob,
     return the value for the leaf matching the given glob.
@@ -191,7 +203,7 @@ def get(obj: Dict, glob: str, separator="/", default: Any = _DEFAULT_SENTINEL) -
     return results[0]
 
 
-def values(obj: Dict, glob: str, separator="/", afilter: Filter = None, dirs=True):
+def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -201,7 +213,7 @@ def values(obj: Dict, glob: str, separator="/", afilter: Filter = None, dirs=Tru
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj: Dict, glob: str, yielded=False, separator="/", afilter: Filter = None, dirs=True):
+def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilter: Filter = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
@@ -243,7 +255,7 @@ def search(obj: Dict, glob: str, yielded=False, separator="/", afilter: Filter =
         return segments.fold(obj, f, {})
 
 
-def merge(dst: Dict, src: Dict, separator="/", afilter: Filter = None, flags=MergeType.ADDITIVE):
+def merge(dst: MutableMapping, src: MutableMapping, separator="/", afilter: Filter = None, flags=MergeType.ADDITIVE):
     """
     Merge source into destination. Like dict.update() but performs deep
     merging.
