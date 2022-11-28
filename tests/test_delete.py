@@ -1,5 +1,6 @@
-from nose.tools import raises
-import dpath.util
+from nose2.tools.such import helper
+
+import dpath
 import dpath.exceptions
 
 
@@ -10,7 +11,7 @@ def test_delete_separator():
         },
     }
 
-    dpath.util.delete(dict, ';a;b', separator=";")
+    dpath.delete(dict, ';a;b', separator=";")
     assert 'b' not in dict['a']
 
 
@@ -21,18 +22,18 @@ def test_delete_existing():
         },
     }
 
-    dpath.util.delete(dict, '/a/b')
+    dpath.delete(dict, '/a/b')
     assert 'b' not in dict['a']
 
 
-@raises(dpath.exceptions.PathNotFound)
 def test_delete_missing():
     dict = {
         "a": {
         },
     }
 
-    dpath.util.delete(dict, '/a/b')
+    with helper.assertRaises(dpath.exceptions.PathNotFound):
+        dpath.delete(dict, '/a/b')
 
 
 def test_delete_filter():
@@ -49,7 +50,7 @@ def test_delete_filter():
         },
     }
 
-    dpath.util.delete(dict, '/a/*', afilter=afilter)
+    dpath.delete(dict, '/a/*', afilter=afilter)
     assert dict['a']['b'] == 0
     assert dict['a']['c'] == 1
     assert 'd' not in dict['a']

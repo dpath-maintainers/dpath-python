@@ -1,7 +1,7 @@
-from distutils.core import setup
-import dpath.version
 import os
+from distutils.core import setup
 
+import dpath.version
 
 long_description = open(
     os.path.join(
@@ -13,7 +13,7 @@ long_description = open(
 if __name__ == "__main__":
     setup(
         name="dpath",
-        url="https://www.github.com/akesterson/dpath-python",
+        url="https://github.com/dpath-maintainers/dpath-python",
         version=dpath.version.VERSION,
         description="Filesystem-like pathing and searching for dictionaries",
         long_description=long_description,
@@ -25,7 +25,17 @@ if __name__ == "__main__":
         scripts=[],
         packages=["dpath"],
         data_files=[],
-        python_requires=">=3",
+
+        # Type hints are great.
+        # Function annotations were added in Python 3.0.
+        # Typing module was added in Python 3.5.
+        # Variable annotations were added in Python 3.6.
+        # Python versions that are >=3.6 are more popular.
+        #   (Source: https://github.com/hugovk/pypi-tools/blob/master/README.md)
+        #
+        # Conclusion: In order to accommodate type hinting support must be limited to Python versions >=3.6.
+        # 3.6 was dropped because of EOL and this issue: https://github.com/actions/setup-python/issues/544
+        python_requires=">=3.7",
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
