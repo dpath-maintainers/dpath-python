@@ -309,7 +309,7 @@ def set(
 ) -> MutableMapping:
     """
     Set the value in obj at the place indicated by segments. If creator is not
-    None (default __default_creator__), then call the creator function to
+    None (default _default_creator), then call the creator function to
     create any missing path components.
 
     set(obj, segments, value) -> obj
@@ -326,7 +326,7 @@ def set(
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
             current[segment]
-        except (KeyError, IndexError):
+        except:
             if creator is not None:
                 creator(current, segments, i, hints)
             else:
