@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 from collections.abc import MutableMapping, MutableSequence
-from typing import Union, List, Any, Callable, Optional, Sequence
+from typing import Union, List, Any, Callable, Optional
 
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound
