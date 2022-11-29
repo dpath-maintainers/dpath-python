@@ -42,4 +42,4 @@ Example creator function signature:
         segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()
-    ) -> PathSegment"""
+    )"""
