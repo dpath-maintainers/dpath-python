@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 from collections.abc import MutableMapping, MutableSequence
-from typing import Union, List, Any, Callable, Optional
+from typing import Union, List, Any, Callable, Optional, Sequence
 
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound
@@ -30,7 +30,7 @@ from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hin
 _DEFAULT_SENTINEL = object()
 
 
-def _split_path(path: Path, separator: Optional[str]) -> Union[List[PathSegment], PathSegment]:
+def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
     Given a path and separator, return a tuple of segments. If path is
     already a non-leaf thing, return it.
@@ -44,16 +44,6 @@ def _split_path(path: Path, separator: Optional[str]) -> Union[List[PathSegment]
         split_segments = path
     else:
         split_segments = path.lstrip(separator).split(separator)
-
-        if options.CONVERT_INT_LIKE_SEGMENTS:
-            # Attempt to convert integer segments into actual integers.
-            final = []
-            for segment in split_segments:
-                try:
-                    final.append(int(segment))
-                except ValueError:
-                    final.append(segment)
-            split_segments = final
 
     return split_segments
 

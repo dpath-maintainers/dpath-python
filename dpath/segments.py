@@ -320,6 +320,11 @@ def set(
     # For everything except the last value, walk down the path and
     # create if creator is set.
     for (i, segment) in enumerate(segments[:-1]):
+
+        # If segment is non-int but supposed to be a sequence index
+        if not isinstance(segment, int) and segment.isdigit() and isinstance(current, Sequence):
+            segment = int(segment)
+
         try:
             # Optimistically try to get the next value. This makes the
             # code agnostic to whether current is a list or a dict.
