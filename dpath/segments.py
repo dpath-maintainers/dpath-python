@@ -322,7 +322,7 @@ def set(
     for (i, segment) in enumerate(segments[:-1]):
 
         # If segment is non-int but supposed to be a sequence index
-        if not isinstance(segment, int) and segment.isdigit() and isinstance(current, Sequence):
+        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
             segment = int(segment)
 
         try:
@@ -341,10 +341,16 @@ def set(
         if i != length - 1 and leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
 
-    if isinstance(segments[-1], int):
-        extend(current, segments[-1])
+    last_segment = segments[-1]
 
-    current[segments[-1]] = value
+    # Resolve ambiguity of last segment
+    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdigit():
+        last_segment = int(last_segment)
+
+    if isinstance(last_segment, int):
+        extend(current, last_segment)
+
+    current[last_segment] = value
 
     return obj
 
@@ -393,9 +399,11 @@ def view(obj, glob):
 
     view(obj, glob) -> obj'
     """
+
     def f(obj, pair, result):
         (segments, value) = pair
         if match(segments, glob):
             if not has(result, segments):
                 set(result, segments, deepcopy(value), hints=types(obj, segments))
+
     return fold(obj, f, type(obj)())
