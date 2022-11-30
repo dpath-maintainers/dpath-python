@@ -309,7 +309,7 @@ def set(
 ) -> MutableMapping:
     """
     Set the value in obj at the place indicated by segments. If creator is not
-    None (default __default_creator__), then call the creator function to
+    None (default _default_creator), then call the creator function to
     create any missing path components.
 
     set(obj, segments, value) -> obj
@@ -320,13 +320,18 @@ def set(
     # For everything except the last value, walk down the path and
     # create if creator is set.
     for (i, segment) in enumerate(segments[:-1]):
+
+        # If segment is non-int but supposed to be a sequence index
+        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
+            segment = int(segment)
+
         try:
             # Optimistically try to get the next value. This makes the
             # code agnostic to whether current is a list or a dict.
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
             current[segment]
-        except (KeyError, IndexError):
+        except:
             if creator is not None:
                 creator(current, segments, i, hints)
             else:
@@ -336,10 +341,16 @@ def set(
         if i != length - 1 and leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
 
-    if isinstance(segments[-1], int):
-        extend(current, segments[-1])
+    last_segment = segments[-1]
 
-    current[segments[-1]] = value
+    # Resolve ambiguity of last segment
+    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdigit():
+        last_segment = int(last_segment)
+
+    if isinstance(last_segment, int):
+        extend(current, last_segment)
+
+    current[last_segment] = value
 
     return obj
 
@@ -388,9 +399,11 @@ def view(obj, glob):
 
     view(obj, glob) -> obj'
     """
+
     def f(obj, pair, result):
         (segments, value) = pair
         if match(segments, glob):
             if not has(result, segments):
                 set(result, segments, deepcopy(value), hints=types(obj, segments))
+
     return fold(obj, f, type(obj)())

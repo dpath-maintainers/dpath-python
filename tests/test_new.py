@@ -42,6 +42,16 @@ def test_set_new_list():
     assert dict['a'][0] is None
 
 
+def test_set_list_with_dict_int_ambiguity():
+    d = {"list": [{"root": {"1": {"k": None}}}]}
+
+    dpath.new(d, "list/0/root/1/k", "new")
+
+    expected = {"list": [{"root": {"1": {"k": "new"}}}]}
+
+    assert d == expected
+
+
 def test_set_new_list_path_with_separator():
     # This test kills many birds with one stone, forgive me
     dict = {
