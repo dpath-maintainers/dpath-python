@@ -230,9 +230,12 @@ def match(segments: Path, glob: Glob):
 
             try:
                 # If search path segment (s) is an int and the current evaluated index (g) is int-like,
-                #   then g is surely a sequence index. Convert it to int and compare.
-                if isinstance(s, int) and isinstance(g, str) and (g.count("-") == 0 or g.lstrip("-").isdigit()):
-                    return s == int(g)
+                #   then g is surely a sequence index as well. Convert it to int and compare.
+                if isinstance(s, int) and isinstance(g, str):
+                    neg_c = g.count("-")
+
+                    if (neg_c == 0 and g.isdigit()) or (neg_c == 1 and g.lstrip("-").isdigit()):
+                        return s == int(g)
 
                 # Let's see if the glob matches. We will turn any kind of
                 # exception while attempting to match into a False for the
