@@ -3,9 +3,9 @@ from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, Mutabl
 
 
 class CyclicInt(int):
-    """Same as a normal int but mimicks the behavior of list indexes (can be compared to a negative number)"""
+    """Same as a normal int but mimicks the behavior of list indexes (can be compared to a negative number)."""
 
-    def __new__(cls, value, max_value, *args, **kwargs):
+    def __new__(cls, value: int, max_value: int, *args, **kwargs):
         if value >= max_value:
             raise TypeError(
                 f"Tried to initiate a CyclicInt with a value ({value}) "
