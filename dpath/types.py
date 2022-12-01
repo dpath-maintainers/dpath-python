@@ -23,6 +23,9 @@ class CyclicInt(int):
     def __repr__(self):
         return f"<CyclicInt {int(self)}/{self.max_value}>"
 
+    def __str__(self):
+        return str(int(self))
+
 
 class MergeType(IntFlag):
     ADDITIVE = auto()
