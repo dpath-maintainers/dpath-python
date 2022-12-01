@@ -230,12 +230,13 @@ def match(segments: Path, glob: Glob):
 
             try:
                 # If search path segment (s) is an int and the current evaluated index (g) is int-like,
-                #   then g is surely a sequence index as well. Convert it to int and compare.
+                #   then g might be a sequence index as well. Try converting it to an int.
                 if isinstance(s, int) and isinstance(g, str):
                     return s == int(g)
             except:
-                # Will reach this point if g can't be converted to an int...
-                pass
+                # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
+                # In this case convert s to a str so fnmatch can work on it.
+                s = str(s)
 
             try:
                 # Let's see if the glob matches. We will turn any kind of
