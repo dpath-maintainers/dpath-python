@@ -185,8 +185,8 @@ def match(segments: Path, glob: Glob):
 
     match(segments, glob) -> bool
     """
-    # Handle edge case where last segment of the glob is a wildcard.
-    if glob.count("*") > 0 and glob.index("*") == len(glob) - 1:
+    # Handle edge case where last segment of the glob is a wildcard and we want fnmatchcase to validate the path.
+    if len(segments) == len(glob) - 1 and glob.count("*") > 0 and glob.index("*") == len(glob) - 1:
         segments = list(segments) + [""]
 
     segments = tuple(segments)
