@@ -185,6 +185,10 @@ def match(segments: Path, glob: Glob):
 
     match(segments, glob) -> bool
     """
+    # Handle edge case where last segment of the glob is a wildcard.
+    if glob.count("*") > 0 and glob.index("*") == len(glob) - 1:
+        segments = list(segments) + [""]
+
     segments = tuple(segments)
     glob = tuple(glob)
 
@@ -217,7 +221,6 @@ def match(segments: Path, glob: Glob):
     # If we were successful in matching up the lengths, then we can
     # compare them using fnmatch.
     if path_len == len(ss_glob):
-        # TODO: Delete if not needed (previous code) - i = zip(map(int_str, segments), map(int_str, ss_glob))
         i = zip(segments, ss_glob)
         for s, g in i:
             # Match the stars we added to the glob to the type of the
