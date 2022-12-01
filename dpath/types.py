@@ -2,6 +2,28 @@ from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
 
+class CyclicInt(int):
+    """Same as a normal int but mimicks the behavior of list indexes (can be compared to a negative number)"""
+
+    def __new__(cls, value, max_value, *args, **kwargs):
+        if value >= max_value:
+            raise TypeError(
+                f"Tried to initiate a CyclicInt with a value ({value}) "
+                f"greater than the provided max value ({max_value})"
+            )
+
+        obj = super().__new__(cls, value)
+        obj.max_value = max_value
+
+        return obj
+
+    def __eq__(self, other):
+        return int(self) == (self.max_value + other) % self.max_value
+
+    def __repr__(self):
+        return f"<CyclicInt {int(self)}/{self.max_value}>"
+
+
 class MergeType(IntFlag):
     ADDITIVE = auto()
     """List objects are combined onto one long list (NOT a set). This is the default flag."""

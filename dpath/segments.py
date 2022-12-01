@@ -4,7 +4,7 @@ from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, Mutabl
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, CyclicInt
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -21,7 +21,10 @@ def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
         return iter(node.items())
     except AttributeError:
         try:
-            return zip(range(len(node)), node)
+            indices = range(len(node))
+            # Make all list indices cyclic so negative (wraparound) indexes are supported
+            indices = map(lambda i: CyclicInt(i, len(node)), indices)
+            return zip(indices, node)
         except TypeError:
             # This can happen in cases where the node isn't leaf(node) == True,
             # but also isn't actually iterable. Instead of this being an error
@@ -163,7 +166,7 @@ class Star(object):
 STAR = Star()
 
 
-def match(segments: Sequence[PathSegment], glob: Sequence[str]):
+def match(segments: Path, glob: Glob):
     """
     Return True if the segments match the given glob, otherwise False.
 
@@ -214,7 +217,9 @@ def match(segments: Sequence[PathSegment], glob: Sequence[str]):
     # If we were successful in matching up the lengths, then we can
     # compare them using fnmatch.
     if path_len == len(ss_glob):
-        for s, g in zip(map(int_str, segments), map(int_str, ss_glob)):
+        # TODO: Delete if not needed (previous code) - i = zip(map(int_str, segments), map(int_str, ss_glob))
+        i = zip(segments, ss_glob)
+        for s, g in i:
             # Match the stars we added to the glob to the type of the
             # segment itself.
             if g is STAR:
@@ -223,10 +228,15 @@ def match(segments: Sequence[PathSegment], glob: Sequence[str]):
                 else:
                     g = '*'
 
-            # Let's see if the glob matches. We will turn any kind of
-            # exception while attempting to match into a False for the
-            # match.
             try:
+                # If search path segment (s) is an int and the current evaluated index (g) is int-like,
+                #   then g is surely a sequence index. Convert it to int and compare.
+                if isinstance(s, int) and isinstance(g, str) and (g.count("-") == 0 or g.lstrip("-").isdigit()):
+                    return s == int(g)
+
+                # Let's see if the glob matches. We will turn any kind of
+                # exception while attempting to match into a False for the
+                # match.
                 if not fnmatchcase(s, g):
                     return False
             except:
