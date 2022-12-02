@@ -18,10 +18,13 @@ class CyclicInt(int):
         return obj
 
     def __eq__(self, other):
+        if not isinstance(other, int):
+            return False
+
         return int(self) == (self.max_value + other) % self.max_value
 
     def __repr__(self):
-        return f"<CyclicInt {int(self)}/{self.max_value}>"
+        return f"<CyclicInt {int(self)}%{self.max_value}>"
 
     def __str__(self):
         return str(int(self))
