@@ -229,10 +229,10 @@ def match(segments: Path, glob: Glob):
                     g = '*'
 
             try:
-                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequenc
+                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
                 # index as well. Try converting it to an int.
-                if isinstance(s, int):
-                    return s == int(g)
+                if isinstance(s, int) and s == int(g):
+                    continue
             except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
                 # In this case convert s to a str so fnmatch can work on it.
