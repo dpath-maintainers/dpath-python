@@ -229,9 +229,9 @@ def match(segments: Path, glob: Glob):
                     g = '*'
 
             try:
-                # If search path segment (s) is an int and the current evaluated index (g) is int-like,
-                #   then g might be a sequence index as well. Try converting it to an int.
-                if isinstance(s, int) and isinstance(g, str):
+                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequenc
+                # index as well. Try converting it to an int.
+                if isinstance(s, int):
                     return s == int(g)
             except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
