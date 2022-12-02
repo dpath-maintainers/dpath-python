@@ -406,7 +406,7 @@ def foldm(obj, f, acc):
     return acc
 
 
-def view(obj, glob):
+def view(obj: MutableMapping, glob: Glob):
     """
     Return a view of the object where the glob matches. A view retains
     the same form as the obj, but is limited to only the paths that
