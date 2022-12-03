@@ -4,7 +4,7 @@ from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, Mutabl
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints, Glob, Path, CyclicInt
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -22,8 +22,8 @@ def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     except AttributeError:
         try:
             indices = range(len(node))
-            # Make all list indices cyclic so negative (wraparound) indexes are supported
-            indices = map(lambda i: CyclicInt(i, len(node)), indices)
+            # Convert all list indices to object so negative indexes are supported.
+            indices = map(lambda i: SymmetricInt(i, len(node)), indices)
             return zip(indices, node)
         except TypeError:
             # This can happen in cases where the node isn't leaf(node) == True,
@@ -217,7 +217,6 @@ def match(segments: Path, glob: Glob):
     # If we were successful in matching up the lengths, then we can
     # compare them using fnmatch.
     if path_len == len(ss_glob):
-        # TODO: Delete if not needed (previous code) - i = zip(map(int_str, segments), map(int_str, ss_glob))
         i = zip(segments, ss_glob)
         for s, g in i:
             # Match the stars we added to the glob to the type of the
