@@ -21,7 +21,7 @@ class SymmetricInt(int):
         if not isinstance(other, int):
             return False
 
-        if other >= self.max_value or other >= -self.max_value:
+        if other >= self.max_value or other <= -self.max_value:
             return False
 
         return int(self) == (self.max_value + other) % self.max_value
