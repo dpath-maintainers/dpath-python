@@ -29,6 +29,7 @@ from dpath.exceptions import InvalidKeyName, PathNotFound
 from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
 from dpath.ddict import DDict
 
+
 _DEFAULT_SENTINEL = object()
 
 
