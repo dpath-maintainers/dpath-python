@@ -19,7 +19,6 @@ class DDict(dict):
         self.separator = __separator
         self.creator = __creator
 
-        self._recursive_items = True
         self.recursive_items = True
 
     def __getitem__(self, item):
@@ -107,29 +106,24 @@ class DDict(dict):
         return self
 
     def keys(self):
+        from dpath.segments import walk
+
         if not self.recursive_items:
-            yield from super().keys()
+            yield from dict(self).keys()
             return
 
-        for k, _ in self.walk():
-            yield k
+        for path, _ in walk(self):
+            yield self.separator.join((str(segment) for segment in path))
 
     def values(self):
+        from dpath.segments import walk
+
+        d = self
         if not self.recursive_items:
-            yield from super().values()
-            return
+            d = dict(self)
 
-        for _, v in self.walk():
-            yield v
-
-    def items(self):
-        if not self.recursive_items or not self._recursive_items:
-            yield from dict(self).items()
-            return
-
-        self._recursive_items = False
-        yield from self.walk()
-        self._recursive_items = True
+        for _, value in walk(d):
+            yield value
 
     def walk(self):
         """
@@ -137,4 +131,5 @@ class DDict(dict):
         """
         from dpath.segments import walk
 
-        yield from ((self.separator.join((str(segment) for segment in path)), value) for path, value in walk(self))
+        for path, value in walk(self):
+            yield self.separator.join((str(segment) for segment in path)), value

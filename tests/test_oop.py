@@ -136,6 +136,23 @@ def test_oop_merge():
     assert d == expected_after
 
 
+def test_oop_len():
+    d = DDict({
+        "a": 1,
+        "b": [12, 23, 34],
+        "c": {
+            "d": {
+                "e": [56, 67]
+            }
+        }
+    })
+
+    assert len(d) == 10, len(d)
+
+    d.recursive_items = False
+    assert len(d) == 3, len(d)
+
+
 def test_oop_keys():
     d = DDict({
         "a": 1,
