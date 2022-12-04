@@ -51,6 +51,9 @@ class DDict(dict):
     def __ior__(self, other):
         return self.merge(other)
 
+    def __repr__(self):
+        return f"{type(self).__name__}({super().__repr__()})"
+
     def get(self, glob: Glob, default=_DEFAULT_SENTINEL) -> Any:
         """
         Same as dict.get but accepts glob aware keys.
