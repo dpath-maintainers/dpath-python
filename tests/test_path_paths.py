@@ -1,10 +1,10 @@
-from nose.tools import raises
+from nose2.tools.such import helper
+
 import dpath.segments
 import dpath.exceptions
 import dpath.options
 
 
-@raises(dpath.exceptions.InvalidKeyName)
 def test_path_paths_empty_key_disallowed():
     tdict = {
         "Empty": {
@@ -14,8 +14,9 @@ def test_path_paths_empty_key_disallowed():
         }
     }
 
-    for x in dpath.segments.walk(tdict):
-        pass
+    with helper.assertRaises(dpath.exceptions.InvalidKeyName):
+        for x in dpath.segments.walk(tdict):
+            pass
 
 
 def test_path_paths_empty_key_allowed():
@@ -34,4 +35,4 @@ def test_path_paths_empty_key_allowed():
         pass
 
     dpath.options.ALLOW_EMPTY_STRING_KEYS = False
-    assert("/".join(segments) == "Empty//Key")
+    assert "/".join(segments) == "Empty//Key"

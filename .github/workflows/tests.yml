@@ -1,0 +1,89 @@
+name: Run tests
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for important files
+  push:
+    branches:
+      - master
+    paths:
+      - "dpath/"
+      - "**.py"
+      - "tox.ini"
+  pull_request:
+    paths:
+      - "dpath/"
+      - "**.py"
+      - "tox.ini"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  # Run flake8 linter
+  flake8:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@main
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@main
+        with:
+          python-version: "3.10"
+
+      - name: Setup flake8 annotations
+        uses: rbialon/flake8-annotations@v1.1
+
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8 setup.py dpath/ tests/
+
+  # Generate a common hashseed for all tests
+  generate-hashseed:
+    runs-on: ubuntu-latest
+
+    outputs:
+      hashseed: ${{ steps.generate.outputs.hashseed }}
+
+    steps:
+      - name: Generate Hashseed
+        id: generate
+        run: |
+          python -c "import os
+          from random import randint
+          hashseed = randint(0, 4294967295)
+          print(f'{hashseed=}')
+          open(os.environ['GITHUB_OUTPUT'], 'a').write(f'hashseed={hashseed}')"
+
+  # Tests job
+  tests:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    needs: [generate-hashseed, flake8]
+
+    strategy:
+      matrix:
+        # Match versions specified in tox.ini
+        python-version: ['3.8', '3.9', '3.10', 'pypy-3.7']
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Check out code
+      uses: actions/checkout@main
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@main
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Run tox with tox-gh-actions
+      uses: ymyzk/run-tox-gh-actions@main
+      with:
+        tox-args: -vv --hashseed=${{ needs.generate-hashseed.outputs.hashseed }}

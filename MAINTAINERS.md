@@ -1,27 +1,22 @@
 Who Maintains DPATH
 ===================
 
-dpath is primarily maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. These two individuals collectively govern the project.
+dpath was created by and originally maintained by Andrew Kesterson <andrew@aklabs.net> and Caleb Case <calebcase@gmail.com>. In July
+of 2020 they put out a call for new maintainers. [@bigsablept](https://github.com/bigsablept) and 
+[@moomoohk](https://github.com/moomoohk) stepped up to become the new maintainers.
 
 There are several individuals in the community who have taken an active role in helping to maintain the project and submit fixes. Those individuals are shown in the git changelog.
-
-DPATH NEEDS NEW MAINTAINERS. SEE https://github.com/akesterson/dpath-python/issues/136
-
-Becoming a Maintainer
-=====================
-
-Nobody has to become a maintainer to submit a patch against dpath. Simply send the pull request on github.
-
-If you would like to help triage issues, attend monthly meetings, and become a regular part of the team working on the roadmap, send an email to andrew@aklabs.net and/or calebcase@gmail.com.
 
 Where and How do we communicate
 ===============================
 
-The dpath maintainers communcate in 3 primary ways:
+The dpath maintainers communicate in 3 primary ways:
 
 1. Email, directly to each other.
 2. Github via issue and pull request comments
-3. A monthly maintainers meeting via telephone
+3. A monthly maintainers meeting via Zoom
+
+The remainder of this document is subject to change after further discussion among the new maintainers.
 
 What is the roadmap
 ===================
@@ -92,7 +87,9 @@ We name bugfixes as "bugfix/ISSUENUMBER_shortname"; features are named "feature/
 Cutting a New Release
 =====================
 
-Releases for dpath occur automatically from travis-ci based on tags on the master branch, or on the version/[0-9].x branches for major version LTS.
+Releases for dpath occur automatically from Github Actions based on version changes on the master branch.
+
+Due to legacy reasons older tag names do not follow a uniform format:
 
     akesterson@akesterson:~/dpath-python$ git tag
     1.0-0
@@ -113,18 +110,33 @@ Releases for dpath occur automatically from travis-ci based on tags on the maste
     build,1.5,0
     build,2.0,0
 
-Once upon a time, the version string was automatially computed based on the content of these tags. Now, however, the version string is stored statically in dpath/version.py
+Moving forward version numbers and tag names will be identical and follow the standard semver format.
+
+The version string is stored in `dpath/version.py` and tag names/release versions are generated using this string.
 
     akesterson@akesterson:~/dpath-python$ cat dpath/version.py
     VERSION = "2.0.0"
 
 To cut a new release, follow this procedure:
 
-1. Commit a new dpath/version.py on the appropriate branch with the format "MAJOR.MINOR.RELEASE"
-2. Add a new tag of the form "build,MAJOR.MINOR,RELEASE" to the appropriate branch. This tag must have the same version number as the one commmited in dpath/version.py or we will fill your desk drawers with cockroaches.
-3. Push the new branch version and the associated tag to github.
-4. travis-ci SHOULD push the new release to pypi.
+1. Commit a new `dpath/version.py` on the appropriate branch with the format "MAJOR.MINOR.RELEASE".
+2. Github Actions SHOULD push the new release to PyPI on merge to `master`.
 
-If travis-ci fails to update pypi, follow the instructions on manually creating a release, here:
+See `.github/workflows/deploy.yml` for more information.
+
+If the Github workflow fails to update pypi, follow the instructions on manually creating a release, here:
 
 https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives
+
+Deployment CI was previously implemented using [Travis CI](https://travis-ci.org/github/akesterson/dpath-python).
+
+Running Tests
+=============
+
+Tests are managed using [tox](https://tox.readthedocs.io/en/latest/).
+
+Environment creation and dependency installation is managed by this tool, all one has to do is install it with `pip` and run `tox` in this repo's root directory.
+
+Tests can also be run with Github Actions via the [tests.yml](https://github.com/dpath-maintainers/dpath-python/actions/workflows/tests.yml) workflow.
+
+This workflow will run automatically on pretty much any commit to any branch of this repo but manual runs are also available.

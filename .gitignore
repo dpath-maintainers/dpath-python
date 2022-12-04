@@ -1,6 +1,12 @@
 /MANIFEST
 /.tox
-/.hypothesis
 /build
 /env
+.hypothesis
 *.pyc
+.vscode
+venv_39
+.idea/
+dpath.egg-info/
+dist/
+tests/.hypothesis
