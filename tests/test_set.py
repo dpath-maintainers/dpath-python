@@ -103,13 +103,19 @@ def test_set_filter_not_only_leaves():
     dict_obj = {
         "a": {
             "b": {
-                "name": "value",
+                "some_known_key": "some_known_key_value",
                 "b_nested": {
                     "name": "value",
                 },
             },
             "c": 1,
-            "d": 31,
+            "d": {
+                "some_known_key": "some_other_known_key_value",
+                "b_nested": {
+                    "name": "value",
+                },
+            },
+            "e": 31,
         }
     }
     new_value = "new_value"
@@ -118,52 +124,61 @@ def test_set_filter_not_only_leaves():
         dict_obj,
         '/a/b/*',
         new_value,
-        afilter=partial(afilter, "name", "value"),
+        afilter=partial(afilter, "some_known_key", "some_other_known_key_value"),
         is_only_leaves_filter=False
     )
-
-    assert dict_obj["a"]["b"]["b_nested"] == new_value
+    assert dict_obj["a"]["b"]["b_nested"]["name"] == "value"
+    assert dict_obj["a"]["d"] == new_value
 
     dict_obj = {
         "a": {
             "b": {
-                "name": "value",
+                "some_known_key": "some_known_key_value",
                 "b_nested": {
                     "name": "value",
                 },
             },
             "c": 1,
-            "d": 31,
+            "d": {
+                "some_known_key": "some_other_known_key_value",
+                "b_nested": {
+                    "name": "value",
+                },
+            },
+            "e": 31,
         }
     }
     new_value = "new_value"
 
     dpath.set(
         dict_obj,
-        ["a", "*"],
+        ["a", "b", "*"],
         new_value,
-        afilter=partial(afilter, "name", "value"),
+        afilter=partial(afilter, "some_known_key", "some_other_known_key_value"),
         is_only_leaves_filter=False
     )
 
-    assert dict_obj["a"]["b"] == new_value
+    assert dict_obj["a"]["b"]["b_nested"]["name"] == "value"
+    assert dict_obj["a"]["d"] == new_value
 
 
 def test_set_filter_not_only_leaves_and_update_dict_flag():
     def afilter(key, value, x):
         return isinstance(x, dict) and x.get(key) == value
 
-    nested_value = "nested_value"
     new_dict_for_update = {
-        "name": "updated_value"
+        "name": "updated_value",
+        "some_other_value": 100
     }
     dict_obj = {
         "a": {
             "b": {
-                "name": "value",
+                "some_known_key": "some_known_key_value",
+                "name": "some_name",
                 "b_nested": {
-                    "name": nested_value,
+                    "name": "some_nested_value",
                 },
+                "some_other_value": 33
             },
             "c": 1,
             "d": 31,
@@ -174,21 +189,24 @@ def test_set_filter_not_only_leaves_and_update_dict_flag():
         dict_obj,
         '/a/*',
         new_dict_for_update,
-        afilter=partial(afilter, "name", "value"),
+        afilter=partial(afilter, "some_known_key", "some_known_key_value"),
         is_only_leaves_filter=False,
         is_dict_update=True
     )
 
-    assert dict_obj["a"]["b"]["b_nested"]["name"] == nested_value
     assert dict_obj["a"]["b"]["name"] == new_dict_for_update["name"]
+    assert dict_obj["a"]["b"]["some_other_value"] == \
+           new_dict_for_update["some_other_value"]
 
     dict_obj = {
         "a": {
             "b": {
-                "name": "value",
+                "some_known_key": "some_known_key_value",
+                "name": "some_name",
                 "b_nested": {
-                    "name": nested_value,
+                    "name": "some_nested_value",
                 },
+                "some_other_value": 33
             },
             "c": 1,
             "d": 31,
@@ -199,13 +217,14 @@ def test_set_filter_not_only_leaves_and_update_dict_flag():
         dict_obj,
         ["a", "*"],
         new_dict_for_update,
-        afilter=partial(afilter, "name", "value"),
+        afilter=partial(afilter, "some_known_key", "some_known_key_value"),
         is_only_leaves_filter=False,
         is_dict_update=True
     )
 
-    assert dict_obj["a"]["b"]["b_nested"]["name"] == nested_value
     assert dict_obj["a"]["b"]["name"] == new_dict_for_update["name"]
+    assert dict_obj["a"]["b"]["some_other_value"] == \
+           new_dict_for_update["some_other_value"]
 
 
 def test_set_existing_path_with_separator():

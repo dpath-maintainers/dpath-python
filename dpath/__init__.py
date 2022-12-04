@@ -150,7 +150,11 @@ def set(
         else:
             selected = afilter and afilter(found)
 
-        if (matched and not afilter) or (matched and selected):
+        if (
+                (matched and not afilter) or
+                (matched and selected) or
+                (selected and not is_only_leaves_filter)
+        ):
             nonlocal value
             if is_dict_update and isinstance(value, dict):
                 value = {**found, **value}
