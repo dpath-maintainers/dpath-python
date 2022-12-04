@@ -20,6 +20,7 @@ class DDict(dict):
         self.creator = __creator
 
         self._recursive_items = True
+        self.recursive_items = True
 
     def __getitem__(self, item):
         return self.get(item)
@@ -103,20 +104,29 @@ class DDict(dict):
         return self
 
     def keys(self):
+        if not self.recursive_items:
+            yield from super().keys()
+            return
+
         for k, _ in self.walk():
             yield k
 
     def values(self):
+        if not self.recursive_items:
+            yield from super().values()
+            return
+
         for _, v in self.walk():
             yield v
 
     def items(self):
-        if not self._recursive_items:
+        if not self.recursive_items or not self._recursive_items:
             yield from dict(self).items()
-        else:
-            self._recursive_items = False
-            yield from self.walk()
-            self._recursive_items = True
+            return
+
+        self._recursive_items = False
+        yield from self.walk()
+        self._recursive_items = True
 
     def walk(self):
         """
