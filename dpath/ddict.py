@@ -19,6 +19,8 @@ class DDict(dict):
         self.separator = __separator
         self.creator = __creator
 
+        self._recursive_items = True
+
     def __getitem__(self, item):
         return self.get(item)
 
@@ -45,7 +47,7 @@ class DDict(dict):
 
         self.clear()
         self.update(temp)
-        
+
     def __or__(self, other):
         from dpath import merge
 
@@ -99,6 +101,22 @@ class DDict(dict):
         self.update(result)
 
         return self
+
+    def keys(self):
+        for k, _ in self.walk():
+            yield k
+
+    def values(self):
+        for _, v in self.walk():
+            yield v
+
+    def items(self):
+        if not self._recursive_items:
+            yield from dict(self).items()
+        else:
+            self._recursive_items = False
+            yield from self.walk()
+            self._recursive_items = True
 
     def walk(self):
         """

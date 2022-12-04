@@ -147,23 +147,17 @@ def test_oop_keys():
         }
     })
 
-    # assert not {
-    #     "a",
-    #     "b",
-    #     "c",
-    #     "b/0",
-    #     "b/1",
-    #     "b/2",
-    #     "c/d",
-    #     "c/d/e",
-    #     "c/d/e/0",
-    #     "c/d/e/1",
-    # }.difference(set(d.keys()))
-
     assert not {
         "a",
         "b",
         "c",
+        "b/0",
+        "b/1",
+        "b/2",
+        "c/d",
+        "c/d/e",
+        "c/d/e/0",
+        "c/d/e/1",
     }.difference(set(d.keys()))
 
 
@@ -188,3 +182,17 @@ def test_oop_setdefault():
     res = d.setdefault("b/6", 89)
     assert res == 89
     assert d["b"] == [12, 23, 34, None, None, None, 89]
+
+
+def test_oop_items():
+    d = DDict({
+        "a": 1,
+        "b": [12, 23, 34],
+        "c": {
+            "d": {
+                "e": [56, 67]
+            }
+        }
+    })
+
+    assert len(list(d.items())) == 10
