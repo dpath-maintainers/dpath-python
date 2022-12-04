@@ -54,15 +54,6 @@ def test_oop_contains():
     assert "c/d/e/1" in d
 
 
-def test_oop_len():
-    d = DDict({
-        "a": 1,
-        "b": [12, 23, 34],
-    })
-
-    assert len(d) == 5
-
-
 def test_oop_merge():
     d = DDict({
         "a": 1,
@@ -120,13 +111,3 @@ def test_oop_keys():
         "c/d/e/0",
         "c/d/e/1",
     })
-
-
-def test_oop_values():
-    d = DDict({
-        "a": 1,
-        "b": [12, 23, 34],
-    })
-
-    assert list(d.values()) == [1, [12, 23, 34], 12, 23, 34]
-

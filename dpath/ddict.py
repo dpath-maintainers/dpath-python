@@ -34,6 +34,11 @@ class DDict(dict):
 
         self.update(temp)
 
+    def __delitem__(self, key: Glob, afilter: Filter = None):
+        from dpath import delete
+
+        delete(self, key, separator=self.separator, afilter=afilter)
+
     def __len__(self):
         return len(self.keys())
 
@@ -59,22 +64,6 @@ class DDict(dict):
             # Default value was passed
             return get(self, glob, separator=self.separator, default=default)
 
-    # def keys(self):
-    #     from dpath.segments import walk
-    #
-    #     temp = dict(self)
-    #
-    #     paths = (part[0] for part in walk(temp))
-    #     return (self.separator.join((str(segment) for segment in path)) for path in paths)
-
-    def values(self, glob: Glob = "*", afilter: Filter = None, dirs=True):
-        """
-        Same as dict.values but glob aware
-        """
-        from dpath import values
-
-        return values(self, glob, separator=self.separator, afilter=afilter, dirs=dirs)
-
     def search(self, glob: Glob, yielded=False, afilter: Filter = None, dirs=True):
         from dpath import search
 
@@ -91,10 +80,8 @@ class DDict(dict):
 
         return self
 
-    def items(self):
+    def walk(self):
         from dpath.segments import walk
 
-        temp = dict(self)
-
-        for path, value in walk(temp):
+        for path, value in walk(self):
             yield self.separator.join((str(segment) for segment in path)), value
