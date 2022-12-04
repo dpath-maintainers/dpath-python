@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, MutableMapping
 
 from dpath import Creator
@@ -37,6 +38,12 @@ class DDict(dict):
         return len(self.keys())
 
     def __or__(self, other):
+        from dpath import merge
+
+        copy = deepcopy(self)
+        return merge(copy, other, self.separator)
+
+    def __ior__(self, other):
         return self.merge(other)
 
     def get(self, glob: Glob, default=_DEFAULT_SENTINEL) -> Any:
