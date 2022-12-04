@@ -53,7 +53,7 @@ class DDict(dict):
 
     def get(self, glob: Glob, default=_DEFAULT_SENTINEL) -> Any:
         """
-        Same as dict.get but glob aware
+        Same as dict.get but accepts glob aware keys.
         """
         from dpath import get
 
@@ -70,18 +70,21 @@ class DDict(dict):
         return search(self, glob, yielded=yielded, separator=self.separator, afilter=afilter, dirs=dirs)
 
     def merge(self, src: MutableMapping, afilter: Filter = None, flags=MergeType.ADDITIVE):
+        """
+        Performs in-place merge with another dict.
+        """
         from dpath import merge
 
-        temp = dict(self)
-
-        result = merge(temp, src, separator=self.separator, afilter=afilter, flags=flags)
+        result = merge(self, src, separator=self.separator, afilter=afilter, flags=flags)
 
         self.update(result)
 
         return self
 
     def walk(self):
+        """
+        Yields all possible key, value pairs.
+        """
         from dpath.segments import walk
 
-        for path, value in walk(self):
-            yield self.separator.join((str(segment) for segment in path)), value
+        yield from ((self.separator.join((str(segment) for segment in path)), value) for path, value in walk(self))
