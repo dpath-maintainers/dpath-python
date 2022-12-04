@@ -27,6 +27,54 @@ def test_oop_setitem():
     assert d["c"] == [54, 43, 32, 21]
 
 
+def test_oop_delitem():
+    d = DDict({
+        "a": 1,
+        "b": [12, 23, 34],
+        "c": {
+            "d": {
+                "e": [56, 67]
+            }
+        }
+    })
+
+    del d["a"]
+    assert "a" not in d
+
+    del d["c/**/1"]
+    assert 67 not in d["c/d/e"]
+
+
+def test_oop_pop():
+    d = DDict({
+        "a": 1,
+        "b": [12, 23, 34],
+        "c": {
+            "d": {
+                "e": [56, 67]
+            }
+        }
+    })
+    before = deepcopy(d)
+
+    popped = d.pop("a")
+    assert popped == {"a": 1}
+
+    d = deepcopy(before)
+    popped = d.pop("b/1")
+    assert popped == {"b": [None, 23]}
+
+    d = deepcopy(before)
+    popped = d.pop("c/**/1")
+    assert popped == {
+        "c": {
+            "d": {
+                "e": [None, 67]
+            }
+        }
+    }
+
+
 def test_oop_setitem_overwrite():
     d = DDict({
         "a": 1,
