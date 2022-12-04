@@ -12,11 +12,12 @@ class DDict(dict):
     Glob aware dict
     """
 
-    def __init__(self, data: MutableMapping, separator="/", creator: Creator = None):
-        super().__init__(data)
+    def __init__(self, data: MutableMapping, __separator="/", __creator: Creator = None, **kwargs):
+        super().__init__()
+        super().update(data, **kwargs)
 
-        self.separator = separator
-        self.creator = creator
+        self.separator = __separator
+        self.creator = __creator
 
     def __getitem__(self, item):
         return self.get(item)
@@ -32,12 +33,18 @@ class DDict(dict):
 
         new(temp, key, value, separator=self.separator, creator=self.creator)
 
+        self.clear()
         self.update(temp)
 
     def __delitem__(self, key: Glob, afilter: Filter = None):
         from dpath import delete
 
-        delete(self, key, separator=self.separator, afilter=afilter)
+        temp = dict(self)
+
+        delete(temp, key, separator=self.separator, afilter=afilter)
+
+        self.clear()
+        self.update(temp)
 
     def __len__(self):
         return len(self.keys())
@@ -66,6 +73,11 @@ class DDict(dict):
         else:
             # Default value was passed
             return get(self, glob, separator=self.separator, default=default)
+
+    def pop(self, __key: Glob):
+        results = self.search(__key)
+        del self[__key]
+        return results
 
     def search(self, glob: Glob, yielded=False, afilter: Filter = None, dirs=True):
         from dpath import search
