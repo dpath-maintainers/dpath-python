@@ -25,23 +25,23 @@ class DDict(dict):
     def __contains__(self, item):
         return len(self.search(item)) > 0
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, glob, value):
         from dpath import new
 
         # Prevent infinite recursion and other issues
         temp = dict(self)
 
-        new(temp, key, value, separator=self.separator, creator=self.creator)
+        new(temp, glob, value, separator=self.separator, creator=self.creator)
 
         self.clear()
         self.update(temp)
 
-    def __delitem__(self, key: Glob, afilter: Filter = None):
+    def __delitem__(self, glob: Glob, afilter: Filter = None):
         from dpath import delete
 
         temp = dict(self)
 
-        delete(temp, key, separator=self.separator, afilter=afilter)
+        delete(temp, glob, separator=self.separator, afilter=afilter)
 
         self.clear()
         self.update(temp)
@@ -74,9 +74,16 @@ class DDict(dict):
             # Default value was passed
             return get(self, glob, separator=self.separator, default=default)
 
-    def pop(self, __key: Glob):
-        results = self.search(__key)
-        del self[__key]
+    def setdefault(self, glob: Glob, __default=_DEFAULT_SENTINEL):
+        if glob in self:
+            return self[glob]
+
+        self[glob] = None if __default == _DEFAULT_SENTINEL else __default
+        return self[glob]
+
+    def pop(self, glob: Glob):
+        results = self.search(glob)
+        del self[glob]
         return results
 
     def search(self, glob: Glob, yielded=False, afilter: Filter = None, dirs=True):

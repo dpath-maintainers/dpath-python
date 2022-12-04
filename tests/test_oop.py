@@ -159,3 +159,26 @@ def test_oop_keys():
         "c/d/e/0",
         "c/d/e/1",
     })
+
+
+def test_oop_setdefault():
+    d = DDict({
+        "a": 1,
+        "b": [12, 23, 34],
+        "c": {
+            "d": {
+                "e": [56, 67]
+            }
+        }
+    })
+
+    res = d.setdefault("a", 345)
+    assert res == 1
+
+    res = d.setdefault("c/4", 567)
+    assert res == 567
+    assert d["c"]["4"] == res
+
+    res = d.setdefault("b/6", 89)
+    assert res == 89
+    assert d["b"] == [12, 23, 34, None, None, None, 89]
