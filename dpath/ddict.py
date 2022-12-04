@@ -58,6 +58,9 @@ class DDict(dict):
     def __ior__(self, other):
         return self.merge(other)
 
+    def __len__(self):
+        return sum(1 for _ in self.keys())
+
     def __repr__(self):
         return f"{type(self).__name__}({super().__repr__()})"
 
