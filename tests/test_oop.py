@@ -147,18 +147,24 @@ def test_oop_keys():
         }
     })
 
-    assert not set(d.keys()).difference({
+    # assert not {
+    #     "a",
+    #     "b",
+    #     "c",
+    #     "b/0",
+    #     "b/1",
+    #     "b/2",
+    #     "c/d",
+    #     "c/d/e",
+    #     "c/d/e/0",
+    #     "c/d/e/1",
+    # }.difference(set(d.keys()))
+
+    assert not {
         "a",
         "b",
         "c",
-        "b/0",
-        "b/1",
-        "b/2",
-        "c/d",
-        "c/d/e",
-        "c/d/e/0",
-        "c/d/e/1",
-    })
+    }.difference(set(d.keys()))
 
 
 def test_oop_setdefault():
