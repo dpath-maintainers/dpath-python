@@ -45,10 +45,7 @@ class DDict(dict):
 
         self.clear()
         self.update(temp)
-
-    def __len__(self):
-        return len(self.keys())
-
+        
     def __or__(self, other):
         from dpath import merge
 
