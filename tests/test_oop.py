@@ -199,17 +199,3 @@ def test_oop_setdefault():
     res = d.setdefault("b/6", 89)
     assert res == 89
     assert d["b"] == [12, 23, 34, None, None, None, 89]
-
-
-def test_oop_items():
-    d = DDict({
-        "a": 1,
-        "b": [12, 23, 34],
-        "c": {
-            "d": {
-                "e": [56, 67]
-            }
-        }
-    })
-
-    assert len(list(d.items())) == 10
