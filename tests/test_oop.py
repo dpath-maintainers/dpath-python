@@ -11,7 +11,7 @@ def test_oop_getitem():
 
     assert d["a"] == 1
     assert d["b/0"] == 12
-    # assert d["b/-1"] == 34
+    assert d["b/-1"] == 34
 
 
 def test_oop_setitem():
