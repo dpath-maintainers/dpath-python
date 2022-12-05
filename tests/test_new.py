@@ -96,7 +96,7 @@ def test_set_new_list_integer_path_with_creator():
     assert d['a'][2] == 3
 
 
-def test_new_overwrite_placeholder():
+def test_new_overwrite_none_in_list():
     a = {}
     dpath.new(a, ['b'], [])
     dpath.new(a, ['b', 3], 5)

@@ -4,10 +4,7 @@ from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, Mutabl
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt, Placeholder
-
-
-PLACEHOLDER = Placeholder()
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:

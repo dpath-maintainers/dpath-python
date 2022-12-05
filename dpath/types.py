@@ -33,24 +33,6 @@ class SymmetricInt(int):
         return str(int(self))
 
 
-class Placeholder:
-    """
-    Placeholder object to pad out newly created lists.
-    Should be effectively equivalent to None.
-    """
-    def __repr__(self):
-        return f"<{type(self).__name__}>"
-
-    def __eq__(self, other):
-        if isinstance(other, Placeholder) or other is None:
-            return True
-
-        return False
-
-    def __hash__(self):
-        return hash(None)
-
-
 class MergeType(IntFlag):
     ADDITIVE = auto()
     """List objects are combined onto one long list (NOT a set). This is the default flag."""
