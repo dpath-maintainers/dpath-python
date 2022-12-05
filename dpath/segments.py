@@ -257,7 +257,7 @@ def match(segments: Path, glob: Glob):
     return False
 
 
-def extend(thing: List, index: int, value=PLACEHOLDER):
+def extend(thing: List, index: int, value=None):
     """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
@@ -342,6 +342,7 @@ def set(
         if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
             segment = int(segment)
 
+        create_current = False
         try:
             # Optimistically try to get the next value. This makes the
             # code agnostic to whether current is a list or a dict.
@@ -350,11 +351,11 @@ def set(
             current[segment]
         except:
             if creator is not None:
-                creator(current, segments, i, hints)
+                create_current = True
             else:
                 raise
 
-        if current[segment] == PLACEHOLDER and creator is not None:
+        if create_current or (options.REPLACE_NONE_VALUES_IN_LISTS and current[segment] is None):
             creator(current, segments, i, hints)
 
         current = current[segment]

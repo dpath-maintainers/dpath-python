@@ -1,4 +1,7 @@
+from nose2.tools.such import helper
+
 import dpath
+from dpath import options
 
 
 def test_set_new_separator():
@@ -94,6 +97,13 @@ def test_set_new_list_integer_path_with_creator():
 
 
 def test_new_overwrite_placeholder():
+    a = {}
+    dpath.new(a, ['b'], [])
+    dpath.new(a, ['b', 3], 5)
+    with helper.assertRaises(dpath.exceptions.PathNotFound):
+        dpath.new(a, ['b', 1, "c"], 5)
+
+    options.REPLACE_NONE_VALUES_IN_LISTS = True
     a = {}
     dpath.new(a, ['b'], [])
     dpath.new(a, ['b', 3], 5)
