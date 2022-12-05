@@ -236,3 +236,10 @@ def test_search_multiple_stars():
     assert res['a'][0]['b'][0]['c'] == 1
     assert res['a'][0]['b'][1]['c'] == 2
     assert res['a'][0]['b'][2]['c'] == 3
+
+
+def test_search_negative_index():
+    d = {'a': {'b': [1, 2, 3]}}
+    res = dpath.search(d, 'a/b/-1')
+
+    assert res == dpath.search(d, "a/b/2")

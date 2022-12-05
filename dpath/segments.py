@@ -4,7 +4,7 @@ from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, Mutabl
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -21,7 +21,10 @@ def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
         return iter(node.items())
     except AttributeError:
         try:
-            return zip(range(len(node)), node)
+            indices = range(len(node))
+            # Convert all list indices to object so negative indexes are supported.
+            indices = map(lambda i: SymmetricInt(i, len(node)), indices)
+            return zip(indices, node)
         except TypeError:
             # This can happen in cases where the node isn't leaf(node) == True,
             # but also isn't actually iterable. Instead of this being an error
@@ -163,7 +166,7 @@ class Star(object):
 STAR = Star()
 
 
-def match(segments: Sequence[PathSegment], glob: Sequence[str]):
+def match(segments: Path, glob: Glob):
     """
     Return True if the segments match the given glob, otherwise False.
 
@@ -214,7 +217,8 @@ def match(segments: Sequence[PathSegment], glob: Sequence[str]):
     # If we were successful in matching up the lengths, then we can
     # compare them using fnmatch.
     if path_len == len(ss_glob):
-        for s, g in zip(map(int_str, segments), map(int_str, ss_glob)):
+        i = zip(segments, ss_glob)
+        for s, g in i:
             # Match the stars we added to the glob to the type of the
             # segment itself.
             if g is STAR:
@@ -223,10 +227,20 @@ def match(segments: Sequence[PathSegment], glob: Sequence[str]):
                 else:
                     g = '*'
 
-            # Let's see if the glob matches. We will turn any kind of
-            # exception while attempting to match into a False for the
-            # match.
             try:
+                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
+                # index as well. Try converting it to an int.
+                if isinstance(s, int) and s == int(g):
+                    continue
+            except:
+                # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
+                # In this case convert s to a str so fnmatch can work on it.
+                s = str(s)
+
+            try:
+                # Let's see if the glob matches. We will turn any kind of
+                # exception while attempting to match into a False for the
+                # match.
                 if not fnmatchcase(s, g):
                     return False
             except:
@@ -391,7 +405,7 @@ def foldm(obj, f, acc):
     return acc
 
 
-def view(obj, glob):
+def view(obj: MutableMapping, glob: Glob):
     """
     Return a view of the object where the glob matches. A view retains
     the same form as the obj, but is limited to only the paths that
