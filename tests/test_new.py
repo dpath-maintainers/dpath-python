@@ -91,3 +91,12 @@ def test_set_new_list_integer_path_with_creator():
     assert isinstance(d['a'], list)
     assert len(d['a']) == 3
     assert d['a'][2] == 3
+
+
+def test_new_overwrite_placeholder():
+    a = {}
+    dpath.new(a, ['b'], [])
+    dpath.new(a, ['b', 3], 5)
+    dpath.new(a, ['b', 1, "c"], 5)
+
+    assert a["b"][1]["c"] == 5

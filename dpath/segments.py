@@ -4,7 +4,10 @@ from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, Mutabl
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt, Placeholder
+
+
+PLACEHOLDER = Placeholder()
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -254,7 +257,7 @@ def match(segments: Path, glob: Glob):
     return False
 
 
-def extend(thing: List, index: int, value=None):
+def extend(thing: List, index: int, value=PLACEHOLDER):
     """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
@@ -350,6 +353,9 @@ def set(
                 creator(current, segments, i, hints)
             else:
                 raise
+
+        if current[segment] == PLACEHOLDER and creator is not None:
+            creator(current, segments, i, hints)
 
         current = current[segment]
         if i != length - 1 and leaf(current):
