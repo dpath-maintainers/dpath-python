@@ -10,3 +10,13 @@ venv_39
 dpath.egg-info/
 dist/
 tests/.hypothesis
+
+# Github logs
+.githubLogs
+
+# Test etc
+.coverage
+
+# Editor temporaries
+*~
+ 
