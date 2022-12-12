@@ -18,7 +18,13 @@ import hypothesis.strategies as st
 from dpath import options
 import dpath.segments as api
 import dpath.options
-dpath.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
+
+# check that how the options have been set
+print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {dpath.options.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)
+
+if not dpath.options.DPATH_ACCEPT_RE_REGEXP :
+    print("This test doesn't make sense with DPATH_ACCEPT_RE_REGEXP = False", file=sys.stderr)
+    dpath.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
 
 # enables to modify some globals
 MAX_SAMPLES = None

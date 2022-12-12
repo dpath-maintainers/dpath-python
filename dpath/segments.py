@@ -7,6 +7,13 @@ from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints
 
 
+import sys
+import re
+try:
+    RE_PATTERN_TYPE = re.Pattern
+except AttributeError:
+    RE_PATTERN_TYPE = re._pattern_type
+
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     """
     Returns an iterator which yields tuple pairs of (node index, node value), regardless of node type.
@@ -227,8 +234,12 @@ def match(segments: Sequence[PathSegment], glob: Sequence[str]):
             # exception while attempting to match into a False for the
             # match.
             try:
-                if not fnmatchcase(s, g):
-                    return False
+                if isinstance(g, RE_PATTERN_TYPE):
+                    mobj = g.match(s)
+                    if mobj is None:
+                        return False
+                elif not fnmatchcase(s, g):
+                     return False
             except:
                 return False
 
