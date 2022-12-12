@@ -29,6 +29,9 @@ from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hin
 
 _DEFAULT_SENTINEL = object()
 
+import sys
+import dpath.options
+import re
 
 def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
@@ -45,7 +48,22 @@ def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSe
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-    return split_segments
+    final = []
+    for segment in split_segments:
+        if (options.DPATH_ACCEPT_RE_REGEXP and isinstance(segment, str)
+                 and segment[0] == '{' and segment[-1] == '}'):
+            try:
+                rs = segment[1:-1]
+                rex = re.compile(rs)
+            except Exception as reErr:
+                print(f"Error in segment '{segment}' string '{rs}' not accepted"
+                          + f"as re.regexp:\n\t{reErr}",
+                          file=sys.stderr)
+                raise reErr
+            final.append(rex)               
+        else:         
+            final.append(segment)
+    return final
 
 
 def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
