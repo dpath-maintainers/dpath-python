@@ -457,9 +457,10 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
      >>> import dpath
 	 >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = True
 
-  -  Now a path component may also be specified as: 
-     - in a path expression, as {<re.regexpr>} where `<re.regexpr>` is a regular expression accepted by the 
-     standard Python module `re`. For example:
+  -  Now a path component may also be specified : 
+
+     - in a path expression, as {<re.regexpr>} where `<re.regexpr>` is a regular expression
+       accepted by the  standard Python module `re`. For example:
 
       .. code-block:: python 
 
@@ -491,11 +492,11 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
        +-----------------------------------------+--------------------------------------+
        +     "\*\*/{[^A-Za-z]{2}$}"              |   "Id"                               +
        +-----------------------------------------+--------------------------------------+
-       +     r"\*/{[A-Z][A-Za-z\d]*$}"           |  "Name","Id","Created", "Scope",...  +
+       +     r"\*/{[A-Z][A-Za-z\\d]*$}"          |  "Name","Id","Created", "Scope",...  +
        +-----------------------------------------+--------------------------------------+
-       +     r"\*\*/{[A-Z][A-Za-z\d]*\d$}"       |   EnableIPv6"                        +
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*\d$}"      |   EnableIPv6"                        +
        +-----------------------------------------+--------------------------------------+
-       +     r"\*\*/{[A-Z][A-Za-z\d]*Address$}"  |   "Containers/199c5/MacAddress"      +
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*Address$}" |   "Containers/199c5/MacAddress"      +
        +-----------------------------------------+--------------------------------------+
        
        With Python's chararcter string conventions, required backslashes in the `re` syntax
