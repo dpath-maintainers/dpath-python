@@ -2,7 +2,7 @@ import datetime
 import decimal
 import time
 
-import mock
+from unittest.mock import patch
 from nose2.tools.such import helper
 
 import dpath
@@ -109,7 +109,7 @@ def test_values():
     assert 2 in ret
 
 
-@mock.patch('dpath.search')
+@patch('dpath.search')
 def test_values_passes_through(searchfunc):
     searchfunc.return_value = []
 

@@ -45,10 +45,10 @@ class SampleDicts():
                         [re.compile("[a-z]+$")] , 
                         ["*", re.compile(".*")],
                         ["*", "*",re.compile(".*")],
-                        ["*", re.compile("[a-z]+\d+$")],
+                        ["*", re.compile("[a-z]+\\d+$")],
                         ["*", re.compile("[a-z]+[.][a-z]+$")],
                         ["**", re.compile(".*")],
-                        ["**", re.compile("[a-z]+\d+$")],
+                        ["**", re.compile("[a-z]+\\d+$")],
                         ["**", re.compile("[a-z]+[.][a-z]+$")]
                         )
 
@@ -56,12 +56,12 @@ class SampleDicts():
                            ( [re.compile("[a-z]+$")], None), 
                            ( ["*", re.compile(".*")], ("a001/b2",)),
                            ( ["*", "*",re.compile(".*")], ("a001/b2/c1.2",)),
-                           ( ["*", re.compile("[a-z]+\d+$")], ("a001/b2",)) ,
+                           ( ["*", re.compile("[a-z]+\\d+$")], ("a001/b2",)) ,
                            ( ["*", re.compile("[a-z]+[.][a-z]+$")], None),
                            ( ["**", re.compile(".*")], 
                              ("a001","a001/b2", "a001/b2/c1.2","a001/b2/c1.2/d.dd",
                              "a001/b2/c1.2/e.ee", "a001/b2/c1.2/f.f0")),
-                           ( ["**", re.compile("[a-z]+\d+$")], ("a001", "a001/b2")),
+                           ( ["**", re.compile("[a-z]+\\d+$")], ("a001", "a001/b2")),
                            ( ["**", re.compile("[a-z]+[.][a-z]+$")], 
                              ("a001/b2/c1.2/d.dd","a001/b2/c1.2/e.ee"))
                         )
@@ -72,10 +72,10 @@ class SampleDicts():
                         ([re.compile("[a-z]+$")] , ('*NONE*',)),
                         (["*", re.compile(".*")],{'c1.2': {'d.dd': 0, 'e.ee': 1, 'f.f0': 2}}),
                         (["*", "*",re.compile(".*")],{'d.dd': 0, 'e.ee': 1, 'f.f0': 2} ),
-                        (["*", re.compile("[a-z]+\d+$")],{'c1.2': {'d.dd': 0, 'e.ee': 1, 'f.f0': 2}}),
+                        (["*", re.compile("[a-z]+\\d+$")],{'c1.2': {'d.dd': 0, 'e.ee': 1, 'f.f0': 2}}),
                         (["*", re.compile("[a-z]+[.][a-z]+$")],('*NONE*',)),
                         (["**", re.compile(".*")], "*FAIL*"),
-                        (["**", re.compile("[a-z]+\d+$")],"*FAIL*"),
+                        (["**", re.compile("[a-z]+\\d+$")],"*FAIL*"),
                         (["**", re.compile("[a-z]+[.][a-z]+$")],"*FAIL*"),
                         )
 
@@ -123,46 +123,55 @@ class SampleDicts():
         "Labels": {}
         }
 
-        self.specs2 = ( 
-                        ["*", re.compile("[A-Z][a-z\d]*$")],
-                        ["**", re.compile("[A-Z][a-z\d]*$")],
-                        ["**", re.compile("[A-Z][A-Za-z\d]*Address$")],
-                        ["**", re.compile("[A-Za-z]+\d+$")],
-                        ["**", re.compile("\d+[.]\d+")]
-                        )
 
         self.specs2Pairs = ( 
-                        (["*", re.compile("[A-Z][a-z\d]*$")],
+                        (["*", re.compile("[A-Z][a-z\\d]*$")],
                          ("IPAM/Driver","IPAM/Options","IPAM/Config","ConfigFrom/Network")),
-                        (["**", re.compile("[A-Z][a-z\d]*$")],
+                        (["**", re.compile("[A-Z][a-z\\d]*$")],
                          ("Name","Id","Created", "Scope","Driver", "Internal", "Attachable",
                           "Ingress", "Containers", "Options", "Labels", "IPAM/Driver", "IPAM/Options",
                           "IPAM/Config", "IPAM/Config/Subnet", "IPAM/Config/Gateway",
                           "ConfigFrom/Network","Containers/199c590e8f13477/Name",
                           "Containers/199c590e8f13477/MacAddress" )),
-                        (["**", re.compile("[A-Z][A-Za-z\d]*Address$")],
+                        (["**", re.compile("[A-Z][A-Za-z\\d]*Address$")],
                          ("Containers/199c590e8f13477/MacAddress","Containers/199c590e8f13477/IPv4Address",
                          "Containers/199c590e8f13477/IPv6Address")),
-                        (["**", re.compile("[A-Za-z]+\d+$")],("EnableIPv6",)),
-                        (["**", re.compile("\d+[.]\d+")],None)
-                        )
-                                                
-        self.specs3 = ( ["*", re.compile("[A-Z][a-z\d]*$")],
-                        "**/{.*}",
-                        "*/{[A-Z][A-Za-z\d]*$}",
-                        "**/{[A-Z][A-Za-z\d]*$}",
-                        "**/{[A-Z][A-Za-z\d]*Address$}"
-                        )
+                        (["**", re.compile("[A-Za-z]+\\d+$")],("EnableIPv6",)),
+                        (["**", re.compile("\\d+[.]\\d+")],None),
 
-        self.specs3Pairs = ( 
-                        ("**/{[^A-Za-z]{2}$}",("Id",)),
-                        ("*/{[A-Z][A-Za-z\d]*$}",("Name","Id","Created", "Scope","Driver", "Internal", "Attachable",
+                        # repeated intentionally using raw strings rather than '\\' escapes
+
+                        (["*", re.compile(r"[A-Z][a-z\d]*$")],
+                         ("IPAM/Driver","IPAM/Options","IPAM/Config","ConfigFrom/Network")),
+                        (["**", re.compile(r"[A-Z][a-z\d]*$")],
+                         ("Name","Id","Created", "Scope","Driver", "Internal", "Attachable",
                           "Ingress", "Containers", "Options", "Labels", "IPAM/Driver", "IPAM/Options",
                           "IPAM/Config", "IPAM/Config/Subnet", "IPAM/Config/Gateway",
                           "ConfigFrom/Network","Containers/199c590e8f13477/Name",
                           "Containers/199c590e8f13477/MacAddress" )),
-                        ("**/{[A-Z][A-Za-z\d]*\d$}", ("EnableIPv6",)),
-                        ( "**/{[A-Z][A-Za-z\d]*Address$}", ("Containers/199c590e8f13477/MacAddress","Containers/199c590e8f13477/IPv4Address",
+                        (["**", re.compile(r"[A-Z][A-Za-z\d]*Address$")],
+                         ("Containers/199c590e8f13477/MacAddress","Containers/199c590e8f13477/IPv4Address",
+                         "Containers/199c590e8f13477/IPv6Address")),
+                        (["**", re.compile(r"[A-Za-z]+\d+$")],("EnableIPv6",)),
+                        (["**", re.compile(r"\d+[.]\d+")],None)
+                      )
+                                                
+
+        self.specs3Pairs = ( 
+                        ("**/{[^A-Za-z]{2}$}",("Id",)),
+                        ("*/{[A-Z][A-Za-z\\d]*$}",("Name","Id","Created", "Scope","Driver", "Internal", "Attachable",
+                          "Ingress", "Containers", "Options", "Labels", "IPAM/Driver", "IPAM/Options",
+                          "IPAM/Config", "IPAM/Config/Subnet", "IPAM/Config/Gateway",
+                          "ConfigFrom/Network","Containers/199c590e8f13477/Name",
+                          "Containers/199c590e8f13477/MacAddress" )),
+                        ("**/{[A-Z][A-Za-z\\d]*\\d$}", ("EnableIPv6",)),
+                        ("**/{[A-Z][A-Za-z\\d]*Address$}", ("Containers/199c590e8f13477/MacAddress","Containers/199c590e8f13477/IPv4Address",
+                         "Containers/199c590e8f13477/IPv6Address")),
+
+                        # repeated intentionally using raw strings rather than '\\' escapes
+
+                        (r"**/{[A-Z][A-Za-z\d]*\d$}", ("EnableIPv6",)),
+                        (r"**/{[A-Z][A-Za-z\d]*Address$}", ("Containers/199c590e8f13477/MacAddress","Containers/199c590e8f13477/IPv4Address",
                          "Containers/199c590e8f13477/IPv6Address")),
                         )                
 
@@ -265,8 +274,8 @@ class TestDelete(unittest.TestCase):
             },
         }   
 
-        specs = (re.compile("[a-z]+$"), re.compile("[a-z]+\d+$"), 
-                "{[a-z]+\d+$}")
+        specs = (re.compile("[a-z]+$"), re.compile("[a-z]+\\d+$"), 
+                "{[a-z]+\\d+$}")
         i=0
         for spec in specs:
             dict = copy(dict1)
