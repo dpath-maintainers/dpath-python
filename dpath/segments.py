@@ -7,12 +7,12 @@ from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
 
-import sys
 import re
 try:
     RE_PATTERN_TYPE = re.Pattern
 except AttributeError:
     RE_PATTERN_TYPE = re._pattern_type
+
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     """
@@ -112,7 +112,7 @@ def has(obj, segments):
     try:
         get(obj, segments)
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -240,7 +240,7 @@ def match(segments: Path, glob: Glob):
                 # index as well. Try converting it to an int.
                 if isinstance(s, int) and s == int(g):
                     continue
-            except:
+            except Exception:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
                 # In this case convert s to a str so fnmatch can work on it.
                 s = str(s)
@@ -255,9 +255,9 @@ def match(segments: Path, glob: Glob):
                     if mobj is None:
                         return False
                 elif not fnmatchcase(s, g):
-                     return False
+                    return False
 
-            except:
+            except Exception:
                 return False
 
         # All of the segments matched so we have a complete match.
@@ -359,7 +359,7 @@ def set(
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
             current[segment]
-        except:
+        except Exception:
             if creator is not None:
                 creator(current, segments, i, hints)
             else:

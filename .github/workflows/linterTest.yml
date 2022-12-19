@@ -1,6 +1,6 @@
 name: LinterTest
     # ------------------------------------------------------------
-    # (C) Alain Lichnewsky, 2021, 2022
+    # (C) Alain Lichnewsky, 2021
     #
     # For running under Github's Actions
     #
@@ -12,9 +12,9 @@ name: LinterTest
 on:
   #
   ## Not enabled, would triggers the workflow on push or pull request events but
-  ## only for the AL-master4merge branch.
+  ## only for the AL-addRegexp branch.
   #push:
-  #  branches: [ AL-master4merge ]
+  #  branches: [ AL-addRegexp ]
 
   # Allows to run this workflow manually from the Github Actions tab
   workflow_dispatch:

@@ -22,7 +22,7 @@ import dpath.options
 # check that how the options have been set
 print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {dpath.options.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)
 
-if not dpath.options.DPATH_ACCEPT_RE_REGEXP :
+if not dpath.options.DPATH_ACCEPT_RE_REGEXP:
     print("This test doesn't make sense with DPATH_ACCEPT_RE_REGEXP = False", file=sys.stderr)
     dpath.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
 
@@ -53,15 +53,15 @@ random_leaf = random_key_int | st.text(alphabet=ALPHABET, min_size=2)
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (  st.lists(children, max_size=3)
-                          | st.dictionaries(  st.binary(max_size=5)
+        lambda children: (st.lists(children, max_size=3)
+                          | st.dictionaries(st.binary(max_size=5)
                                             | st.text(alphabet=ALPHABET), children)),
         max_leaves=MAX_LEAVES)
 else:
     random_thing = st.recursive(
         random_leaf,
-        lambda children: (  st.lists(children, max_size=3)
-                          | st.dictionaries( st.binary(min_size=1, max_size=5)
+        lambda children: (st.lists(children, max_size=3)
+                          | st.dictionaries(st.binary(min_size=1, max_size=5)
                                             | st.text(min_size=1, alphabet=ALPHABET),
                           children)),
         max_leaves=MAX_LEAVES)
@@ -71,13 +71,13 @@ random_node = random_thing.filter(lambda thing: isinstance(thing, (list, dict)))
 if options.ALLOW_EMPTY_STRING_KEYS:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: ( st.lists(children, max_size=3) | st.text(alphabet=ALPHABET),
-                           children),
+        lambda children: (st.lists(children, max_size=3) | st.text(alphabet=ALPHABET),
+                          children),
         max_leaves=MAX_LEAVES)
 else:
     random_mutable_thing = st.recursive(
         random_leaf,
-        lambda children: (  st.lists(children, max_size=3)
+        lambda children: (st.lists(children, max_size=3)
                           | st.dictionaries(st.text(alphabet=ALPHABET, min_size=1),
                           children)),
         max_leaves=MAX_LEAVES)
@@ -100,7 +100,7 @@ def mutate(draw, segment):
         def to_kind(v):
             try:
                 return bytes(v, 'utf-8')
-            except:
+            except Exception:
                 return kind(v)
     else:
         def to_kind(v):
@@ -193,7 +193,6 @@ def random_segments_with_nonmatching_glob(draw):
         glob.insert(index, invalid)
 
     return (segments, glob)
-
 
 
 def checkSegGlob(segments, glob):
@@ -318,7 +317,6 @@ class TestEncoding(unittest.TestCase):
         assert api.match(segments, glob) is True
         if TestEncoding.DO_DEBUG_PRINT:
             sys.stderr.write("api.match: segments:{} , glob:{}\n".format(segments, glob))
-
 
     @settings(max_examples=MAX_SAMPLES)
     @given(random_segments_with_nonmatching_re_glob())

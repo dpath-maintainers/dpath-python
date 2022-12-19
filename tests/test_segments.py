@@ -43,7 +43,7 @@ def mutate(draw, segment):
         def to_kind(v):
             try:
                 return bytes(v, 'utf-8')
-            except:
+            except Exception:
                 return kind(v)
     else:
         def to_kind(v):

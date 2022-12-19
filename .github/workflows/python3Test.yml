@@ -9,8 +9,6 @@ name: Test python package dpath-python with regexp extension
     # ------------------------------------------------------------
 
 on:
-    # [push]
-
     workflow_dispatch:
     # Allows manual dispatch from the Actions tab  
 
@@ -24,7 +22,7 @@ jobs:
         strategy:
             matrix:
             # Match versions specified in tox.ini
-              python-version: ['3.10', 'pypy-3.7']
+              python-version: ['3.10', 'pypy3.9']
 
         steps:
             - name: Checkout code
@@ -84,7 +82,7 @@ jobs:
             
               run: |
                 echo running the nose2 wrapper
-                PYTHONPATH="." tests/nose_runner -E  -s tests
+                PYTHONPATH="." test-utils/nose_runner -E  -s tests
 
             - name: Tox testing
 
@@ -98,11 +96,5 @@ jobs:
                 tox
                 echo "Ran tox"
 
-            - name: Nose2 testing
 
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              #  Last try... without a cfg file
-              #
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              run: |
-                nose2 --start-dir tests
+              

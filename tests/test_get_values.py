@@ -190,7 +190,7 @@ def test_non_leaf_leaf():
     # Data classes should also be retrievable:
     try:
         import dataclasses
-    except:
+    except Exception:
         return
 
     @dataclasses.dataclass

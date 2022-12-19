@@ -1,17 +1,11 @@
-name: Test python package dpath-python
+name: Test python package dpath-python with regexp ext and pypy
     # ------------------------------------------------------------
-    # (C) Alain Lichnewsky, 2021
+    # (C) Alain Lichnewsky, 2021, 2022
     #
     # For running under Github's Actions
     #
     # Here the idea is to use tox for testing and test on python 3.8 and
     # pypy-3.7.
-    #
-    # There are numerous issues that must be understood with the predefined
-    # features of Github's preloaded containers.
-    # Here :
-    #       - try and load in 2 separate steps
-    #       - probably not optimal in viexw of preloaded configurations
     #
     # ------------------------------------------------------------
 
@@ -28,22 +22,23 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@main
 
-            - name: Set up Python 3.8
-              uses: actions/setup-python@v2
+            - name: Set up Python 3.10
+              uses: actions/setup-python@main
               with:
-                  python-version: '3.8'
+                  python-version: '3.10'
                   architecture: 'x64'
 
-            - name: Set up Pypy 3.7
-              uses: actions/setup-python@v2
+            - name: Set up Pypy 
+              uses: actions/setup-python@main
               with:
-                  python-version: 'pypy-3.7'
+                  python-version: 'pypy3.9'
                   architecture: 'x64'
 
 
             - name: Ascertain configuration
+              shell: bash
               #
               #    Collect information concerning $HOME and the location of
               #    file(s) loaded from Github/
@@ -72,6 +67,7 @@ jobs:
               #  requirements install the test framework, which is not
               #  required by the package in setup.py
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              shell: bash
               run: |
                 python -m pip install --upgrade pip setuptools wheel
                 if [ -f requirements.txt ]; then
@@ -83,23 +79,38 @@ jobs:
                 echo which nose2-3.6: $(which nose2-3.6)
                 echo which nose2-3.8: $(which nose2-3.8)
 
+            - name: Check path preparing for pypy
+              shell: bash
+
+              run: |
+                test_utils/py_path_checker -M nose2 -U
+                pypy3 test_utils/py_path_checker -M nose2 -U
+
+            - name: Perform python tests
+              shell: bash
+              if : always()
+              run: |
+                PYTHONPATH="." test-utils/nose_runner -E -s tests
+
+            - name: Perform pypy tests
+              shell: bash
+              if : always()
+              run: |
+                PYTHONPATH=".:/usr/local/lib/python3.10/dist-packages/" pypy3 test-utils/nose_runner -E -s tests
+
+
             - name: Tox testing
 
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               #  move to tox testing, otherwise will have to parametrize
               #  nose in more details; here tox.ini will apply
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              shell: bash
+              if : always()
               run: |
                 pip install tox
                 echo "Installed tox"
                 tox
                 echo "Ran tox"
 
-            - name: Nose2 testing
 
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              #  Last try... with a nose2.cfg file
-              #
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              run: |
-                nose2 -c nose2.cfg
