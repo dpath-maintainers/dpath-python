@@ -30,7 +30,7 @@ jobs:
                   python-version: '3.10'
                   architecture: 'x64'
 
-            - name: Set up Pypy 
+            - name: Set up Pypy
               uses: actions/setup-python@main
               with:
                   python-version: 'pypy3.9'
@@ -88,15 +88,16 @@ jobs:
 
             - name: Perform python tests
               shell: bash
-              if : always()
+              if: always()
               run: |
                 PYTHONPATH="." test-utils/nose_runner -E -s tests
 
             - name: Perform pypy tests
               shell: bash
-              if : always()
+              if: always()
               run: |
-                PYTHONPATH=".:/usr/local/lib/python3.10/dist-packages/" pypy3 test-utils/nose_runner -E -s tests
+                PYTHONPATH=".:/usr/local/lib/python3.10/dist-packages/" \
+                      pypy3 test-utils/nose_runner -E -s tests
 
 
             - name: Tox testing
@@ -106,11 +107,9 @@ jobs:
               #  nose in more details; here tox.ini will apply
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               shell: bash
-              if : always()
+              if: always()
               run: |
                 pip install tox
                 echo "Installed tox"
                 tox
                 echo "Ran tox"
-
-
