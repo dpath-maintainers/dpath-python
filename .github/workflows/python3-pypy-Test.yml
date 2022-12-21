@@ -73,18 +73,24 @@ jobs:
                 if [ -f requirements.txt ]; then
                    pip install -r requirements.txt;
                 fi
+                python -m pip install --upgrade nose2 rapidfuzz hypothesis
                 python setup.py install
                 echo which nose :$(which nose)
                 echo which nose2: $(which nose2)
                 echo which nose2-3.6: $(which nose2-3.6)
                 echo which nose2-3.8: $(which nose2-3.8)
 
-            - name: Check path preparing for pypy
+            - name: Check path preparing for pypy (1)
               shell: bash
-
+              if: always()
               run: |
-                test_utils/py_path_checker -M nose2 -U
-                pypy3 test_utils/py_path_checker -M nose2 -U
+                test-utils/py_path_checker -M nose2 -U
+
+            - name: Check path preparing for pypy (2)
+              shell: bash
+              if: always()
+              run: |
+                pypy3 test-utils/py_path_checker -M nose2 -U
 
             - name: Perform python tests
               shell: bash

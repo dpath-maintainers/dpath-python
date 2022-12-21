@@ -111,8 +111,8 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
         }
     }
 
-Using Python's `re` regular expressions instead of globs is also possible
-see below re_regexp_.
+**Note** : Using Python's `re` regular expressions instead of globs is explained
+below re_regexp_; defining your own string matcher objects is shown in duck_string_match_ below.
 
 ... Wow that was easy. What if I want to iterate over the results, and
 not get a merged view?
@@ -511,7 +511,66 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
         +   r"\*\*/{[A-Z][A-Za-z\\d]*Address$}"   |  "\*\*/{[A-Z][A-Za-z\\\\d]*Address$}"  +
         +-----------------------------------------+----------------------------------------+
 
+.. _duck_string_match:
 
+Need still more customization ? Roll your own match method!
+===========================================================
+
+We provide the following abstract types, where `StringMatcher` is allowed in Glob in the
+sequence form (definitions in `dpath.types`) :
+
+- `StringMatcher` (descriptive ) and
+
+- `Duck_StringMatcher`: which can be subtyped into a class, provided it offers
+    a `match` method. Instances may then be used as components in the list form of paths. 
+    This method of structural subtyping is explained in PEP 544 [https://peps.python.org/pep-0544/].
+
+Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
+  including:
+
+  - match anagrams and 
+
+  - approximate match:
+
+  .. code-block:: python 
+
+      class Anagram():
+           def __init__(self, s):
+               self.ref = "".join(sorted(s))
+    
+           def match(self, st):
+               retval = True if "".join(sorted(st)) == self.ref else None
+               return retval
+
+       mydict = TestBasics.mydict
+    
+       r1 = DP.search(mydict, "**/label")
+       r2 = DP.search(mydict, [ '**', Anagram("bella")])
+
+       assert r1 == r2
+
+
+
+  .. code-block:: python
+
+        class Approx():
+            def __init__(self, s, quality=90):
+                self.ref = s
+                self.quality=quality
+
+            def match(self, st):
+                fratio = rapidfuzz.fuzz.ratio(st, self.ref)
+                retval = True if fratio > self.quality  else None
+                return retval
+
+        mydict = TestBasics.mydict
+
+
+        r1 = DP.search(mydict, "**/placeholder")
+        r2 = DP.search(mydict, [ '**', Approx("placecolder")])
+        r3 = DP.search(mydict, [ '**', Approx("acecolder",75)])
+        assert r1 == r2
+        assert r1 == r3
 
 
 dpath.segments : The Low-Level Backend

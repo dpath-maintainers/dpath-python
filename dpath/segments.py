@@ -6,6 +6,7 @@ from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
+from dpath.types import Duck_StringMatcher
 
 import re
 try:
@@ -186,9 +187,13 @@ def match(segments: Path, glob: Glob):
     or more star segments and the type will be coerced to match that of
     the segment.
 
-    A segment is considered to match a glob if the function
-    fnmatch.fnmatchcase returns True. If fnmatchcase returns False or
-    throws an exception the result will be False.
+    A segment is considered to match a glob when:
+      -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
+                                  If fnmatchcase returns False or throws an exception
+                                  the result will be False.
+      -  the segment is a re.Pattern (result of re.compile) or
+         a dpath.types.Duck_StringMatcher : the  method match returns a value
+                                  convertible to True
 
     match(segments, glob) -> bool
     """
@@ -250,7 +255,7 @@ def match(segments: Path, glob: Glob):
                 # exception while attempting to match into a False for the
                 # match.
 
-                if isinstance(g, RE_PATTERN_TYPE):
+                if isinstance(g, Duck_StringMatcher):
                     mobj = g.match(s)
                     if mobj is None:
                         return False
