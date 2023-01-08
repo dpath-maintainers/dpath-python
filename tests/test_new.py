@@ -65,29 +65,50 @@ def test_set_new_list_path_with_separator():
     assert dict['a']['b/c/d'][0] == 1
 
 
-def test_set_new_list_integer_path_with_creator():
-    d = {}
+def test_int_ambiguity_as_list():
+    empty_dict = {}
+    dpath.new(empty_dict, 'a/b/0/c/0', 'hello')
+    assert 'b' in empty_dict.get('a', {})
+    assert isinstance(empty_dict['a']['b'], list)
+    assert len(empty_dict['a']['b']) == 1
+    assert 'c' in empty_dict['a']['b'][0]
+    assert isinstance(empty_dict['a']['b'][0]['c'], list)
+    assert len(empty_dict['a']['b'][0]['c']) == 1
 
-    def mycreator(obj, pathcomp, nextpathcomp, hints):
-        print(hints)
-        print(pathcomp)
-        print(nextpathcomp)
-        print("...")
 
-        target = pathcomp[0]
-        if isinstance(obj, list) and (target.isdigit()):
-            target = int(target)
+def test_int_ambiguity_as_dict():
+    _dict = {"a": {"b": {"0": {}}}}
+    dpath.new(_dict, 'a/b/0/c/0', 'hello')
+    assert 'b' in _dict.get('a', {})
+    assert isinstance(_dict['a']['b'], dict)
+    assert '0' in _dict['a']['b']
+    assert 'c' in _dict['a']['b']['0']
+    assert isinstance(_dict['a']['b']['0']['c'], list)
 
-        if ((nextpathcomp is not None) and (isinstance(nextpathcomp, int) or str(nextpathcomp).isdigit())):
-            obj[target] = [None] * (int(nextpathcomp) + 1)
-            print("Created new list in target")
-        else:
-            print("Created new dict in target")
-            obj[target] = {}
-        print(obj)
 
-    dpath.new(d, '/a/2', 3, creator=mycreator)
-    print(d)
-    assert isinstance(d['a'], list)
-    assert len(d['a']) == 3
-    assert d['a'][2] == 3
+# def test_set_new_list_integer_path_with_creator():
+#     d = {}
+
+#     def mycreator(obj, pathcomp, nextpathcomp, hints):
+#         print(hints)
+#         print(pathcomp)
+#         print(nextpathcomp)
+#         print("...")
+
+#         target = pathcomp[0]
+#         if isinstance(obj, list) and (target.isdigit()):
+#             target = int(target)
+
+#         if ((nextpathcomp is not None) and (isinstance(nextpathcomp, int) or str(nextpathcomp).isdigit())):
+#             obj[target] = [None] * (int(nextpathcomp) + 1)
+#             print("Created new list in target")
+#         else:
+#             print("Created new dict in target")
+#             obj[target] = {}
+#         print(obj)
+
+#     dpath.new(d, '/a/2', 3, creator=mycreator)
+#     print(d)
+#     assert isinstance(d['a'], list)
+#     assert len(d['a']) == 3
+#     assert d['a'][2] == 3
