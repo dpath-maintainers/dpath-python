@@ -1,6 +1,6 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping
+from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
@@ -254,7 +254,7 @@ def match(segments: Path, glob: Glob):
     return False
 
 
-def extend(thing: List, index: int, value=None):
+def extend(thing: MutableSequence, index: int, value=None):
     """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
@@ -280,7 +280,7 @@ def extend(thing: List, index: int, value=None):
 
 
 def _default_creator(
-        current: Union[MutableMapping, List],
+        current: Union[MutableMapping, Sequence],
         segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()
@@ -294,7 +294,10 @@ def _default_creator(
     segment = segments[i]
     length = len(segments)
 
-    if isinstance(segment, int):
+    if isinstance(current, Sequence):
+        segment = int(segment)
+
+    if isinstance(current, MutableSequence):
         extend(current, segment)
 
     # Infer the type from the hints provided.
@@ -308,7 +311,7 @@ def _default_creator(
         else:
             segment_next = None
 
-        if isinstance(segment_next, int):
+        if isinstance(segment_next, int) or segment_next.isdigit():
             current[segment] = []
         else:
             current[segment] = {}
