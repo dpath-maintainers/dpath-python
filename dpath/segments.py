@@ -92,7 +92,7 @@ def get(obj, segments: Path):
         if leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
 
-        if isinstance(current, Sequence) and isinstance(segment, (str, bytes)) and segment.isdigit():
+        if isinstance(current, Sequence) and isinstance(segment, str) and segment.isdecimal():
             segment = int(segment)
 
         current = current[segment]
@@ -314,7 +314,7 @@ def _default_creator(
         else:
             segment_next = None
 
-        if isinstance(segment_next, int) or segment_next.isdigit():
+        if isinstance(segment_next, int) or (isinstance(segment_next, str) and segment_next.isdecimal()):
             current[segment] = []
         else:
             current[segment] = {}
@@ -342,7 +342,7 @@ def set(
     for (i, segment) in enumerate(segments[:-1]):
 
         # If segment is non-int but supposed to be a sequence index
-        if isinstance(segment, (str, bytes)) and isinstance(current, Sequence) and segment.isdigit():
+        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdecimal():
             segment = int(segment)
 
         try:
@@ -364,7 +364,7 @@ def set(
     last_segment = segments[-1]
 
     # Resolve ambiguity of last segment
-    if isinstance(last_segment, (str, bytes)) and isinstance(current, Sequence) and last_segment.isdigit():
+    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdecimal():
         last_segment = int(last_segment)
 
     if isinstance(last_segment, int):
