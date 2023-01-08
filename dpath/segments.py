@@ -307,11 +307,13 @@ def _default_creator(
             segment_next = segments[i + 1]
         else:
             segment_next = None
-
-        if isinstance(segment_next, int):
+        if isinstance(segment_next, int) or str(segment_next).isdigit():
             current[segment] = []
         else:
-            current[segment] = {}
+            if isinstance(current, Sequence) and isinstance(segment, str) and segment.isdigit():
+                current.append({})
+            else:
+                current[segment] = {}
 
 
 def set(
@@ -334,7 +336,6 @@ def set(
     # For everything except the last value, walk down the path and
     # create if creator is set.
     for (i, segment) in enumerate(segments[:-1]):
-
         # If segment is non-int but supposed to be a sequence index
         if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
             segment = int(segment)
@@ -358,7 +359,7 @@ def set(
     last_segment = segments[-1]
 
     # Resolve ambiguity of last segment
-    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdigit():
+    if isinstance(last_segment, str) and last_segment.isdigit() and (isinstance(current, Sequence) or not current):
         last_segment = int(last_segment)
 
     if isinstance(last_segment, int):
