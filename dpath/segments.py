@@ -81,7 +81,7 @@ def walk(obj, location=()):
                 yield found
 
 
-def get(obj, segments):
+def get(obj, segments: Path):
     """
     Return the value at the path indicated by segments.
 
@@ -91,6 +91,9 @@ def get(obj, segments):
     for i, segment in enumerate(segments):
         if leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
+
+        if isinstance(current, Sequence) and isinstance(segment, (str, bytes)) and segment.isdigit():
+            segment = int(segment)
 
         current = current[segment]
     return current
@@ -339,7 +342,7 @@ def set(
     for (i, segment) in enumerate(segments[:-1]):
 
         # If segment is non-int but supposed to be a sequence index
-        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
+        if isinstance(segment, (str, bytes)) and isinstance(current, Sequence) and segment.isdigit():
             segment = int(segment)
 
         try:
@@ -361,7 +364,7 @@ def set(
     last_segment = segments[-1]
 
     # Resolve ambiguity of last segment
-    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdigit():
+    if isinstance(last_segment, (str, bytes)) and isinstance(current, Sequence) and last_segment.isdigit():
         last_segment = int(last_segment)
 
     if isinstance(last_segment, int):
