@@ -1,10 +1,6 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
-# Use PEP544 for Duck Typing specs
-from typing import Protocol, runtime_checkable
-from abc import abstractmethod
-
 # For re.regexp string match
 import re
 
@@ -61,36 +57,7 @@ Filter = Callable[[Any], bool]
 
 (Any) -> bool"""
 
-
-@runtime_checkable
-class Duck_StringMatcher(Protocol):
-    """Uses PEP 544: Protocols: Structural subtyping (static duck typing)
-       to define requirements for a string matcher that can be used in
-       an extended glob.
-
-       Requirement:
-         - match(str) -> Optional (Object)
-    """
-    @abstractmethod
-    def match(self, str) -> Optional[object]:
-        """ Requirement for match function, must return None if matching
-            rejected. False is not a rejection !
-        """
-        # Method without a default implementation
-        raise NotImplementedError
-
-
-StringMatcher = Union[re.Pattern, Duck_StringMatcher]
-""" Either a re.Pattern or a type that satisfies duck typing requirements
-    for matching strings
-"""
-
-
-GlobElt = Union[str, StringMatcher]
-""" Type alias for a glob sequence element
-"""
-
-Glob = Union[str, Sequence[GlobElt]]
+Glob = Union[str, Sequence[str]]
 """Type alias for glob parameters."""
 
 Path = Union[str, Sequence[PathSegment]]

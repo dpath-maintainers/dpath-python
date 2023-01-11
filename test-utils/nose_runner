@@ -2,7 +2,7 @@
 #
 # Allow to run nose2 tests with predefined variables as defined in options.py
 #
-# (C) A.Lichnewsky, 2022
+# (C) A.Lichnewsky, 2022, 2023
 
 import nose2
 import sys
@@ -16,7 +16,7 @@ def do_main():
           and in particular DPATH_ACCEPT_RE_REGEXP
 
     Usage:
-            PYTHONPATH=<as appropriate> nose_runner [-d] [-E] [-K]  [-s <test directory>] <test-specs>
+            PYTHONPATH=<as appropriate> nose_runner [-d] [-E] [-K] [-D <val>]  [-s <test directory>] <test-specs>
 
     Flags:
     """
@@ -56,7 +56,7 @@ def do_main():
 
         sys.exit(1)
 
-    sys.argv = [el for el in sys.argv if not (el in ("-d", "-K", "-E"))]
+    sys.argv = [el for el in sys.argv if not (el in ("-d", "-K", "-E", "-D", "-N"))]
 
     if options.doDebug:
         print(f"Accept extended regexp:{OPTS.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)

@@ -73,7 +73,7 @@ jobs:
                 if [ -f requirements.txt ]; then
                    pip install -r requirements.txt;
                 fi
-                python -m pip install --upgrade nose2 rapidfuzz hypothesis
+                python -m pip install --upgrade nose2  hypothesis
                 python setup.py install
                 echo which nose :$(which nose)
                 echo which nose2: $(which nose2)

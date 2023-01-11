@@ -6,8 +6,6 @@ from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
-from dpath.types import Duck_StringMatcher
-
 import re
 try:
     RE_PATTERN_TYPE = re.Pattern
@@ -191,9 +189,7 @@ def match(segments: Path, glob: Glob):
       -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
                                   If fnmatchcase returns False or throws an exception
                                   the result will be False.
-      -  the segment is a re.Pattern (result of re.compile) or
-         a dpath.types.Duck_StringMatcher : the  method match returns a value
-                                  convertible to True
+      -  the segment is a re.Pattern (result of re.compile) 
 
     match(segments, glob) -> bool
     """
@@ -255,7 +251,7 @@ def match(segments: Path, glob: Glob):
                 # exception while attempting to match into a False for the
                 # match.
 
-                if isinstance(g, Duck_StringMatcher):
+                if isinstance(g, RE_PATTERN_TYPE):
                     mobj = g.match(s)
                     if mobj is None:
                         return False

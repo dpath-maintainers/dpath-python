@@ -1,6 +1,6 @@
 name: LinterTest
     # ------------------------------------------------------------
-    # (C) Alain Lichnewsky, 2021
+    # (C) Alain Lichnewsky, 2021, 2022
     #
     # For running under Github's Actions
     #
@@ -47,10 +47,10 @@ jobs:
 
       # Runs the Super-Linter action
       - name: Run Super-Linter
-        uses: github/super-linter@v3
+        uses: github/super-linter@latest
       #
       # this script requires some environment variables
       #
         env:
-          DEFAULT_BRANCH: AL-addRegexp
+          DEFAULT_BRANCH: AL-master4merge
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

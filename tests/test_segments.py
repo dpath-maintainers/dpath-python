@@ -382,9 +382,9 @@ if __name__ == "__main__":
     #           ../dpath-source/tests/test_segments.py
 
     # B) Adapt and uncomment the following
-    ts = TestSegments()
-    ts.test_view()
-    print("Test test_view: OK")
+    # ts = TestSegments()
+    # ts.test_view()
+    # print("Test test_view: OK")
 
     print("""
     a) This is intended to be run under nose2 and not standalone !
