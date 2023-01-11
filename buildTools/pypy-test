@@ -53,11 +53,14 @@ function run_pypy () {
     declare -r target="$1"
     declare -r pythonpath="$2"
 
-    declare -r pythonpath2="${pythonpath}:${HOME}/.local/lib/python3.10/site-packages/:/usr/local/lib/python3.10/dist-packages/" 
+    pythonpath2="${pythonpath}:${HOME}/.local/lib/python3.10/site-packages/:/usr/local/lib/python3.10/dist-packages/" 
+    #pythonpath2="${pythonpath2}:/usr/lib/python3.10/:/usr/lib/python3.11/"
+    pythonpath2="${pythonpath2}:/usr/local/lib/python3.10/dist-packages/:/usr/local/lib/python3.11/dist-packages/"
+
     export PYTHONPATH="${pythonpath2}" 
 
     echo ${ECHO} PYTHONPATH="${pythonpath2}"
-    ${ECHO} ${PYPY} ${target} ${@: 3} 
+    ${ECHO} ${PYPY} ${runPdb} ${target} ${@: 3} 
 }
 
 function usage() {
@@ -69,6 +72,7 @@ Function:
     -h         : print this help
     -v         : verbose mode
     -d         : debug mode: echo commands instead of executing (env. ECHO) 
+    -P         : run the Python Debugger pdb
     -r <target> : run pypy on target
 
 EOF
@@ -76,7 +80,7 @@ EOF
 }
 
 doProc="default"
-while getopts "dhvr:" opt; do
+while getopts "dhvr:P" opt; do
     foundOpt=1
     case "$opt" in
     d)  verbose=1 ;
@@ -87,6 +91,9 @@ while getopts "dhvr:" opt; do
         ;;
     r) runtarget="${OPTARG}"
         doProc=runPypy
+        ;;
+
+    P) runPdb="-m pdb"
         ;;
 
     -)  echo found --

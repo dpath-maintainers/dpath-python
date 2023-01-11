@@ -1,9 +1,15 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
-# Use PEP544 for Duck Typing specs
-from typing import Protocol, runtime_checkable
-from abc import abstractmethod
+from dpath.options import PEP544_PROTOCOL_AVAILABLE
+
+if PEP544_PROTOCOL_AVAILABLE:
+    try:
+        # Use PEP544 for Duck Typing specs
+        from typing import Protocol, runtime_checkable
+        from abc import abstractmethod
+    except Exception:
+        PEP544_PROTOCOL_AVAILABLE = False
 
 # For re.regexp string match
 import re
@@ -62,29 +68,53 @@ Filter = Callable[[Any], bool]
 (Any) -> bool"""
 
 
-@runtime_checkable
-class Duck_StringMatcher(Protocol):
-    """Uses PEP 544: Protocols: Structural subtyping (static duck typing)
-       to define requirements for a string matcher that can be used in
-       an extended glob.
-
-       Requirement:
-         - match(str) -> Optional (Object)
+class Basic_StringMatcher:
+    """ Empty version of base class to be used when typing.Protocol is not
+            available. In this case, a derived class defining match can be
+            used to match path components. (see examples)
     """
-    @abstractmethod
-    def match(self, str) -> Optional[object]:
-        """ Requirement for match function, must return None if matching
-            rejected. False is not a rejection !
-        """
-        # Method without a default implementation
+
+    def __init__(self):
+        raise RuntimeError("This is a pseudo abstract class")
+
+    def match(self, str):
         raise NotImplementedError
 
 
-StringMatcher = Union[re.Pattern, Duck_StringMatcher]
-""" Either a re.Pattern or a type that satisfies duck typing requirements
-    for matching strings
-"""
+if PEP544_PROTOCOL_AVAILABLE:
+    @runtime_checkable
+    class Duck_StringMatcher(Protocol):
+        """ Facilitate match component matching using duck typing (see examples)
+           Uses PEP 544: Protocols: Structural subtyping (static duck typing)
+           to define requirements for a string matcher that can be used in
+           an extended glob.
 
+           Requirement:
+            - match(str) -> Optional (Object)
+        """
+        @abstractmethod
+        def match(self, str) -> Optional[object]:
+            """ Requirement for match function, must return None if matching
+            rejected. False is not a rejection !
+            """
+            # Method without a default implementation
+            raise NotImplementedError
+
+    StringMatcher = Union[re.Pattern, Duck_StringMatcher, Basic_StringMatcher]
+
+    # version facilitating use of isinstance internally
+    StringMatcher_aslist = (re.Pattern, Basic_StringMatcher, Duck_StringMatcher)
+else:
+
+    Duck_StringMatcher = Basic_StringMatcher
+
+    StringMatcher = Union[re.Pattern, Basic_StringMatcher]
+    """ Either a re.Pattern or a type that satisfies duck typing requirements
+    for matching strings
+    """
+
+    # version facilitating use of isinstance internally
+    StringMatcher_aslist = (re.Pattern, Basic_StringMatcher)
 
 GlobElt = Union[str, StringMatcher]
 """ Type alias for a glob sequence element

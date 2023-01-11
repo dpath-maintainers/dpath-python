@@ -519,11 +519,18 @@ Need still more customization ? Roll your own match method!
 We provide the following abstract types, where `StringMatcher` is allowed in Glob in the
 sequence form (definitions in `dpath.types`) :
 
-- `StringMatcher` (descriptive ) and
+- `StringMatcher` (descriptive ),
 
-- `Duck_StringMatcher`: which can be subtyped into a class, provided it offers
+- `Duck_StringMatcher`: which will accept a class as a **subtype**, provided it offers
     a `match` method. Instances may then be used as components in the list form of paths. 
     This method of structural subtyping is explained in PEP 544 [https://peps.python.org/pep-0544/].
+
+- `Basic_StringMatcher` which can be used as a base class, enabling your derivec class to be 
+   recognized and participate in a match.
+
+**Note** The mechanisms used by Duck_StringMatcher are not available on all versions
+of Python and Pypy, so you may need to revert to using Basic_StringMatcher. The
+variable dpath.options.PEP544_PROTOCOL_AVAILABLE indicates when duck typing is possible.
 
 Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
   including:
@@ -572,6 +579,20 @@ Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
         assert r1 == r2
         assert r1 == r3
 
+For comparison, the first example redone to avoid duck typing:
+
+  .. code-block:: python
+
+       if not DP.options.PEP544_PROTOCOL_AVAILABLE:
+             class Anagram(DP.types.Basic_StringMatcher):
+                def __init__(self, s):
+                    self.ref = "".join(sorted(s))
+
+                def match(self, st):
+                    retval = True if "".join(sorted(st)) == self.ref else None
+                    return retval
+
+       DP.search(mydict, ['**', Anagram("bella")])
 
 dpath.segments : The Low-Level Backend
 ======================================

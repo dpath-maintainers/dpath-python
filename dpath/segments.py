@@ -6,7 +6,8 @@ from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
-from dpath.types import Duck_StringMatcher
+from dpath.types import StringMatcher_aslist
+from dpath.options import isinstance_ext
 
 import re
 try:
@@ -255,7 +256,7 @@ def match(segments: Path, glob: Glob):
                 # exception while attempting to match into a False for the
                 # match.
 
-                if isinstance(g, Duck_StringMatcher):
+                if isinstance_ext(g, StringMatcher_aslist):
                     mobj = g.match(s)
                     if mobj is None:
                         return False

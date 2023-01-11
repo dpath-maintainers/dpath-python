@@ -16,7 +16,7 @@ def do_main():
           and in particular DPATH_ACCEPT_RE_REGEXP
 
     Usage:
-            PYTHONPATH=<as appropriate> nose_runner [-d] [-E] [-K]  [-s <test directory>] <test-specs>
+            PYTHONPATH=<as appropriate> nose_runner [-d] [-E] [-K] [-D <val>]  [-s <test directory>] <test-specs>
 
     Flags:
     """
@@ -31,6 +31,12 @@ def do_main():
 
     argLineParser.add_argument("-K", "--emptyStringKeys", action="store_true", dest="doEmptyStringKeys",
                                help="Enable regexp extended paths")
+
+    argLineParser.add_argument("-D", "--duckTyping", dest="duckTyping", action="store_true",
+                               help="Enable support for PEP544 duck typing (if available), default: enabled")
+
+    argLineParser.add_argument("-N", "--noDuckTyping", dest="duckTyping", action="store_false",
+                               help="Disable support for PEP544 duck typing")
 
     argLineParser.add_argument("-v", "--verbose",  action="store_true",  dest="noseVerbose",
                                help="Request nose prints tests entered and result")
@@ -51,16 +57,20 @@ def do_main():
         if options.doEmptyStringKeys:
             OPTS.ALLOW_EMPTY_STRING_KEYS = True
 
+        if options.duckTyping is not None:
+            OPTS.PEP544_PROTOCOL_AVAILABLE = options.duckTyping
+
     except Exception:
         print("Quitting because of error(s)", file=sys.stderr)
 
         sys.exit(1)
 
-    sys.argv = [el for el in sys.argv if not (el in ("-d", "-K", "-E"))]
+    sys.argv = [el for el in sys.argv if not (el in ("-d", "-K", "-E", "-D", "-N"))]
 
     if options.doDebug:
         print(f"Accept extended regexp:{OPTS.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)
         print(f"Allow empty string keys:{OPTS.ALLOW_EMPTY_STRING_KEYS}", file=sys.stderr)
+        print(f"PEP544 duck_typing supported:{OPTS.PEP544_PROTOCOL_AVAILABLE}", file=sys.stderr)
         print(f"Start discovery at:{options.startDir}", file=sys.stderr)
 
         print(f"Nose2.discover arglist:{sys.argv}")

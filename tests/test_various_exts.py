@@ -314,13 +314,16 @@ if __name__ == "__main__":
     #    PYTHONPATH="../dpath-source"  python3 -m pdb \
     #             ../dpath-source/tests/test_various_exts.py
     # B) Adapt and uncomment the following
-    # ts=TestSearch()
-    # ts.test4()
+    # ts=TestGet()
+    # ts.test1()
+
+    # ts=TestDelete()
+    # ts.test1()
 
     print("""
     a) This is intended to be run under nose2 and not standalone !
     b) Python script nose_runner (in test-utils) adds to nose2 capability to set dpath.options
-
+       It is also possible to run under pypy using pypy-test
     Exiting
     """,
           file=sys.stderr
