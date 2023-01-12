@@ -52,6 +52,27 @@ def test_set_list_with_dict_int_ambiguity():
     assert d == expected
 
 
+def test_int_segment_list_type_check():
+    d = {}
+    dpath.new(d, "a/b/0/c/0", "hello")
+    assert 'b' in d.get("a", {})
+    assert isinstance(d["a"]["b"], list)
+    assert len(d["a"]["b"]) == 1
+    assert 'c' in d["a"]["b"][0]
+    assert isinstance(d["a"]["b"][0]["c"], list)
+    assert len(d["a"]["b"][0]["c"]) == 1
+
+
+def test_int_segment_dict_type_check():
+    d = {"a": {"b": {"0": {}}}}
+    dpath.new(d, "a/b/0/c/0", "hello")
+    assert "b" in d.get("a", {})
+    assert isinstance(d["a"]["b"], dict)
+    assert '0' in d["a"]["b"]
+    assert 'c' in d["a"]["b"]["0"]
+    assert isinstance(d["a"]["b"]["0"]["c"], list)
+
+
 def test_set_new_list_path_with_separator():
     # This test kills many birds with one stone, forgive me
     dict = {

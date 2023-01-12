@@ -49,7 +49,7 @@ class MergeType(IntFlag):
     replaces the destination in this situation."""
 
 
-PathSegment = Union[int, str]
+PathSegment = Union[int, str, bytes]
 """Type alias for dict path segments where integers are explicitly casted."""
 
 Filter = Callable[[Any], bool]
