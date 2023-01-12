@@ -1,9 +1,6 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
-# For re.regexp string match
-import re
-
 
 class SymmetricInt(int):
     """Same as a normal int but mimicks the behavior of list indexes (can be compared to a negative number)."""
