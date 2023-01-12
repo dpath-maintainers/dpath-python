@@ -43,7 +43,7 @@ def mutate(draw, segment):
         def to_kind(v):
             try:
                 return bytes(v, 'utf-8')
-            except:
+            except Exception:
                 return kind(v)
     else:
         def to_kind(v):
@@ -328,4 +328,70 @@ class TestSegments(TestCase):
         assume(found == found)  # Hello, nan! We don't want you here.
 
         view = api.view(node, segments)
+        g1 = api.get(view, segments)
+        g2 = api.get(node, segments)
+
+        # ------------------------------------------------------------------
+        # Added to debug a rare case of (random )error
+        if g1 != g2:
+            print(f"node: {node}")
+            print(f"segments: {segments}")
+            print(f"view: {view}")
+            print(f"g1: {g1}")
+            print(f"g2: {g2}")
+        # ------------------------------------------------------------------
+
         assert api.get(view, segments) == api.get(node, segments)
+
+        # ------------------------------------------------------------------
+
+        # Traceback (most recent call last):
+        # File "/mount/dpath-source/tests/test_segments.py", line 323, in test_view
+        # def test_view(self, walkable):
+        # File "/usr/local/lib/python3.10/dist-packages/hypothesis/core.py", line 1325, in wrapped_test
+        #  raise the_error_hypothesis_found
+        # File "/mount/dpath-source/tests/test_segments.py", line 331, in test_view
+        #  assert api.get(view, segments) == api.get(node, segments)
+        # File "/home/user/dpath-source/dpath/segments.py", line 103, in get
+        #  current = current[segment]
+        # KeyError: b'[\x00]'
+        # Falsifying example: test_view(
+        #    walkable=({b'': None,
+        #    b'\x00': {b'': 0, '': 0},
+        #    b'\x01': {b'': {b'': False, b'\x00': False, '': 0}, '': 0},
+        #    '': [0, 0],
+        #    b'[\x00]': [0]},
+        #    ((b'[\x00]', <SymmetricInt 0%1>), 0)),
+        #   self=<tests.test_segments.TestSegments testMethod=test_view>,)
+
+        # Under Pdb
+        # AT LINE 345 ()
+        # view = {}
+        # node =  {b'': None, b'\x00': {b'': 0, '': 0},
+        #          b'\x01': {b'': {b'': False,    b'\x00': False, '': 0}, '': 0},
+        #         '': [0, 0], b'[\x00]': [0]}
+        # segments = segments (b'[\x00]', <SymmetricInt 0%1>)
+        # ------------------------------------------------------------------
+
+
+if __name__ == "__main__":
+    import sys
+    # To debug under the Python debugger:
+    # A) Use a command like:
+    # PYTHONPATH="../dpath-source"  python3 -m pdb \
+    #           ../dpath-source/tests/test_segments.py
+
+    # B) Adapt and uncomment the following
+    ts = TestSegments()
+    ts.test_view()
+    print("Test test_view: OK")
+
+    print("""
+    a) This is intended to be run under nose2 and not standalone !
+    b) Python script nose_runner (in test-utils) adds to nose2 capability to set dpath.options
+
+    Exiting
+    """,
+          file=sys.stderr
+          )
+    sys.exit(2)

@@ -1,0 +1,121 @@
+name: Test python package dpath-python with regexp ext and pypy
+    # ------------------------------------------------------------
+    # (C) Alain Lichnewsky, 2021, 2022
+    #
+    # For running under Github's Actions
+    #
+    # Here the idea is to use tox for testing and test on python 3.8 and
+    # pypy-3.7.
+    #
+    # ------------------------------------------------------------
+
+on:
+    # manual dispatch, this script will not be started automagically
+    workflow_dispatch:
+
+jobs:
+    test-python3:
+
+        timeout-minutes: 60
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@main
+
+            - name: Set up Python 3.10
+              uses: actions/setup-python@main
+              with:
+                  python-version: '3.10'
+                  architecture: 'x64'
+
+            - name: Set up Pypy
+              uses: actions/setup-python@main
+              with:
+                  python-version: 'pypy3.9'
+                  architecture: 'x64'
+
+
+            - name: Ascertain configuration
+              shell: bash
+              #
+              #    Collect information concerning $HOME and the location of
+              #    file(s) loaded from Github/
+              run: |
+                echo Working dir: $(pwd)
+                echo Files at this location:
+                ls -ltha
+                echo HOME: ${HOME}
+                echo LANG: ${LANG}  SHELL: ${SHELL}
+                which python
+                echo LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}
+                echo PYTHONPATH: \'${PYTHONPATH}\'
+
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #    ** here (it is expected that) **
+              #  pythonLocation: /opt/hostedtoolcache/Python/3.8.8/x64
+              #  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.8/x64/lib
+              #  Working dir /home/runner/work/dpath-python/dpath-python
+              #  HOME: /home/runner
+              #  LANG: C.UTF-8
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+            - name: Install dependencies
+
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  requirements install the test framework, which is not
+              #  required by the package in setup.py
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              shell: bash
+              run: |
+                python -m pip install --upgrade pip setuptools wheel
+                if [ -f requirements.txt ]; then
+                   pip install -r requirements.txt;
+                fi
+                python -m pip install --upgrade nose2 rapidfuzz hypothesis
+                python setup.py install
+                echo which nose :$(which nose)
+                echo which nose2: $(which nose2)
+                echo which nose2-3.6: $(which nose2-3.6)
+                echo which nose2-3.8: $(which nose2-3.8)
+
+            - name: Check path preparing for pypy (1)
+              shell: bash
+              if: always()
+              run: |
+                test-utils/py_path_checker -M nose2 -U
+
+            - name: Check path preparing for pypy (2)
+              shell: bash
+              if: always()
+              run: |
+                pypy3 test-utils/py_path_checker -M nose2 -U
+
+            - name: Perform python tests
+              shell: bash
+              if: always()
+              run: |
+                PYTHONPATH="." test-utils/nose_runner -E -s tests
+
+            - name: Perform pypy tests
+              shell: bash
+              if: always()
+              run: |
+                PYTHONPATH=".:/usr/local/lib/python3.10/dist-packages/" \
+                      pypy3 test-utils/nose_runner -E -s tests
+
+
+            - name: Tox testing
+
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              #  move to tox testing, otherwise will have to parametrize
+              #  nose in more details; here tox.ini will apply
+              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              shell: bash
+              if: always()
+              run: |
+                pip install tox
+                echo "Installed tox"
+                tox
+                echo "Ran tox"

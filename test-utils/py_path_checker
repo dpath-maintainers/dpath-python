@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+#
+# Check PYTHONPATH in relation with using PyPy3
+#
+# (C) A.Lichnewsky, 2022
+#
+
+# Object:
+#   On some installations, pypy3 does not search installation paths as
+#   extensively as python3, so that codes do not work. This is easily
+#   corrected using PYTHONPATH, once the required paths are known
+#
+#   This programs displays path where certain modules are to be found
+# -------------------------------------------------------------------------
+
+# minimum set of imports
+import sys
+import os
+import fnmatch
+import glob
+import argparse
+import importlib
+import re
+
+modules_not_imported = []
+
+
+def do_checks(nameList):
+    "Check if modules in nameList may be imported"
+    for modname in nameList:
+        print(f"trying module {modname}", file=sys.stderr)
+        try:
+            importlib.import_module(modname)
+        except Exception as err:
+            print(f"Error when importing '{modname}':{err}")
+            modules_not_imported.append(modname)
+
+
+def do_check_paths(nameList, pathList=sys.path):
+    "Look in pathList for modules in nameList"
+    print(f"Looking in sys.path for {nameList}", file=sys.stderr)
+    count = 0
+    for p in pathList:
+        print(f"Searching path:\t{p}", file=sys.stderr)
+        for root, dirs, files in os.walk(p):
+            for sname in nameList:
+                for name in files:
+                    mname = sname + ".py"
+                    if fnmatch.fnmatch(name, mname):
+                        count += 1
+                        print(f"\t\tFound:{os.path.join(root, name)}\tmatching:{mname}",
+                              file=sys.stderr)
+
+                if (len(dirs) > 1) or (len(dirs) == 1 and "__pycache__" not in dirs):
+                    if sname in dirs:
+                        count += 1
+                        print(f"\tFound module dir {os.path.join(root, name)}\tmatching:{sname}", file=sys.stderr)
+
+    return count
+
+
+piplist_str = r"(?P<pkgname>[A-Za-z]\S+)\s+" \
+    + r"(?P<version>\S+)\s+"       \
+    + r"(?P<path>\S+)\s+"          \
+    + r"(?P<installer>\S+).*"
+
+piplist_rex = None
+try:
+    piplist_rex = re.compile(piplist_str)
+except Exception as err:
+    print(f"In re.regex=\"{piplist_str}\"", file=sys.stderr)
+    print(f"Error:{err}", file=sys.stderr)
+    raise
+
+
+def do_check_pip_installs():
+    "Inform on pip installed modules as returned by command 'pip list -v'"
+    collect = {}
+    with os.popen("pip list -v") as pipe:
+        first = True
+        for line in pipe:
+            match = piplist_rex.match(line)
+            if match and not first:
+                d = match.groupdict()
+                p = d["path"]
+                if p in collect:
+                    collect[p].append(d)
+                else:
+                    collect[p] = [d]
+
+            first = False
+
+    print("Packages known to pip", file=sys.stderr)
+    for p, v in collect.items():
+        r = ",\t".join(("/".join((elv["pkgname"], elv["version"])) for elv in v))
+        print(f"{p}\t{r}\n", file=sys.stderr)
+
+
+usual_paths = (
+    "/usr/local/lib/python*/dist-packages",
+    "/usr/local/lib/pypy*/dist-packages",
+    "/usr/lib/python*",
+    "usr/lib/pypy*",
+    os.path.expanduser("~") + "/.local/lib/py*"
+)
+
+
+def do_check_usual(nameList, verbose=False):
+    "Inform on modules installed in path (glob'ed)"
+    collect = set()
+    for path in usual_paths:
+        if verbose:
+            print(f"Path:{path}", file=sys.stderr)
+        for p in glob.iglob(path):
+            if verbose:
+                print(f"\tPath: {p}", file=sys.stderr)
+            collect.add(p)
+    fmtlist = '\n\t'.join(sorted(collect))
+
+    if len (nameList) == 0 :
+        print(f"Collected paths from 'Usual Suspects':\n\t{fmtlist}\n")
+    else:
+        print(f"Searching in paths from  'Usual Suspects':")        
+        do_check_paths(nameList, pathList=collect)
+
+
+def do_main():
+    description = """
+    This explores the library search paths, looking for module installation
+
+    Usage:nose_pypychecker [-d] [-v] [-h] [-P] [-U]  [-M <module> ...]
+
+    Default for -M: empty list
+    """
+
+    argLineParser = argparse.ArgumentParser(description=description,
+                                            formatter_class=argparse.RawTextHelpFormatter)
+    argLineParser.add_argument("-d", "--debug", action="store_true", dest="doDebug",
+                               help="Adds debug messages on stderr"),
+
+    argLineParser.add_argument("-v", "--verbose", action="store_true", dest="verbose",
+                               help="Increase output of commands")
+
+    argLineParser.add_argument("-U", "--usual", action="store_true", dest="usual",
+                               help="Request analysis of usual suspects beyond sys.path")
+
+    argLineParser.add_argument("-P", "--pip", action="store_true", dest="pip",
+                               help="Request analysis of modules installed by pip")
+
+    argLineParser.add_argument("-M", "--module", dest="module", type=str, nargs="+",
+                               help="Request searching for a specific module")
+
+    try:
+        options = argLineParser.parse_args()
+        if options.doDebug:
+            print(f"Options in use:{repr(options)}", file=sys.stderr)
+            print(f"Python interpreter: {sys.executable}")
+
+        if options.module is None:
+            options.module = []
+
+        do_checks(options.module)
+
+        nb = None
+        if len(modules_not_imported) > 0:
+            nb = do_check_paths(modules_not_imported)
+        elif (len(options.module) > 0) or options.verbose:
+            nb = do_check_paths(options.module)
+
+        nb = 0 if (nb is None) else nb
+        print(f"Found {nb} paths leading to a module in search list")
+
+        if options.pip:
+            do_check_pip_installs()
+
+        if options.usual or (len(modules_not_imported) > 0 and not nb):
+            do_check_usual(modules_not_imported, verbose=options.verbose)
+
+    except Exception:
+        print("Quitting because of error(s)", file=sys.stderr)
+        raise
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    do_main()
