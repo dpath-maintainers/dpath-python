@@ -192,7 +192,7 @@ def match(segments: Path, glob: Glob):
       -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
                                   If fnmatchcase returns False or throws an exception
                                   the result will be False.
-      -  the segment is a re.Pattern (result of re.compile) 
+      -  the segment is a re.Pattern (result of re.compile)
 
     match(segments, glob) -> bool
     """
