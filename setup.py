@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 import dpath.version
 
@@ -25,6 +25,7 @@ if __name__ == "__main__":
         scripts=[],
         packages=["dpath"],
         data_files=[],
+        package_data={"dpath": ["py.typed"]},
 
         # Type hints are great.
         # Function annotations were added in Python 3.0.
@@ -43,6 +44,11 @@ if __name__ == "__main__":
             'License :: OSI Approved :: MIT License',
             'Natural Language :: English',
             'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
             'Topic :: Software Development :: Libraries :: Python Modules',
+            'Typing :: Typed',
         ],
     )
