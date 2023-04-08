@@ -111,6 +111,9 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
         }
     }
 
+**Note** : Using Python's `re` regular expressions instead of globs is explained
+below re_regexp_.
+
 ... Wow that was easy. What if I want to iterate over the results, and
 not get a merged view?
 
@@ -437,6 +440,82 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> x = { 'a': {'b/c': 0}}
    >>> dpath.get(['a', 'b/c'])
    0
+
+.. _re_regexp:
+
+Globs too imprecise? Use Python's `re` Regular Expressions
+==========================================================
+
+Python's `re` regular expressions PythonRe_ may be used as follows:
+
+  .. _PythonRe:  https://docs.python.org/3/library/re.html
+
+  -  This facility is enabled by default, but may be disabled (for backwards 
+     compatibility in the unlikely cases where a path expression component would start 
+     with '{' and end in '}'):
+
+   .. code-block:: python
+
+     >>> import dpath
+     >>> # disable
+     >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = False
+     >>> # enable
+	 >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = True
+
+  -  Now a path component may also be specified : 
+
+     - in a path expression, as {<re.regexpr>} where `<re.regexpr>` is a regular expression
+       accepted by the  standard Python module `re`. For example:
+
+      .. code-block:: python 
+
+       >>> selPath = 'Config/{(Env|Cmd)}'
+       >>> x = dpath.util.search(js.lod, selPath)
+
+      .. code-block:: python
+
+       >>> selPath = '{(Config|Graph)}/{(Env|Cmd|Data)}'
+       >>> x = dpath.util.search(js.lod, selPath)
+
+     - When using the list form for a path, a list element can also
+       be expressed as
+   
+       -  a string as above
+       -  the output of ::    `re.compile( args )``
+
+       An example:
+
+       .. code-block:: python
+
+        >>> selPath = [ re.compile('(Config|Graph)') , re.compile('(Env|Cmd|Data)') ]
+        >>>  x = dpath.util.search(js.lod, selPath)
+
+       More examples from a realistic json context:
+
+       +-----------------------------------------+--------------------------------------+
+       +     **Extended path glob**              |  **Designates**                      + 
+       +-----------------------------------------+--------------------------------------+
+       +     "\*\*/{[^A-Za-z]{2}$}"              |   "Id"                               +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*/{[A-Z][A-Za-z\\d]*$}"          |  "Name","Id","Created", "Scope",...  +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*\d$}"      |   EnableIPv6"                        +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*Address$}" |   "Containers/199c5/MacAddress"      +
+       +-----------------------------------------+--------------------------------------+
+       
+       With Python's character string conventions, required backslashes in the `re` syntax
+       can be entered either in raw strings or using double backslashes, thus
+       the following are equivalent:
+
+        +-----------------------------------------+----------------------------------------+
+        +    *with raw strings*                   | *equivalent* with double backslash     +
+        +-----------------------------------------+----------------------------------------+
+        +    r"\*\*/{[A-Z][A-Za-z\\d]*\\d$}"      |   "\*\*/{[A-Z][A-Za-z\\\\d]*\\\\d$}"   +
+        +-----------------------------------------+----------------------------------------+
+        +   r"\*\*/{[A-Z][A-Za-z\\d]*Address$}"   |  "\*\*/{[A-Z][A-Za-z\\\\d]*Address$}"  +
+        +-----------------------------------------+----------------------------------------+
+
 
 dpath.segments : The Low-Level Backend
 ======================================
