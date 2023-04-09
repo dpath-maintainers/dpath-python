@@ -291,7 +291,7 @@ class TestView(unittest.TestCase):
         specs = dicts.specs1
         for spec in specs:
             for ret in DP.segments.view(dict1, spec[0]):
-                print(f"\tview {spec=} returns:{ret}", file=sys.stderr)
+                print(f"\tview spec:{spec} returns:{ret}", file=sys.stderr)
                 assert ret == spec[1]
 
 
@@ -304,5 +304,5 @@ class TestMatch(unittest.TestCase):
         specs = dicts.specs1
         for spec in specs:
             ret = DP.segments.match(dict1, spec[0])
-            print(f"\tmatch {spec=} returns:{ret}", file=sys.stderr)
+            print(f"\tmatch spec:{spec} returns:{ret}", file=sys.stderr)
             assert ret == spec[2]
