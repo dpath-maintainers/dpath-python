@@ -2,7 +2,7 @@ import datetime
 import decimal
 import time
 
-from unittest.mock import patch
+import mock
 from nose2.tools.such import helper
 
 import dpath
@@ -109,7 +109,7 @@ def test_values():
     assert 2 in ret
 
 
-@patch('dpath.search')
+@mock.patch('dpath.search')
 def test_values_passes_through(searchfunc):
     searchfunc.return_value = []
 
@@ -190,7 +190,7 @@ def test_non_leaf_leaf():
     # Data classes should also be retrievable:
     try:
         import dataclasses
-    except Exception:
+    except:
         return
 
     @dataclasses.dataclass
