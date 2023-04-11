@@ -5,15 +5,7 @@ from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMappi
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
-
-from dpath.types import StringMatcher_aslist
-from dpath.options import isinstance_ext
-
-import re
-try:
-    RE_PATTERN_TYPE = re.Pattern
-except AttributeError:
-    RE_PATTERN_TYPE = re._pattern_type
+from dpath.types import StringMatcher_astuple
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -117,7 +109,7 @@ def has(obj, segments):
     try:
         get(obj, segments)
         return True
-    except Exception:
+    except:
         return False
 
 
@@ -191,13 +183,13 @@ def match(segments: Path, glob: Glob):
     or more star segments and the type will be coerced to match that of
     the segment.
 
-    A segment is considered to match a glob when:
-      -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
-                                  If fnmatchcase returns False or throws an exception
-                                  the result will be False.
-      -  the segment is a re.Pattern (result of re.compile) or
-         a dpath.types.Duck_StringMatcher : the  method match returns a value
-                                  convertible to True
+    A segment is considered to match a glob when either:
+    -  the glob is a String :  the function fnmatch.fnmatchcase returns True.
+       If fnmatchcase returns False or throws an exception the result will be False.
+    -  or, the glob is a re.Pattern (result of re.compile) and re.Pattern.match returns
+       a match
+    -  or, the glob is a generalized match expression (duck typed if available, derivative
+       of class Basic_StringMatcher otherwise).
 
     match(segments, glob) -> bool
     """
@@ -244,29 +236,26 @@ def match(segments: Path, glob: Glob):
                     g = '*'
 
             try:
-
                 # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
                 # index as well. Try converting it to an int.
                 if isinstance(s, int) and s == int(g):
+
                     continue
-            except Exception:
+            except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
                 # In this case convert s to a str so fnmatch can work on it.
                 s = str(s)
 
             try:
-                # Let's see if the glob matches. We will turn any kind of
-                # exception while attempting to match into a False for the
-                # match.
-
-                if isinstance_ext(g, StringMatcher_aslist):
+                # Let's see if the glob, regular expression or the generalized match object matches.
+                # We will turn any kind of exception while attempting to match into a False for the match.
+                if isinstance(g, StringMatcher_astuple):
                     mobj = g.match(s)
                     if mobj is None:
                         return False
                 elif not fnmatchcase(s, g):
                     return False
-
-            except Exception:
+            except:
                 return False
 
         # All of the segments matched so we have a complete match.
@@ -371,7 +360,7 @@ def set(
             # Unfortunately, for our use, 'x in thing' for lists checks
             # values, not keys whereas dicts check keys.
             current[segment]
-        except Exception:
+        except:
             if creator is not None:
                 creator(current, segments, i, hints)
             else:

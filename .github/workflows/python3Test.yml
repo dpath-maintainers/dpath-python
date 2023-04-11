@@ -1,12 +1,17 @@
-name: Test python package dpath-python with regexp extension
+name: Test python package dpath-python with generalized matching
   # ------------------------------------------------------------
-  # (C) Alain Lichnewsky, 2021, 2022
+  # (C) Alain Lichnewsky, 2021, 2022, 2023
   #
   # For running under Github's Actions
   #
   # Script performs basic test of the Python-3 version of the package
   # including added functionality (regexp in search paths).
   # ------------------------------------------------------------
+  
+  # *****************************
+  # ADDED FOR TESTING PRIOR TO PR
+  # REMOVE FROM PR submission
+  # *****************************
 
 on:
     workflow_dispatch:
@@ -22,7 +27,7 @@ jobs:
         strategy:
             matrix:
                 # Match versions specified in tox.ini
-                python-version: ['3.10', 'pypy3.9']
+                python-version: ['3.8', '3.9', '3.10','3.11', 'pypy3.7', 'pypy3.9']
 
         steps:
             - name: Checkout code
@@ -58,7 +63,8 @@ jobs:
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             - name: Install dependencies
-
+              shell: bash
+              if: always()
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               #  requirements install the test framework, which is not
               #  required by the package in setup.py
@@ -75,18 +81,9 @@ jobs:
                 echo which nose2-3.6: $(which nose2-3.6)
                 echo which nose2-3.8: $(which nose2-3.8)
 
-            - name: nose_runner testing
-
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              #  This is the nose2 wrapper that allows to set pgm. parms
-              #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-              run: |
-                echo running the nose2 wrapper
-                PYTHONPATH="." test-utils/nose_runner -E  -s tests
-
             - name: Tox testing
-
+              shell: bash
+              if: always()
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               #  move to tox testing, otherwise will have to parametrize
               #  nose in more details; here tox.ini will apply

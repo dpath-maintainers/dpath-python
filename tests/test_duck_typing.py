@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 # -*- mode: Python -*-
 #
-# (C) Alain Lichnewsky, 2022
+# (C) Alain Lichnewsky, 2022, 2023
 #
-#     Test for handling structures that mix dicts and lists (possibly other
-#     iterables)
+# Tests of generalized path segment match using ad-hoc matcher objects
 #
 
 import dpath as DP
@@ -13,17 +12,22 @@ import unittest
 import re
 import sys
 import rapidfuzz
-from dpath.options import isinstance_ext
+
+
+def _sprint(*args, **kwdargs):
+    print(*args, **kwdargs, file=sys.stderr)
+
 
 # check that how the options have been set
-print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {DP.options.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)
+_sprint(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {DP.options.DPATH_ACCEPT_RE_REGEXP}")
 
 if not DP.options.DPATH_ACCEPT_RE_REGEXP:
-    print("This test doesn't make sense with DPATH_ACCEPT_RE_REGEXP = False", file=sys.stderr)
+    _sprint("This test only works with DPATH_ACCEPT_RE_REGEXP = True")
     DP.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
 
-
-print(f"PEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}", file=sys.stderr)
+if DP.options.PEP544_PROTOCOL_AVAILABLE:
+    _sprint(f"\tPEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}")
+    _sprint("\tWhen True, this permits duck typing, only available since Python3.8")
 
 
 class TestLangProc(unittest.TestCase):
@@ -32,7 +36,7 @@ class TestLangProc(unittest.TestCase):
 
     def test1(self):
         if not DP.options.PEP544_PROTOCOL_AVAILABLE:
-            print("Test1 PEPS544 Protocol not available", file=sys.stderr)
+            _sprint("Test1 PEPS544 Protocol not available")
 
         class Anagram():
             def __init__(self, s):
@@ -43,27 +47,35 @@ class TestLangProc(unittest.TestCase):
                 return retval
 
         ana = Anagram("sire")
-        test_cases = (
+        test_cases = [
             (ana, Anagram, True),
-            (ana, DP.types.Duck_StringMatcher, True),
-            (ana, DP.types.StringMatcher_aslist, True),
             ("ana", Anagram, False),
-            ("ana", DP.types.Duck_StringMatcher, False),
-            ("ana", DP.types.StringMatcher_aslist, False),
-            (re.compile("ana"), DP.types.Duck_StringMatcher, True),
-            (re.compile("ana"), DP.types.StringMatcher_aslist, True),
-            (re.compile("ana"), DP.types.Basic_StringMatcher, False),
-        )
+            ("ana", DP.types.StringMatcher_astuple, False),
+            (re.compile("ana"), DP.types.StringMatcher_astuple, True),
+            (re.compile("ana"), DP.types.Basic_StringMatcher, False)]
+
+        if DP.options.PEP544_PROTOCOL_AVAILABLE:
+            # these require Python > 3.7
+            test_cases.extend([
+                (ana, DP.types.Duck_StringMatcher, True),
+                (ana, DP.types.StringMatcher_astuple, True),
+                ("ana", DP.types.Duck_StringMatcher, False),
+                (re.compile("ana"), DP.types.Duck_StringMatcher, True)])
+        else:
+            # This executes when Python < 3.7, but rejects object ana
+            # since it is neither a re.Pattern, nor derived from BasicStringMatcher.
+            # Shows that object ana requires non available duck typing!
+            test_cases.extend([(ana, DP.types.StringMatcher_astuple, False)])
+
         success = True
         for (o, c, e) in test_cases:
-            r = isinstance_ext(o, c)
+            r = isinstance(o, c)
             exp = "OK" if (e == r) else "Unexpected"
-            print(f"{exp} isinstance({o},{c}) returns {r} expected {e}",
-                  file=sys.stderr)
+            _sprint(f"isinstance({o},{c}) returns {r} expected {e}: {exp}")
             if (e != r):
                 success = False
         assert success
-        print("Performed TestLangProc", file=sys.stderr)
+        _sprint("Performed TestLangProc.test1")
 
 
 class TestBasics(unittest.TestCase):
@@ -99,17 +111,21 @@ class TestBasics(unittest.TestCase):
                   ]
               }
 
-    def testtypes(self):
+    def testDuckStringMatcher(self):
         """ Test types
         """
-        print("Entered TestBasics.testtypes", file=sys.stderr)
+        _sprint(f"PEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}")
+        if not DP.options.PEP544_PROTOCOL_AVAILABLE:
+            _sprint("skipping TestBasics.testDuckStringMatcher, not available for Python <= 3.7")
+            return
+        _sprint("Entered TestBasics.testDuckStringMatcher")
 
         str1 = "a string"
-        if isinstance_ext(str1, DP.types.Duck_StringMatcher):
+        if isinstance(str1, DP.types.Duck_StringMatcher):
             raise RuntimeError("A string should not be accepted as a StringMatcher")
 
         rex = re.compile(r"\d+")
-        assert isinstance_ext(rex, DP.types.Duck_StringMatcher)
+        assert isinstance(rex, DP.types.Duck_StringMatcher)
 
         class Anagram():
             def __init__(self, s):
@@ -126,31 +142,39 @@ class TestBasics(unittest.TestCase):
         class Bad():
             pass
 
-        print(f"PEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}", file=sys.stderr)
         ana = Anagram("tryit")
-        assert isinstance_ext(ana, DP.types.Duck_StringMatcher)
-        catAna = isinstance_ext(ana, DP.types.Duck_StringMatcher)
-        print(f"Anagram is instance Duck_StringMatcher={catAna}", file=sys.stderr)
-        catWeird = isinstance_ext(Weird("oh"), DP.types.Duck_StringMatcher)
-        print(f"Weird is instance Duck_StringMatcher={catWeird}", file=sys.stderr)
-        catBad = isinstance_ext(Bad(), DP.types.Duck_StringMatcher)
-        print(f"Bad is instance Duck_StringMatcher={catBad}", file=sys.stderr)
+        catAna = isinstance(ana, DP.types.Duck_StringMatcher)
+        _sprint(f"Anagram is instance Duck_StringMatcher={catAna}")
+        assert catAna
+
+        catWeird = isinstance(Weird("oh"), DP.types.Duck_StringMatcher)
+        _sprint(f"Weird is instance Duck_StringMatcher={catWeird}")
+        assert not catWeird
+
+        catBad = isinstance(Bad(), DP.types.Duck_StringMatcher)
+        _sprint(f"Bad is instance Duck_StringMatcher={catBad}")
+        assert not catBad
 
     def test1(self):
         """ Test1: reference, test extended glob with embedded re.regex
         """
-        print("Entered test1", file=sys.stderr)
+        _sprint("Entered test1")
 
         mydict = TestBasics.mydict
 
         r1 = DP.search(mydict, '**/placeholder')
         r2 = DP.search(mydict, '**/{plac\\S+r$}')
         assert r1 == r2
+        _sprint("TestBasics.test1 : PASSED")
 
     def test2(self):
         """ Test2: using a StringMatcher duck typed class
         """
-        print("Entered test2", file=sys.stderr)
+        if not DP.options.PEP544_PROTOCOL_AVAILABLE:
+            _sprint("TestBasics.test2 disabled, cannot use PEPS544 Protocol with this Python")
+            return
+
+        _sprint("Entered test2")
 
         class MySM():
             def match(self, st):
@@ -164,12 +188,16 @@ class TestBasics(unittest.TestCase):
 
         assert r1 == r2
         assert r1 == r3
+        _sprint("TestBasics.test2 : PASSED")
 
     def test3(self):
-        """ Test3: using a StringMatcher (duck typed or derivative) class
+        """ Test3: using a StringMatcher (duck typed or derivative) class, according to
+            Python version's ability.
         """
-        print("Entered test3 (anagram)", file=sys.stderr)
-        print(f"PEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}", file=sys.stderr)
+        # This test corresponds to example in README.rst
+
+        _sprint("Entered test3 (anagram)")
+        _sprint(f"PEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}")
 
         if DP.options.PEP544_PROTOCOL_AVAILABLE:
             class Anagram():
@@ -192,69 +220,56 @@ class TestBasics(unittest.TestCase):
 
         r1 = DP.search(mydict, "**/label")
         r2 = DP.search(mydict, ['**', Anagram("bella")])
-        print(f"Explicit {r1}", file=sys.stderr)
-        print(f"Anagram {r2}", file=sys.stderr)
+        _sprint(f"Explicit {r1}")
+        _sprint(f"Anagram {r2}")
         expected = {'first': [{'info': {'label': 'a'}},
                               {'info': {'label': 'b'}},
                               {'info': {'label': 'c'}}]}
         assert r1 == r2
         assert r1 == expected
+        _sprint("TestBasics.test3 : PASSED")
 
     def test4(self):
         """ Test4: using a StringMatcher (duck typed or derivative) class (with RapidFuzz pkg
             https://github.com/maxbachmann/RapidFuzz)
         """
-        print("Entered test4", file=sys.stderr)
+        # This test corresponds to example in README.rst
 
-        class Approx():
-            def __init__(self, s, quality=90):
-                self.ref = s
-                self.quality = quality
+        _sprint("Entered test4")
 
-            def match(self, st):
-                fratio = rapidfuzz.fuzz.ratio(st, self.ref)
-                retval = True if fratio > self.quality else None
-                return retval
+        if DP.options.PEP544_PROTOCOL_AVAILABLE:
+            class Approx():
+                def __init__(self, s, quality=90):
+                    self.ref = s
+                    self.quality = quality
+
+                def match(self, st):
+                    fratio = rapidfuzz.fuzz.ratio(st, self.ref)
+                    retval = True if fratio > self.quality else None
+                    return retval
+        else:
+            class Approx(DP.types.Basic_StringMatcher):
+                def __init__(self, s, quality=90):
+                    self.ref = s
+                    self.quality = quality
+
+                def match(self, st):
+                    fratio = rapidfuzz.fuzz.ratio(st, self.ref)
+                    retval = True if fratio > self.quality else None
+                    return retval
 
         mydict = TestBasics.mydict
 
         r1 = DP.search(mydict, "**/placeholder")
         r2 = DP.search(mydict, ['**', Approx("placecolder")])
         r3 = DP.search(mydict, ['**', Approx("acecolder", 75)])
-        print(f"Explicit {r1}", file=sys.stderr)
-        print(f"Approx {r2}", file=sys.stderr)
-        print(f"Approx {r3}", file=sys.stderr)
+        _sprint(f"Explicit {r1}")
+        _sprint(f"Approx {r2}")
+        _sprint(f"Approx {r3}")
         expected = {'first': [{'info': {'placeholder': 'A'}},
                               {'info': {'placeholder': 'B'}},
                               {'info': {'placeholder': 'C'}}]}
         assert r1 == r2
         assert r1 == r3
         assert r1 == expected
-
-
-if __name__ == "__main__":
-
-    # To debug under the Python debugger:
-    # A) Use a command like:
-    #    PYTHONPATH="../dpath-source"  python3 -m pdb \
-    #             ../dpath-source/tests/test_various_exts.py
-    # B) Adapt and uncomment the following
-    # ts = TestLangProc()
-    # ts.test1()
-
-    # ts = TestBasics()
-    # ts.testtypes()
-    # ts.test1()
-    # ts.test2()
-    # ts.test3()
-    # ts.test4()
-
-    print("""
-    a) This is intended to be run under nose2 and not standalone !
-    b) Python script nose_runner (in test-utils) adds to nose2 capability to set dpath.options
-
-    Exiting
-    """,
-          file=sys.stderr
-          )
-    sys.exit(2)
+        _sprint("TestBasics.test4 : PASSED")
