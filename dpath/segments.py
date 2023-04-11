@@ -5,8 +5,7 @@ from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMappi
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
-
-from re import Pattern
+from dpath.types import StringMatcher_astuple
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -185,10 +184,12 @@ def match(segments: Path, glob: Glob):
     the segment.
 
     A segment is considered to match a glob when either:
-    -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
+    -  the glob is a String :  the function fnmatch.fnmatchcase returns True.
        If fnmatchcase returns False or throws an exception the result will be False.
-    -  or, the segment is a re.Pattern (result of re.compile) and re.Pattern.match returns
+    -  or, the glob is a re.Pattern (result of re.compile) and re.Pattern.match returns
        a match
+    -  or, the glob is a generalized match expression (duck typed if available, derivative
+       of class Basic_StringMatcher otherwise).
 
     match(segments, glob) -> bool
     """
@@ -238,6 +239,7 @@ def match(segments: Path, glob: Glob):
                 # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
                 # index as well. Try converting it to an int.
                 if isinstance(s, int) and s == int(g):
+
                     continue
             except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
@@ -245,9 +247,9 @@ def match(segments: Path, glob: Glob):
                 s = str(s)
 
             try:
-                # Let's see if the glob or the regular expression matches. We will turn any kind of
-                # exception while attempting to match into a False for the match.
-                if isinstance(g, Pattern):
+                # Let's see if the glob, regular expression or the generalized match object matches.
+                # We will turn any kind of exception while attempting to match into a False for the match.
+                if isinstance(g, StringMatcher_astuple):
                     mobj = g.match(s)
                     if mobj is None:
                         return False

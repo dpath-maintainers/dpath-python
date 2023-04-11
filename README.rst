@@ -11,8 +11,8 @@ A python library for accessing and searching dictionaries via
 
 Basically it lets you glob over a dictionary as if it were a filesystem.
 It allows you to specify globs (ala the bash eglob syntax, through some
-advanced fnmatch.fnmatch magic) to access dictionary elements, and
-provides some facility for filtering those results.
+advanced fnmatch.fnmatch magic, or using Python's `re`regular expressions ) 
+to access dictionary elements, and provides some facility for filtering those results.
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
@@ -112,7 +112,7 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
     }
 
 **Note** : Using Python's `re` regular expressions instead of globs is explained
-below re_regexp_.
+below re_regexp_; defining your own string matcher objects is shown in generalized_string_match_ below.
 
 ... Wow that was easy. What if I want to iterate over the results, and
 not get a merged view?
@@ -450,17 +450,18 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
 
   .. _PythonRe:  https://docs.python.org/3/library/re.html
 
+ 
   -  This facility is enabled by default, but may be disabled (for backwards 
      compatibility in the unlikely cases where a path expression component would start 
      with '{' and end in '}'):
-
-   .. code-block:: python
-
-     >>> import dpath
-     >>> # disable
-     >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = False
-     >>> # enable
-	 >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = True
+ 
+    .. code-block:: python
+ 
+      >>> import dpath
+      >>> # disable
+      >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = False
+      >>> # enable
+      >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = True   
 
   -  Now a path component may also be specified : 
 
@@ -516,6 +517,87 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
         +   r"\*\*/{[A-Z][A-Za-z\\d]*Address$}"   |  "\*\*/{[A-Z][A-Za-z\\\\d]*Address$}"  +
         +-----------------------------------------+----------------------------------------+
 
+.. _generalized_string_match:
+
+Need still more customization ? Roll your own match method!
+===========================================================
+
+We provide the following abstract types, where `StringMatcher` is allowed in Glob in the
+sequence form (definitions in `dpath.types`) :
+
+- `StringMatcher` (descriptive Union type ),
+
+- `Duck_StringMatcher`: which will accept a class as a **subtype**, provided it offers a `match` method. Instances may then be used as components in the list form of paths. This method of structural subtyping is explained in PEP 544 [https://peps.python.org/pep-0544/].
+    
+
+- `Basic_StringMatcher`: an abstract base class, enabling your derived class to be recognized and participate in a match. 
+
+**Notes:** 
+  - It is required that the `match` method: `match(self, str) -> Optional[object]`, 
+    returns `None` to reject the match.
+  - Using `Duck_StringMatcher` requires a version of Python and Pypy not less than 3.8, 
+    otherwise you should derive from base class `Basic_StringMatcher`. The
+    variable `dpath.options.PEP544_PROTOCOL_AVAILABLE` indicates when duck typing is possible.
+
+Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
+  including:
+
+  - *match anagrams*:
+
+    .. code-block:: python 
+
+      class Anagram():
+           def __init__(self, s):
+               self.ref = "".join(sorted(s))
+    
+           def match(self, st):
+               retval = True if "".join(sorted(st)) == self.ref else None
+               return retval
+
+       mydict = TestBasics.mydict
+    
+       r1 = DP.search(mydict, "**/label")
+       r2 = DP.search(mydict, [ '**', Anagram("bella")])
+
+       assert r1 == r2
+
+- and *approximate match* (requires `rapidfuzz` https://maxbachmann.github.io/RapidFuzz/):
+
+  .. code-block:: python
+
+        class Approx():
+            def __init__(self, s, quality=90):
+                self.ref = s
+                self.quality=quality
+
+            def match(self, st):
+                fratio = rapidfuzz.fuzz.ratio(st, self.ref)
+                retval = True if fratio > self.quality  else None
+                return retval
+
+        mydict = TestBasics.mydict
+
+
+        r1 = DP.search(mydict, "**/placeholder")
+        r2 = DP.search(mydict, [ '**', Approx("placecolder")])
+        r3 = DP.search(mydict, [ '**', Approx("acecolder",75)])
+        assert r1 == r2
+        assert r1 == r3
+
+For comparison, we show now the first example reimplemented to avoid duck typing:
+
+  .. code-block:: python
+
+       if not DP.options.PEP544_PROTOCOL_AVAILABLE:
+             class Anagram(DP.types.Basic_StringMatcher):
+                def __init__(self, s):
+                    self.ref = "".join(sorted(s))
+
+                def match(self, st):
+                    retval = True if "".join(sorted(st)) == self.ref else None
+                    return retval
+
+       DP.search(mydict, ['**', Anagram("bella")])
 
 dpath.segments : The Low-Level Backend
 ======================================
