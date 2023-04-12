@@ -470,12 +470,12 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
       .. code-block:: python 
 
        >>> selPath = 'Config/{(Env|Cmd)}'
-       >>> x = dpath.util.search(js.lod, selPath)
+       >>> x = dpath.search(js.lod, selPath)
 
       .. code-block:: python
 
        >>> selPath = '{(Config|Graph)}/{(Env|Cmd|Data)}'
-       >>> x = dpath.util.search(js.lod, selPath)
+       >>> x = dpath.search(js.lod, selPath)
 
      - When using the list form for a path, a list element can also
        be expressed as
@@ -488,7 +488,7 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
        .. code-block:: python
 
         >>> selPath = [ re.compile('(Config|Graph)') , re.compile('(Env|Cmd|Data)') ]
-        >>>  x = dpath.util.search(js.lod, selPath)
+        >>>  x = dpath.search(js.lod, selPath)
 
        More examples from a realistic json context:
 
