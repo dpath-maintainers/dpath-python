@@ -471,12 +471,12 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
       .. code-block:: python 
 
        >>> selPath = 'Config/{(Env|Cmd)}'
-       >>> x = dpath.util.search(js.lod, selPath)
+       >>> x = dpath.search(js.lod, selPath)
 
       .. code-block:: python
 
        >>> selPath = '{(Config|Graph)}/{(Env|Cmd|Data)}'
-       >>> x = dpath.util.search(js.lod, selPath)
+       >>> x = dpath.search(js.lod, selPath)
 
      - When using the list form for a path, a list element can also
        be expressed as
@@ -489,7 +489,7 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
        .. code-block:: python
 
         >>> selPath = [ re.compile('(Config|Graph)') , re.compile('(Env|Cmd|Data)') ]
-        >>>  x = dpath.util.search(js.lod, selPath)
+        >>>  x = dpath.search(js.lod, selPath)
 
        More examples from a realistic json context:
 
@@ -556,8 +556,8 @@ Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
 
        mydict = TestBasics.mydict
     
-       r1 = DP.search(mydict, "**/label")
-       r2 = DP.search(mydict, [ '**', Anagram("bella")])
+       r1 = dpath.search(mydict, "**/label")
+       r2 = dpath.search(mydict, [ '**', Anagram("bella")])
 
        assert r1 == r2
 
@@ -578,9 +578,9 @@ Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
         mydict = TestBasics.mydict
 
 
-        r1 = DP.search(mydict, "**/placeholder")
-        r2 = DP.search(mydict, [ '**', Approx("placecolder")])
-        r3 = DP.search(mydict, [ '**', Approx("acecolder",75)])
+        r1 = dpath.search(mydict, "**/placeholder")
+        r2 = dpath.search(mydict, [ '**', Approx("placecolder")])
+        r3 = dpath.search(mydict, [ '**', Approx("acecolder",75)])
         assert r1 == r2
         assert r1 == r3
 
@@ -588,8 +588,8 @@ For comparison, we show now the first example reimplemented to avoid duck typing
 
   .. code-block:: python
 
-       if not DP.options.PEP544_PROTOCOL_AVAILABLE:
-             class Anagram(DP.types.Basic_StringMatcher):
+       if not dpath.options.PEP544_PROTOCOL_AVAILABLE:
+             class Anagram(dpath.types.Basic_StringMatcher):
                 def __init__(self, s):
                     self.ref = "".join(sorted(s))
 
@@ -597,7 +597,7 @@ For comparison, we show now the first example reimplemented to avoid duck typing
                     retval = True if "".join(sorted(st)) == self.ref else None
                     return retval
 
-       DP.search(mydict, ['**', Anagram("bella")])
+       dpath.search(mydict, ['**', Anagram("bella")])
 
 dpath.segments : The Low-Level Backend
 ======================================
