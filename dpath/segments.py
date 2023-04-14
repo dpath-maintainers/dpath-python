@@ -235,6 +235,8 @@ def match(segments: Path, glob: Glob):
                     g = '*'
 
             try:
+                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
+                # index as well. Try converting it to an int.
                 if isinstance(s, int) and s == int(g):
                     continue
             except:
