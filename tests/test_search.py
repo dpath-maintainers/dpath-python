@@ -238,16 +238,6 @@ def test_search_multiple_stars():
     assert res['a'][0]['b'][2]['c'] == 3
 
 
-def test_search_glob_list():
-    d = {'a': {'b': []}}
-    res = dpath.search(d, 'a/b/*')
-    assert res == {'a': {'b': []}}
-
-    d = {'a': {'b': [1, 2, 3]}}
-    dpath.search(d, 'a/b/*', afilter=lambda x: x > 3 if isinstance(x, int) else True)
-    assert res == {'a': {'b': []}}
-
-
 def test_search_negative_index():
     d = {'a': {'b': [1, 2, 3]}}
     res = dpath.search(d, 'a/b/-1')

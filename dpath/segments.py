@@ -1,10 +1,10 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import List, Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping
+from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints, Glob, Path, CyclicInt
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -22,8 +22,8 @@ def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     except AttributeError:
         try:
             indices = range(len(node))
-            # Make all list indices cyclic so negative (wraparound) indexes are supported
-            indices = map(lambda i: CyclicInt(i, len(node)), indices)
+            # Convert all list indices to object so negative indexes are supported.
+            indices = map(lambda i: SymmetricInt(i, len(node)), indices)
             return zip(indices, node)
         except TypeError:
             # This can happen in cases where the node isn't leaf(node) == True,
@@ -81,7 +81,7 @@ def walk(obj, location=()):
                 yield found
 
 
-def get(obj, segments):
+def get(obj, segments: Path):
     """
     Return the value at the path indicated by segments.
 
@@ -91,6 +91,9 @@ def get(obj, segments):
     for i, segment in enumerate(segments):
         if leaf(current):
             raise PathNotFound(f"Path: {segments}[{i}]")
+
+        if isinstance(current, Sequence) and isinstance(segment, str) and segment.isdecimal():
+            segment = int(segment)
 
         current = current[segment]
     return current
@@ -232,10 +235,8 @@ def match(segments: Path, glob: Glob):
                     g = '*'
 
             try:
-                # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequenc
-                # index as well. Try converting it to an int.
-                if isinstance(s, int):
-                    return s == int(g)
+                if isinstance(s, int) and s == int(g):
+                    continue
             except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
                 # In this case convert s to a str so fnmatch can work on it.
@@ -258,7 +259,7 @@ def match(segments: Path, glob: Glob):
     return False
 
 
-def extend(thing: List, index: int, value=None):
+def extend(thing: MutableSequence, index: int, value=None):
     """
     Extend a sequence like thing such that it contains at least index +
     1 many elements. The extension values will be None (default).
@@ -284,7 +285,7 @@ def extend(thing: List, index: int, value=None):
 
 
 def _default_creator(
-        current: Union[MutableMapping, List],
+        current: Union[MutableMapping, Sequence],
         segments: Sequence[PathSegment],
         i: int,
         hints: Sequence[Tuple[PathSegment, type]] = ()
@@ -298,7 +299,10 @@ def _default_creator(
     segment = segments[i]
     length = len(segments)
 
-    if isinstance(segment, int):
+    if isinstance(current, Sequence):
+        segment = int(segment)
+
+    if isinstance(current, MutableSequence):
         extend(current, segment)
 
     # Infer the type from the hints provided.
@@ -312,7 +316,7 @@ def _default_creator(
         else:
             segment_next = None
 
-        if isinstance(segment_next, int):
+        if isinstance(segment_next, int) or (isinstance(segment_next, str) and segment_next.isdecimal()):
             current[segment] = []
         else:
             current[segment] = {}
@@ -340,7 +344,7 @@ def set(
     for (i, segment) in enumerate(segments[:-1]):
 
         # If segment is non-int but supposed to be a sequence index
-        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdigit():
+        if isinstance(segment, str) and isinstance(current, Sequence) and segment.isdecimal():
             segment = int(segment)
 
         try:
@@ -362,7 +366,7 @@ def set(
     last_segment = segments[-1]
 
     # Resolve ambiguity of last segment
-    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdigit():
+    if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdecimal():
         last_segment = int(last_segment)
 
     if isinstance(last_segment, int):
@@ -409,7 +413,7 @@ def foldm(obj, f, acc):
     return acc
 
 
-def view(obj, glob):
+def view(obj: MutableMapping, glob: Glob):
     """
     Return a view of the object where the glob matches. A view retains
     the same form as the obj, but is limited to only the paths that

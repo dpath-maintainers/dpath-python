@@ -48,4 +48,4 @@ def search(obj, glob, yielded=False, separator="/", afilter=None, dirs=True):
 
 @deprecated
 def merge(dst, src, separator="/", afilter=None, flags=MergeType.ADDITIVE):
-    return dpath.merge(dst, src, separator, afilter, flags),
+    return dpath.merge(dst, src, separator, afilter, flags)
