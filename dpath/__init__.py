@@ -47,35 +47,29 @@ def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSe
     expressions. These segments will be compiled using re.compile.
     Errors during RegEx compilation will raise an InvalidRegex exception.
     """
-    # First split the path into segments, validate wrt. type annotation GlobExtend
     if not segments.leaf(path):
         split_segments = path
     elif isinstance(path, re.Pattern):
-        # Allow a path which is a single re.Pattern
+        # Handle paths which are comprised of a single re.Pattern
         split_segments = (path,)
-    elif isinstance(path, (int, float, bool, type(None))):
-        # This protects against situations that are not screened by segment.leaf. These should
-        # not occur with spec. "path:GlobExtend", but type annotations do not check arguments.
-        # Thus the error message than is clearer than "...object has no attribute lstrip"
-        raise ValueError(f"Error: scalars cannot appear outside of sequence in {path}")
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-    # now we re.compile segments that represent re.Regexps.
-    split_compiled_segments = []
-    for segment in split_segments:
-        if options.DPATH_ACCEPT_RE_REGEXP_IN_STRING and isinstance(segment, str) and segment[0] == "{" and segment[-1] == "}":
-            try:
-                rs = segment[1:-1]
-                rex = re.compile(rs)
-            except re.error as reErr:
-                raise InvalidRegex(f"In segment '{segment}' string '{rs}' not accepted"
-                      + f" as re.regexp:\n==>\t{reErr}")
-            split_compiled_segments.append(rex)
-        else:
-            split_compiled_segments.append(segment)
+    if options.DPATH_ACCEPT_RE_REGEXP_IN_STRING:
+        # Handle RegEx segments
 
-    return split_compiled_segments
+        def compile_regex_segment(segment: PathSegment):
+            if isinstance(segment, str) and len(reg := segment.removeprefix("{").removesuffix("}")) == len(segment) - 2:
+                try:
+                    return re.compile(reg)
+                except re.error as re_err:
+                    raise InvalidRegex(f"Could not compile RegEx in path segment '{reg}' ({re_err})")
+
+            return segment
+
+        split_segments = list(map(compile_regex_segment, split_segments))
+
+    return split_segments
 
 
 def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
