@@ -33,8 +33,7 @@ _DEFAULT_SENTINEL = object()
 
 def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
-    Given a path and separator, return a tuple of segments; string segments that represent
-    (i.e. "{.*}") regexp are re.compile'd.
+    Given a path and separator, return a tuple of segments.
 
     If path is already a non-leaf thing, return it: this covers sequences of strings
     and re.Patterns.
@@ -44,7 +43,9 @@ def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSe
     ignored, and is assumed to be part of each key glob. It will not be
     stripped (i.e. a first list element can be an empty string).
 
-    Errors in re.compilation raise InvalidRegex exception.
+    If RegEx support is enabled then str segments which are wrapped with curly braces will be handled as regular
+    expressions. These segments will be compiled using re.compile.
+    Errors during RegEx compilation will raise an InvalidRegex exception.
     """
     # First split the path into segments, validate wrt. type annotation GlobExtend
     if not segments.leaf(path):
