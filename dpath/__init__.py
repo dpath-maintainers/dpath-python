@@ -59,11 +59,11 @@ def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSe
         # Handle RegEx segments
 
         def compile_regex_segment(segment: PathSegment):
-            if isinstance(segment, str) and len(reg := segment.removeprefix("{").removesuffix("}")) == len(segment) - 2:
+            if isinstance(segment, str) and segment.startswith("{") and segment.endswith("}"):
                 try:
-                    return re.compile(reg)
+                    return re.compile(segment[1:-1])
                 except re.error as re_err:
-                    raise InvalidRegex(f"Could not compile RegEx in path segment '{reg}' ({re_err})")
+                    raise InvalidRegex(f"Could not compile RegEx in path segment '{segment}' ({re_err})")
 
             return segment
 
