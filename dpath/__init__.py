@@ -20,9 +20,9 @@ __all__ = [
     "Creator",
 ]
 
+import re
 from collections.abc import MutableMapping, MutableSequence
 from typing import Union, List, Any, Callable, Optional
-import re
 
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound, InvalidRegex

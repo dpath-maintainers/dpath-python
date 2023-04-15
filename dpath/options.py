@@ -2,13 +2,13 @@ from os import environ
 
 ALLOW_EMPTY_STRING_KEYS = False
 
-#  Extension to interpret path segments "{rrr}" as re.regexp "rrr" disabled by default.
-#  Disable to preserve backwards compatibility in the case where a user has a
-#  path "a/b/{cd}" where the brackets are intentional and do not denote a request
-#  to re.compile cd
-#  Enable to allow segment matching with Python re regular expressions.
-
 DPATH_ACCEPT_RE_REGEXP_IN_STRING = False
+"""Enables regular expression support.
+
+Enabling this feature will allow usage of regular expressions as part of paths.
+Regular expressions must be wrapped in curly brackets. For example: "a/b/{[cd]}".
+Expressions will be compiled using the standard library re.compile function.
+"""
 
 # ----------------------------------------------------------------------------------------------
 # undocumented feature for testability: facilitate running the entire package (or test suite)

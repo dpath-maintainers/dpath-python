@@ -1,7 +1,7 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 from re import Pattern
+from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
