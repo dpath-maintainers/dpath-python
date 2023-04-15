@@ -26,13 +26,12 @@ from typing import Union, List, Any, Callable, Optional
 
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound, InvalidRegex
-from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, GlobExtend, Path, Hints
-
+from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
 
 _DEFAULT_SENTINEL = object()
 
 
-def _split_path(path: GlobExtend, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
+def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
     Given a path and separator, return a tuple of segments; string segments that represent
     (i.e. "{.*}") regexp are re.compile'd.
@@ -98,7 +97,7 @@ def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator 
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter = None) -> int:
+def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -157,7 +156,7 @@ def delete(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter
     return deleted
 
 
-def set(obj: MutableMapping, glob: GlobExtend, value, separator="/", afilter: Filter = None) -> int:
+def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -184,7 +183,7 @@ def set(obj: MutableMapping, glob: GlobExtend, value, separator="/", afilter: Fi
 
 def get(
         obj: MutableMapping,
-        glob: GlobExtend,
+        glob: Glob,
         separator="/",
         default: Any = _DEFAULT_SENTINEL
 ) -> Union[MutableMapping, object, Callable]:
@@ -223,7 +222,7 @@ def get(
     return results[0]
 
 
-def values(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter = None, dirs=True):
+def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -233,7 +232,7 @@ def values(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj: MutableMapping, glob: GlobExtend, yielded=False, separator="/", afilter: Filter = None, dirs=True):
+def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilter: Filter = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.

@@ -47,7 +47,7 @@ class MergeType(IntFlag):
     replaces the destination in this situation."""
 
 
-PathSegment = Union[int, str, bytes]
+PathSegment = Union[int, str, bytes, Pattern]
 """Type alias for dict path segments where integers are explicitly casted."""
 
 Filter = Callable[[Any], bool]
@@ -55,23 +55,11 @@ Filter = Callable[[Any], bool]
 
 (Any) -> bool"""
 
-Glob = Union[str, Sequence[str]]
+Glob = Union[str, Pattern, Sequence[Union[str, Pattern]]]
 """Type alias for glob parameters."""
 
 
-GlobExtend = Union[str, Pattern, Sequence[Union[str, Pattern]]]
-"""
-Type alias for globs extended by the possibility to have re.Pattern.
-Note that this is a subset of Path, but it seems that changing
-typing from Glob to GlobExtend is sufficient.
-
-Main reason for allowing Pattern is to treat similarly the path '{regex}' and
-re.compile("regex").
-
-This is tested in tests.test_various_exts.
-"""
-
-Path = Union[str, Sequence[PathSegment]]
+Path = Union[str, Pattern, Sequence[PathSegment]]
 """Type alias for path parameters."""
 
 Hints = Sequence[Tuple[PathSegment, type]]
