@@ -1,5 +1,6 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
+from re import Pattern
 
 
 class SymmetricInt(int):
@@ -56,6 +57,19 @@ Filter = Callable[[Any], bool]
 
 Glob = Union[str, Sequence[str]]
 """Type alias for glob parameters."""
+
+
+GlobExtend = Union[str, Pattern, Sequence[Union[str, Pattern]]]
+"""
+Type alias for globs extended by the possibility to have re.Pattern.
+Note that this is a subset of Path, but it seems that changing
+typing from Glob to GlobExtend is sufficient.
+
+Main reason for allowing Pattern is to treat similarly the path '{regex}' and
+re.compile("regex").
+
+This is tested in tests.test_various_exts.
+"""
 
 Path = Union[str, Sequence[PathSegment]]
 """Type alias for path parameters."""

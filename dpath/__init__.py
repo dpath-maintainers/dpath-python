@@ -22,49 +22,60 @@ __all__ = [
 
 from collections.abc import MutableMapping, MutableSequence
 from typing import Union, List, Any, Callable, Optional
+import re
 
 from dpath import segments, options
-from dpath.exceptions import InvalidKeyName, PathNotFound
-from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
-
-import sys
-import re
+from dpath.exceptions import InvalidKeyName, PathNotFound, InvalidRegex
+from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, GlobExtend, Path, Hints
 
 
 _DEFAULT_SENTINEL = object()
 
 
-def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
+def _split_path(path: GlobExtend, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
-    Given a path and separator, return a tuple of segments. If path is
-    already a non-leaf thing, return it.
+    Given a path and separator, return a tuple of segments; string segments that represent
+    (i.e. "{.*}") regexp are re.compile'd.
+
+    If path is already a non-leaf thing, return it: this covers sequences of strings
+    and re.Patterns.
 
     Note that a string path with the separator at index[0] will have the
     separator stripped off. If you pass a list path, the separator is
     ignored, and is assumed to be part of each key glob. It will not be
-    stripped.
+    stripped (i.e. a first list element can be an empty string).
+
+    Errors in re.compilation raise InvalidRegex exception.
     """
+    # First split the path into segments, validate wrt. type annotation GlobExtend
     if not segments.leaf(path):
         split_segments = path
+    elif isinstance(path, re.Pattern):
+        # Allow a path which is a single re.Pattern
+        split_segments = (path,)
+    elif isinstance(path, (int, float, bool, type(None))):
+        # This protects against situations that are not screened by segment.leaf. These should
+        # not occur with spec. "path:GlobExtend", but type annotations do not check arguments.
+        # Thus the error message than is clearer than "...object has no attribute lstrip"
+        raise ValueError(f"Error: scalars cannot appear outside of sequence in {path}")
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-    final = []
+    # now we re.compile segments that represent re.Regexps.
+    split_compiled_segments = []
     for segment in split_segments:
-        if (options.DPATH_ACCEPT_RE_REGEXP and isinstance(segment, str)
-                and segment[0] == '{' and segment[-1] == '}'):
+        if options.DPATH_ACCEPT_RE_REGEXP_IN_STRING and isinstance(segment, str) and segment[0] == "{" and segment[-1] == "}":
             try:
                 rs = segment[1:-1]
                 rex = re.compile(rs)
-            except Exception as reErr:
-                print(f"Error in segment '{segment}' string '{rs}' not accepted"
-                      + f"as re.regexp:\n\t{reErr}",
-                      file=sys.stderr)
-                raise reErr
-            final.append(rex)
+            except re.error as reErr:
+                raise InvalidRegex(f"In segment '{segment}' string '{rs}' not accepted"
+                      + f" as re.regexp:\n==>\t{reErr}")
+            split_compiled_segments.append(rex)
         else:
-            final.append(segment)
-    return final
+            split_compiled_segments.append(segment)
+
+    return split_compiled_segments
 
 
 def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
@@ -87,7 +98,7 @@ def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator 
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None) -> int:
+def delete(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -146,7 +157,7 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = Non
     return deleted
 
 
-def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter = None) -> int:
+def set(obj: MutableMapping, glob: GlobExtend, value, separator="/", afilter: Filter = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -173,7 +184,7 @@ def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter =
 
 def get(
         obj: MutableMapping,
-        glob: Glob,
+        glob: GlobExtend,
         separator="/",
         default: Any = _DEFAULT_SENTINEL
 ) -> Union[MutableMapping, object, Callable]:
@@ -212,7 +223,7 @@ def get(
     return results[0]
 
 
-def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None, dirs=True):
+def values(obj: MutableMapping, glob: GlobExtend, separator="/", afilter: Filter = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -222,7 +233,7 @@ def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = Non
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilter: Filter = None, dirs=True):
+def search(obj: MutableMapping, glob: GlobExtend, yielded=False, separator="/", afilter: Filter = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.

@@ -3,6 +3,11 @@ class InvalidGlob(Exception):
     pass
 
 
+class InvalidRegex(Exception):
+    """Erroneous re regular expression in path segment """
+    pass
+
+
 class PathNotFound(Exception):
     """One or more elements of the requested path did not exist in the object"""
     pass

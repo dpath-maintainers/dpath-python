@@ -14,13 +14,14 @@ from copy import copy
 
 import unittest
 import dpath as DP
+from dpath.exceptions import InvalidRegex
 
 # check that how the options have been set
-print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {DP.options.DPATH_ACCEPT_RE_REGEXP}", file=sys.stderr)
+print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP_IN_STRING = {DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING}", file=sys.stderr)
 
-if not DP.options.DPATH_ACCEPT_RE_REGEXP:
-    print("This test doesn't make sense with DPATH_ACCEPT_RE_REGEXP = False", file=sys.stderr)
-    DP.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
+if not DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING:
+    print("switching to DPATH_ACCEPT_RE_REGEXP_IN_STRING = True", file=sys.stderr)
+    DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING = True  # enable re.regexp support in path expr.
 
 
 # one class per function to be tested
@@ -39,15 +40,15 @@ class SampleDicts():
             },
         }
 
-        self.specs1 = (([re.compile(".*")], "a001", True),
-                       ([re.compile("[a-z]+$")], "a001", False),
-                       (["*", re.compile(".*")], "a001", False),
-                       (["*", "*", re.compile(".*")], "a001", False),
-                       (["*", re.compile("[a-z]+\\d+$")], "a001", False),
-                       (["*", re.compile("[a-z]+[.][a-z]+$")], "a001", False),
-                       (["**", re.compile(".*")], "a001", True),
-                       (["**", re.compile("[a-z]+\\d+$")], "a001", True),
-                       (["**", re.compile("[a-z]+[.][a-z]+$")], "a001", False)
+        self.specs1 = (([re.compile(".*")], "a001", True, set()),
+                       ([re.compile("[a-z]+$")], "a001", False, set()),
+                       (["*", re.compile(".*")], "a001", False, set()),
+                       (["*", "*", re.compile(".*")], "a001", False, set()),
+                       (["*", re.compile("[a-z]+\\d+$")], "a001", False, set()),
+                       (["*", re.compile("[a-z]+[.][a-z]+$")], "a001", False, set()),
+                       (["**", re.compile(".*")], "a001", True, set((0,1,2))),
+                       (["**", re.compile("[a-z]+\\d+$")], "a001", True, set()),
+                       (["**", re.compile("[a-z]+[.][a-z]+$")], "a001", False, set((0,1)))
                        )
 
         self.specs1Pairs = (([re.compile(".*")], ("a001",)),
@@ -123,8 +124,7 @@ class SampleDicts():
                              ("Name", "Id", "Created", "Scope", "Driver", "Internal", "Attachable",
                                 "Ingress", "Containers", "Options", "Labels", "IPAM/Driver", "IPAM/Options",
                                 "IPAM/Config", "IPAM/Config/Subnet", "IPAM/Config/Gateway",
-                                "ConfigFrom/Network", "Containers/199c590e8f13477/Name",
-                                "Containers/199c590e8f13477/MacAddress")),
+                                "ConfigFrom/Network", "Containers/199c590e8f13477/Name")),
                             (["**", re.compile("[A-Z][A-Za-z\\d]*Address$")],
                              ("Containers/199c590e8f13477/MacAddress", "Containers/199c590e8f13477/IPv4Address",
                                 "Containers/199c590e8f13477/IPv6Address")),
@@ -139,8 +139,7 @@ class SampleDicts():
                              ("Name", "Id", "Created", "Scope", "Driver", "Internal", "Attachable",
                                 "Ingress", "Containers", "Options", "Labels", "IPAM/Driver", "IPAM/Options",
                                 "IPAM/Config", "IPAM/Config/Subnet", "IPAM/Config/Gateway",
-                                "ConfigFrom/Network", "Containers/199c590e8f13477/Name",
-                                "Containers/199c590e8f13477/MacAddress")),
+                                "ConfigFrom/Network", "Containers/199c590e8f13477/Name")),
                             (["**", re.compile(r"[A-Z][A-Za-z\d]*Address$")],
                              ("Containers/199c590e8f13477/MacAddress", "Containers/199c590e8f13477/IPv4Address",
                                 "Containers/199c590e8f13477/IPv6Address")),
@@ -148,12 +147,10 @@ class SampleDicts():
                             (["**", re.compile(r"\d+[.]\d+")], None)
                             )
 
-        self.specs3Pairs = (("**/{[^A-Za-z]{2}$}", ("Id",)),
-                            ("*/{[A-Z][A-Za-z\\d]*$}", ("Name", "Id", "Created", "Scope", "Driver", "Internal",
-                                                        "Attachable", "Ingress", "Containers", "Options", "Labels",
-                                                        "IPAM/Driver", "IPAM/Options", "IPAM/Config", "IPAM/Config/Subnet",
-                                                        "IPAM/Config/Gateway", "ConfigFrom/Network", "Containers/199c590e8f13477/Name",
-                                                        "Containers/199c590e8f13477/MacAddress")),
+        self.specs3Pairs = (("**/{^[A-Za-z]{2}$}", ("Id",)),
+                            ("{^[A-Za-z]{2}$}", ("Id",)),
+                            (re.compile("^[A-Za-z]{2}$"), ("Id",)),
+                            ("*/{[A-Z][A-Za-z\\d]*$}", ("IPAM/Driver", "IPAM/Options", "IPAM/Config", "ConfigFrom/Network")),
                             ("**/{[A-Z][A-Za-z\\d]*\\d$}", ("EnableIPv6",)),
                             ("**/{[A-Z][A-Za-z\\d]*Address$}", ("Containers/199c590e8f13477/MacAddress",
                                                                 "Containers/199c590e8f13477/IPv4Address",
@@ -172,26 +169,36 @@ class SampleDicts():
 class TestSearch(unittest.TestCase):
 
     def test1(self):
-        print("Entered test1", file=sys.__stderr__)
+        print("Entered test1", file=sys.stderr)
         dicts = SampleDicts().build()
         dict1 = dicts.d1
         specs = dicts.specs1Pairs
         for (spec, expect) in specs:
             print(f"Spec={spec}", file=sys.stderr)
+            found = set()
             for (path, value) in DP.search(dict1, spec, yielded=True):
                 print(f"\tpath={path}\tv={value}\n\texpected={expect}",
                       file=sys.stderr)
                 if path is None:
                     assert expect is None
                 else:
+                    found.add(path)
                     assert (path in expect)
-            print("\n", file=sys.stderr)
+            if expect is not None:
+                diff = found ^ set(expect)
+                if len(diff) != 0:
+                    print(f"Error\t{found=}\n\t{expect=}", file=sys.stderr)
+                    print(f"Symmetric Difference : {diff}", file=sys.stderr)
+                    assert False
+            else:
+                assert len(found) == 0    
+
 
     def test2(self):
-        print("Entered test2", file=sys.__stderr__)
+        print("Entered test2", file=sys.stderr)
+        print(f"Test for filtering for int values", file=sys.stderr)
 
         def afilter(x):
-            # print(f"In afilter x = {x}({type(x)})", file=sys.stderr)
             if isinstance(x, int):
                 return True
             return False
@@ -199,45 +206,91 @@ class TestSearch(unittest.TestCase):
         dicts = SampleDicts().build()
         dict1 = dicts.d1
         specs = dicts.specs1
-        for spec in (s[0] for s in specs):
-            print(f"Spec={spec}", file=sys.stderr)
+        for spec, expected in ( (s[0],s[3]) for s in specs):
+            print(f"Spec={spec}, Key={expected}", file=sys.stderr)
+            result = set()
             for ret in DP.search(dict1, spec, yielded=True, afilter=afilter):
                 print(f"\tret={ret}", file=sys.stderr)
-                assert (isinstance(ret[1], int))
+                result.add(ret[1])
+                assert isinstance(ret[1], int)
+            assert result == expected
 
     def test3(self):
-        print("Entered test3", file=sys.__stderr__)
+        print("Entered test3", file=sys.stderr)
         dicts = SampleDicts().build()
         dict1 = dicts.d2
         specs = dicts.specs2Pairs
         for (spec, expect) in specs:
             print(f"Spec={spec}", file=sys.stderr)
+            found = set()
             for (path, value) in DP.search(dict1, spec, yielded=True):
                 print(f"\tpath={path}\tv={value}", file=sys.stderr)
                 if path is None:
                     assert expect is None
                 else:
+                    found.add(path)
                     assert (path in expect)
+            if expect is not None:
+                diff = found ^ set(expect)
+                if len(diff) != 0:
+                    print(f"Error\t{found=}\n\t{expect=}", file=sys.stderr)
+                    print(f"Symmetric Difference : {diff}", file=sys.stderr)
+                    assert False
+            else:
+                assert len(found) == 0
 
     def test4(self):
-        print("Entered test4", file=sys.__stderr__)
+        print("Entered test4", file=sys.stderr)
         dicts = SampleDicts().build()
         dict1 = dicts.d2
         specs = dicts.specs3Pairs
         for (spec, expect) in specs:
             print(f"Spec={spec}", file=sys.stderr)
+            found = set()
             for (path, value) in DP.search(dict1, spec, yielded=True):
                 print(f"\tpath={path}\tv={value}", file=sys.stderr)
                 if path is None:
                     assert expect is None
                 else:
+                    found.add(path)
                     assert (path in expect)
+            if expect is not None:
+                diff = found ^ set(expect)
+                if len(diff) != 0:
+                    print(f"Error\t{found=}\n\t{expect=}", file=sys.stderr)
+                    print(f"Symmetric Difference : {diff}", file=sys.stderr)
+                    assert False
+            else:
+                assert len(found) == 0
+
+    def test5(self):
+        print("Entered test5 -- re.error::", file=sys.stderr)
+        dicts = SampleDicts().build()
+        dict1 = dicts.d2
+        specs = (("/**/{zz)bad}", "ERROR"),
+                 ("{zz)bad}/yyy", "ERROR"),
+                 ("**/{zz)bad}/yyy", "ERROR"),
+                 ("**/{zz)bad}/yyy/.*", "ERROR"),
+                 (123, "OTHERERROR"))
+
+        for (spec, expect) in specs:
+            print(f"Spec={spec}", file=sys.stderr)
+            try:
+                for (path, value) in DP.search(dict1, spec, yielded=True):
+                    print(f"\tpath={path}\tv={value}", file=sys.stderr)
+                    assert expect not in ("ERROR", "OTHERERROR")
+            except InvalidRegex as errExpected:
+                print(f"Expected error:{errExpected}", file=sys.stderr)
+                assert expect == "ERROR"
+            except Exception as errExpected:
+                print(f"Expected error:{errExpected}", file=sys.stderr)
+                assert expect == "OTHERERROR"
 
 
 class TestGet(unittest.TestCase):
 
     def test1(self):
-        print("Entered test1", file=sys.__stderr__)
+        print("Entered test1", file=sys.stderr)
 
         dicts = SampleDicts().build()
         dict1 = dicts.d1
@@ -248,7 +301,7 @@ class TestGet(unittest.TestCase):
                 ret = DP.get(dict1, spec, default=("*NONE*",))
                 print(f"\tret={ret}", file=sys.stderr)
                 assert (ret == expect)
-            except Exception as err:
+            except ValueError as err:
                 print("\t get fails:", err, type(err), file=sys.stderr)
                 assert (expect == "*FAIL*")
 
@@ -284,7 +337,7 @@ class TestDelete(unittest.TestCase):
 
 class TestView(unittest.TestCase):
     def test1(self):
-        print("Entered test1", file=sys.__stderr__)
+        print("Entered test1", file=sys.stderr)
 
         dicts = SampleDicts().build()
         dict1 = dicts.d1
@@ -297,7 +350,7 @@ class TestView(unittest.TestCase):
 
 class TestMatch(unittest.TestCase):
     def test1(self):
-        print("Entered test1", file=sys.__stderr__)
+        print("Entered test1", file=sys.stderr)
 
         dicts = SampleDicts().build()
         dict1 = dicts.d1

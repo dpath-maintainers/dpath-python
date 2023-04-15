@@ -1,12 +1,11 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
 from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
+from re import Pattern
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
-
-from re import Pattern
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -38,7 +37,7 @@ def leaf(thing):
     """
     Return True if thing is a leaf, otherwise False.
     """
-    leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None), Pattern)
 
     return isinstance(thing, leaves)
 
