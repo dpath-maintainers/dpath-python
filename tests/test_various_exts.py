@@ -17,7 +17,7 @@ import dpath as DP
 from dpath.exceptions import InvalidRegex
 
 # check that how the options have been set
-print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP_IN_STRING = {DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING}", file=sys.stderr)
+print(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP_IN_STRING = {DP.options.ALLOW_REGEX}", file=sys.stderr)
 
 
 class SampleDicts():
@@ -276,7 +276,7 @@ class TestMatch(unittest.TestCase):
 
 
 # Now tests that require DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING to be set
-if not DP.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING:
+if not DP.options.ALLOW_REGEX:
     print("Skipping because  DPATH_ACCEPT_RE_REGEXP_IN_STRING != True", file=sys.stderr)
 
 else:

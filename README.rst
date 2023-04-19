@@ -462,7 +462,11 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
      >>> # enable
      >>> dpath.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING = True
      >>> # disable
-	 >>> dpath.options.DPATH_ACCEPT_RE_REGEXP_IN_STRING = False
+	 >>> dpath.options.ALLOW_REGEX = False
+
+       -  Now a path component may also be specified :
+
+          - in a path expression, as {<re.regexpr>} where
 
   -  Now a path component may also be specified : 
 

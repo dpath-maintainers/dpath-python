@@ -55,7 +55,7 @@ def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSe
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-    if options.DPATH_ACCEPT_RE_REGEXP_IN_STRING:
+    if options.ALLOW_REGEX:
         # Handle RegEx segments
 
         def compile_regex_segment(segment: PathSegment):
