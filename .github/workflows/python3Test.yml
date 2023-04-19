@@ -68,23 +68,23 @@ jobs:
                 pip install tox
                 echo "Installed tox"
 
-            - name: Tox test with default  DPATH_ACCEPT_RE_REGEXP_IN_STRING = FALSE
+            - name: Tox test with default DPATH_ALLOW_REGEX not set
               shell: bash
               if: always()
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               #  tox testing, here tox.ini is used
-              #  DPATH_ACCEPT_RE_REGEXP_IN_STRING = FALSE (default)
+              #  DPATH_ALLOW_REGEX not set
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               run: |
                 tox
                 echo "Ran tox"
 
-            - name: Tox test with DPATH_ACCEPT_RE_REGEXP_IN_STRING = TRUE
+            - name: Tox test with DPATH_ALLOW_REGEX = TRUE
               shell: bash
               if: always()
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               #  tox testing,  here tox-set-rex.ini is used
-              #  DPATH_ACCEPT_RE_REGEXP_IN_STRING = TRUE
+              #  DPATH_ALLOW_REGEX = TRUE
               #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               run: |
                 tox -c tox-set-rex.ini

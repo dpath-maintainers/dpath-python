@@ -91,6 +91,6 @@ jobs:
     - name: Run tox with tox-gh-actions (Regex feature flag)
       uses: ymyzk/run-tox-gh-actions@main
       env:
-        ALLOW_REGEX: True
+        DPATH_ALLOW_REGEX: True
       with:
         tox-args: -vv --hashseed=${{ needs.generate-hashseed.outputs.hashseed }}
