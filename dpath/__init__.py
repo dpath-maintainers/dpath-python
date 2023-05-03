@@ -20,51 +20,56 @@ __all__ = [
     "Creator",
 ]
 
+import re
 from collections.abc import MutableMapping, MutableSequence
 from typing import Union, List, Any, Callable, Optional
 
 from dpath import segments, options
-from dpath.exceptions import InvalidKeyName, PathNotFound
+from dpath.exceptions import InvalidKeyName, PathNotFound, InvalidRegex
 from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
-
-import sys
-import re
-
 
 _DEFAULT_SENTINEL = object()
 
 
-def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
+def _split_path(path: Glob, separator: Optional[str] = "/") -> Union[List[PathSegment], PathSegment]:
     """
-    Given a path and separator, return a tuple of segments. If path is
-    already a non-leaf thing, return it.
+    Given a path and separator, return a tuple of segments.
+
+    If path is already a non-leaf thing, return it: this covers sequences of strings
+    and re.Patterns.
 
     Note that a string path with the separator at index[0] will have the
     separator stripped off. If you pass a list path, the separator is
     ignored, and is assumed to be part of each key glob. It will not be
-    stripped.
+    stripped (i.e. a first list element can be an empty string).
+
+    If RegEx support is enabled then str segments which are wrapped with curly braces will be handled as regular
+    expressions. These segments will be compiled using re.compile.
+    Errors during RegEx compilation will raise an InvalidRegex exception.
     """
     if not segments.leaf(path):
         split_segments = path
+    elif isinstance(path, re.Pattern):
+        # Handle paths which are comprised of a single re.Pattern
+        split_segments = (path,)
     else:
         split_segments = path.lstrip(separator).split(separator)
 
-    final = []
-    for segment in split_segments:
-        if (options.DPATH_ACCEPT_RE_REGEXP and isinstance(segment, str)
-                and segment[0] == '{' and segment[-1] == '}'):
-            try:
-                rs = segment[1:-1]
-                rex = re.compile(rs)
-            except Exception as reErr:
-                print(f"Error in segment '{segment}' string '{rs}' not accepted"
-                      + f"as re.regexp:\n\t{reErr}",
-                      file=sys.stderr)
-                raise reErr
-            final.append(rex)
-        else:
-            final.append(segment)
-    return final
+    if options.ALLOW_REGEX:
+        # Handle RegEx segments
+
+        def compile_regex_segment(segment: PathSegment):
+            if isinstance(segment, str) and segment.startswith("{") and segment.endswith("}"):
+                try:
+                    return re.compile(segment[1:-1])
+                except re.error as re_err:
+                    raise InvalidRegex(f"Could not compile RegEx in path segment '{segment}' ({re_err})")
+
+            return segment
+
+        split_segments = list(map(compile_regex_segment, split_segments))
+
+    return split_segments
 
 
 def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:

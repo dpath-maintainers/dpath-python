@@ -1,5 +1,6 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
+from re import Pattern
 from abc import ABC
 from dpath.options import PEP544_PROTOCOL_AVAILABLE
 
@@ -11,9 +12,6 @@ if PEP544_PROTOCOL_AVAILABLE:
         from abc import abstractmethod
     except Exception:
         PEP544_PROTOCOL_AVAILABLE = False
-
-# For re.regexp string match
-import re
 
 
 class SymmetricInt(int):
@@ -60,7 +58,7 @@ class MergeType(IntFlag):
     replaces the destination in this situation."""
 
 
-PathSegment = Union[int, str, bytes]
+PathSegment = Union[int, str, bytes, Pattern]
 """Type alias for dict path segments where integers are explicitly casted."""
 
 Filter = Callable[[Any], bool]
@@ -70,21 +68,24 @@ Filter = Callable[[Any], bool]
 
 
 class Basic_StringMatcher (ABC):
-    """ Base class to be used when typing.Protocol is not available. In this case,
-        a derived class defining match can be used to match path components. (see examples)
+    """ Base class to be used when typing.Protocol is not available, or if the user so chooses.
+        (always supported).
+        In this case, a derived class defining the method match can be used to match path components.
+        (see examples)
     """
 
     def __init__(self):
         raise RuntimeError("This is a pseudo abstract class")
 
     def match(self, str):
-        """ This must be provided by the user to define a custom matcher
+        """ This must be provided by the user derived class to define a custom matcher
         Args:
             str ( str): the string to be matched
-        Raises:
-            NotImplementedError: User has not provided the required method
+        Returns:
+            None: the string does not match
+            otherwise: the match is accepted, in particular False is not a rejection.
         """
-        raise NotImplementedError
+        pass
 
 
 if PEP544_PROTOCOL_AVAILABLE:
@@ -93,7 +94,7 @@ if PEP544_PROTOCOL_AVAILABLE:
     @runtime_checkable
     class Duck_StringMatcher(Protocol):
         """ Permits match component matching using duck typing (see examples):
-            The user must provide and object that defines the match method tp
+            The user must provide and object that defines the match method to
             implement the generalized matcher.
 
             Uses PEP 544: Protocols: Structural subtyping (static duck typing)
@@ -108,33 +109,30 @@ if PEP544_PROTOCOL_AVAILABLE:
             """ Requirement for match function, must return None if matching
             rejected. False is not a rejection !
             """
-            # Method without a default implementation
-            raise NotImplementedError
+            pass
 
-    StringMatcher = Union[re.Pattern, Duck_StringMatcher, Basic_StringMatcher]
+    StringMatcher = Union[Pattern, Duck_StringMatcher, Basic_StringMatcher]
 
     # for use with isinstance
-    StringMatcher_astuple = (re.Pattern, Basic_StringMatcher, Duck_StringMatcher)
+    StringMatcher_astuple = (Pattern, Basic_StringMatcher, Duck_StringMatcher)
 else:
 
     Duck_StringMatcher = Basic_StringMatcher
 
-    StringMatcher = Union[re.Pattern, Basic_StringMatcher]
+    StringMatcher = Union[Pattern, Basic_StringMatcher]
     """ Either a re.Pattern or a type that satisfies duck typing requirements
     for matching strings
     """
 
-    # for use with isinstance
-    StringMatcher_astuple = (re.Pattern, Basic_StringMatcher)
+    # For use with isinstance. Apparently, isinstance ability to deal with Union
+    # is not available before Python 3.10, see https://bugs.python.org/issue44529
+    # and https://www.python.org/dev/peps/pep-0604/#isinstance-and-issubclass
+    StringMatcher_astuple = (Pattern, Basic_StringMatcher)
 
-GlobElt = Union[str, StringMatcher]
-""" Type alias for a glob sequence element
-"""
-
-Glob = Union[str, Sequence[GlobElt]]
 """Type alias for glob parameters, allows re.Pattern and generalized matchers"""
+Glob = Union[str, Pattern, Sequence[Union[str, Pattern, StringMatcher]]]
 
-Path = Union[str, Sequence[PathSegment]]
+Path = Union[str, Pattern, Sequence[PathSegment]]
 """Type alias for path parameters."""
 
 Hints = Sequence[Tuple[PathSegment, type]]

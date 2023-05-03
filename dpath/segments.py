@@ -1,5 +1,6 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
+from re import Pattern
 from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
@@ -37,7 +38,7 @@ def leaf(thing):
     """
     Return True if thing is a leaf, otherwise False.
     """
-    leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None), Pattern)
 
     return isinstance(thing, leaves)
 
@@ -188,8 +189,8 @@ def match(segments: Path, glob: Glob):
        If fnmatchcase returns False or throws an exception the result will be False.
     -  or, the glob is a re.Pattern (result of re.compile) and re.Pattern.match returns
        a match
-    -  or, the glob is a generalized match expression (duck typed if available, derivative
-       of class Basic_StringMatcher otherwise).
+    -  or, the glob is a generalized match object (duck typed if available, derivative
+       of class Basic_StringMatcher (always available)), and the method match return is not 'None'.
 
     match(segments, glob) -> bool
     """

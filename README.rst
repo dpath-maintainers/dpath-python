@@ -450,18 +450,19 @@ Python's `re` regular expressions PythonRe_ may be used as follows:
 
   .. _PythonRe:  https://docs.python.org/3/library/re.html
 
- 
-  -  This facility is enabled by default, but may be disabled (for backwards 
-     compatibility in the unlikely cases where a path expression component would start 
-     with '{' and end in '}'):
+  -  The recognition of such regular expressions in strings is disabled by default, but may be easily 
+      enabled ( Set up this way for backwards compatibility in the cases where a path 
+      expression component would start with '{' and end in '}').
+   -  Irrespective of this setting, the user can use `re` regular expressions in the list form of 
+      paths (see below).
  
     .. code-block:: python
  
       >>> import dpath
-      >>> # disable
-      >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = False
       >>> # enable
-      >>> dpath.options.DPATH_ACCEPT_RE_REGEXP = True   
+      >>> dpath.options.ALLOW_REGEX = True
+      >>> # disable
+      >>> dpath.options.ALLOW_REGEX = False   
 
   -  Now a path component may also be specified : 
 

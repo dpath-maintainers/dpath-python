@@ -19,11 +19,11 @@ def _sprint(*args, **kwdargs):
 
 
 # check that how the options have been set
-_sprint(f"At entry in test_path_ext DPATH_ACCEPT_RE_REGEXP = {DP.options.DPATH_ACCEPT_RE_REGEXP}")
+_sprint(f"At entry in test_path_ext ALLOW_REGEX = {DP.options.ALLOW_REGEX}")
 
-if not DP.options.DPATH_ACCEPT_RE_REGEXP:
-    _sprint("This test only works with DPATH_ACCEPT_RE_REGEXP = True")
-    DP.options.DPATH_ACCEPT_RE_REGEXP = True  # enable re.regexp support in path expr.
+if not DP.options.ALLOW_REGEX:
+    _sprint("This test only works with ALLOW_REGEX = True")
+    DP.options.ALLOW_REGEX = True  # enable re.regexp support in path expr.
 
 if DP.options.PEP544_PROTOCOL_AVAILABLE:
     _sprint(f"\tPEP544_PROTOCOL_AVAILABLE={DP.options.PEP544_PROTOCOL_AVAILABLE}")
