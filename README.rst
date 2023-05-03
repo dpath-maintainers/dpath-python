@@ -11,8 +11,8 @@ A python library for accessing and searching dictionaries via
 
 Basically it lets you glob over a dictionary as if it were a filesystem.
 It allows you to specify globs (ala the bash eglob syntax, through some
-advanced fnmatch.fnmatch magic) to access dictionary elements, and
-provides some facility for filtering those results.
+advanced fnmatch.fnmatch magic, or using Python's `re`regular expressions ) 
+to access dictionary elements, and provides some facility for filtering those results.
 
 sdists are available on pypi: http://pypi.python.org/pypi/dpath
 
@@ -110,6 +110,9 @@ elements in ``x['a']['b']`` where the key is equal to the glob ``'[cd]'``. Okay.
             }
         }
     }
+
+**Note** : Using Python's `re` regular expressions instead of globs is explained
+below re_regexp_; defining your own string matcher objects is shown in generalized_string_match_ below.
 
 ... Wow that was easy. What if I want to iterate over the results, and
 not get a merged view?
@@ -437,6 +440,165 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
    >>> x = { 'a': {'b/c': 0}}
    >>> dpath.get(['a', 'b/c'])
    0
+
+.. _re_regexp:
+
+Globs too imprecise? Use Python's `re` Regular Expressions
+==========================================================
+
+Python's `re` regular expressions PythonRe_ may be used as follows:
+
+  .. _PythonRe:  https://docs.python.org/3/library/re.html
+
+  -  The recognition of such regular expressions in strings is disabled by default, but may be easily 
+      enabled ( Set up this way for backwards compatibility in the cases where a path 
+      expression component would start with '{' and end in '}').
+   -  Irrespective of this setting, the user can use `re` regular expressions in the list form of 
+      paths (see below).
+ 
+    .. code-block:: python
+ 
+      >>> import dpath
+      >>> # enable
+      >>> dpath.options.ALLOW_REGEX = True
+      >>> # disable
+      >>> dpath.options.ALLOW_REGEX = False   
+
+  -  Now a path component may also be specified : 
+
+     - in a path expression, as {<re.regexpr>} where `<re.regexpr>` is a regular expression
+       accepted by the  standard Python module `re`. For example:
+
+      .. code-block:: python 
+
+       >>> selPath = 'Config/{(Env|Cmd)}'
+       >>> x = dpath.search(js.lod, selPath)
+
+      .. code-block:: python
+
+       >>> selPath = '{(Config|Graph)}/{(Env|Cmd|Data)}'
+       >>> x = dpath.search(js.lod, selPath)
+
+     - When using the list form for a path, a list element can also
+       be expressed as
+   
+       -  a string as above
+       -  the output of ::    `re.compile( args )``
+
+       An example:
+
+       .. code-block:: python
+
+        >>> selPath = [ re.compile('(Config|Graph)') , re.compile('(Env|Cmd|Data)') ]
+        >>>  x = dpath.search(js.lod, selPath)
+
+       More examples from a realistic json context:
+
+       +-----------------------------------------+--------------------------------------+
+       +     **Extended path glob**              |  **Designates**                      + 
+       +-----------------------------------------+--------------------------------------+
+       +     "\*\*/{[^A-Za-z]{2}$}"              |   "Id"                               +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*/{[A-Z][A-Za-z\\d]*$}"          |  "Name","Id","Created", "Scope",...  +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*\d$}"      |   EnableIPv6"                        +
+       +-----------------------------------------+--------------------------------------+
+       +     r"\*\*/{[A-Z][A-Za-z\\d]*Address$}" |   "Containers/199c5/MacAddress"      +
+       +-----------------------------------------+--------------------------------------+
+       
+       With Python's character string conventions, required backslashes in the `re` syntax
+       can be entered either in raw strings or using double backslashes, thus
+       the following are equivalent:
+
+        +-----------------------------------------+----------------------------------------+
+        +    *with raw strings*                   | *equivalent* with double backslash     +
+        +-----------------------------------------+----------------------------------------+
+        +    r"\*\*/{[A-Z][A-Za-z\\d]*\\d$}"      |   "\*\*/{[A-Z][A-Za-z\\\\d]*\\\\d$}"   +
+        +-----------------------------------------+----------------------------------------+
+        +   r"\*\*/{[A-Z][A-Za-z\\d]*Address$}"   |  "\*\*/{[A-Z][A-Za-z\\\\d]*Address$}"  +
+        +-----------------------------------------+----------------------------------------+
+
+.. _generalized_string_match:
+
+Need still more customization ? Roll your own match method!
+===========================================================
+
+We provide the following abstract types, where `StringMatcher` is allowed in Glob in the
+sequence form (definitions in `dpath.types`) :
+
+- `StringMatcher` (descriptive Union type ),
+
+- `Duck_StringMatcher`: which will accept a class as a **subtype**, provided it offers a `match` method. Instances may then be used as components in the list form of paths. This method of structural subtyping is explained in PEP 544 [https://peps.python.org/pep-0544/].
+    
+
+- `Basic_StringMatcher`: an abstract base class, enabling your derived class to be recognized and participate in a match. 
+
+**Notes:** 
+  - It is required that the `match` method: `match(self, str) -> Optional[object]`, 
+    returns `None` to reject the match.
+  - Using `Duck_StringMatcher` requires a version of Python and Pypy not less than 3.8, 
+    otherwise you should derive from base class `Basic_StringMatcher`. The
+    variable `dpath.options.PEP544_PROTOCOL_AVAILABLE` indicates when duck typing is possible.
+
+Then it is up to you... Examples are provided in `tests/test_duck_typing.py`,
+  including:
+
+  - *match anagrams*:
+
+    .. code-block:: python 
+
+      class Anagram():
+           def __init__(self, s):
+               self.ref = "".join(sorted(s))
+    
+           def match(self, st):
+               retval = True if "".join(sorted(st)) == self.ref else None
+               return retval
+
+       mydict = TestBasics.mydict
+    
+       r1 = dpath.search(mydict, "**/label")
+       r2 = dpath.search(mydict, [ '**', Anagram("bella")])
+
+       assert r1 == r2
+
+- and *approximate match* (requires `rapidfuzz` https://maxbachmann.github.io/RapidFuzz/):
+
+  .. code-block:: python
+
+        class Approx():
+            def __init__(self, s, quality=90):
+                self.ref = s
+                self.quality=quality
+
+            def match(self, st):
+                fratio = rapidfuzz.fuzz.ratio(st, self.ref)
+                retval = True if fratio > self.quality  else None
+                return retval
+
+        mydict = TestBasics.mydict
+
+
+        r1 = dpath.search(mydict, "**/placeholder")
+        r2 = dpath.search(mydict, [ '**', Approx("placecolder")])
+        r3 = dpath.search(mydict, [ '**', Approx("acecolder",75)])
+        assert r1 == r2
+        assert r1 == r3
+
+For comparison, we show now the first example reimplemented to avoid duck typing:
+
+  .. code-block:: python
+
+       if not dpath.options.PEP544_PROTOCOL_AVAILABLE:
+             class Anagram(dpath.types.Basic_StringMatcher):
+                def __init__(self, s):
+                    self.ref = "".join(sorted(s))
+
+                def match(self, st):
+                    retval = True if "".join(sorted(st)) == self.ref else None
+                    return retval
+
+       dpath.search(mydict, ['**', Anagram("bella")])
 
 dpath.segments : The Low-Level Backend
 ======================================

@@ -1,10 +1,12 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
+from re import Pattern
 from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
 from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
+from dpath.types import StringMatcher_astuple
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -36,7 +38,7 @@ def leaf(thing):
     """
     Return True if thing is a leaf, otherwise False.
     """
-    leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None), Pattern)
 
     return isinstance(thing, leaves)
 
@@ -182,9 +184,13 @@ def match(segments: Path, glob: Glob):
     or more star segments and the type will be coerced to match that of
     the segment.
 
-    A segment is considered to match a glob if the function
-    fnmatch.fnmatchcase returns True. If fnmatchcase returns False or
-    throws an exception the result will be False.
+    A segment is considered to match a glob when either:
+    -  the glob is a String :  the function fnmatch.fnmatchcase returns True.
+       If fnmatchcase returns False or throws an exception the result will be False.
+    -  or, the glob is a re.Pattern (result of re.compile) and re.Pattern.match returns
+       a match
+    -  or, the glob is a generalized match object (duck typed if available, derivative
+       of class Basic_StringMatcher (always available)), and the method match return is not 'None'.
 
     match(segments, glob) -> bool
     """
@@ -234,6 +240,7 @@ def match(segments: Path, glob: Glob):
                 # If search path segment (s) is an int then assume currently evaluated index (g) might be a sequence
                 # index as well. Try converting it to an int.
                 if isinstance(s, int) and s == int(g):
+
                     continue
             except:
                 # Will reach this point if g can't be converted to an int (e.g. when g is a RegEx pattern).
@@ -241,10 +248,13 @@ def match(segments: Path, glob: Glob):
                 s = str(s)
 
             try:
-                # Let's see if the glob matches. We will turn any kind of
-                # exception while attempting to match into a False for the
-                # match.
-                if not fnmatchcase(s, g):
+                # Let's see if the glob, regular expression or the generalized match object matches.
+                # We will turn any kind of exception while attempting to match into a False for the match.
+                if isinstance(g, StringMatcher_astuple):
+                    mobj = g.match(s)
+                    if mobj is None:
+                        return False
+                elif not fnmatchcase(s, g):
                     return False
             except:
                 return False
