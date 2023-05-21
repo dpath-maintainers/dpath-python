@@ -1,5 +1,6 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
+from re import Pattern
 from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
 
 from dpath import options
@@ -36,7 +37,7 @@ def leaf(thing):
     """
     Return True if thing is a leaf, otherwise False.
     """
-    leaves = (bytes, str, int, float, bool, type(None))
+    leaves = (bytes, str, int, float, bool, type(None), Pattern)
 
     return isinstance(thing, leaves)
 
@@ -182,9 +183,11 @@ def match(segments: Path, glob: Glob):
     or more star segments and the type will be coerced to match that of
     the segment.
 
-    A segment is considered to match a glob if the function
-    fnmatch.fnmatchcase returns True. If fnmatchcase returns False or
-    throws an exception the result will be False.
+    A segment is considered to match a glob when either:
+    -  the segment is a String :  the function fnmatch.fnmatchcase returns True.
+       If fnmatchcase returns False or throws an exception the result will be False.
+    -  or, the segment is a re.Pattern (result of re.compile) and re.Pattern.match returns
+       a match
 
     match(segments, glob) -> bool
     """
@@ -241,10 +244,13 @@ def match(segments: Path, glob: Glob):
                 s = str(s)
 
             try:
-                # Let's see if the glob matches. We will turn any kind of
-                # exception while attempting to match into a False for the
-                # match.
-                if not fnmatchcase(s, g):
+                # Let's see if the glob or the regular expression matches. We will turn any kind of
+                # exception while attempting to match into a False for the match.
+                if isinstance(g, Pattern):
+                    mobj = g.match(s)
+                    if mobj is None:
+                        return False
+                elif not fnmatchcase(s, g):
                     return False
             except:
                 return False

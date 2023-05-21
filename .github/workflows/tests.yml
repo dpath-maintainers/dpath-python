@@ -87,3 +87,10 @@ jobs:
       uses: ymyzk/run-tox-gh-actions@main
       with:
         tox-args: -vv --hashseed=${{ needs.generate-hashseed.outputs.hashseed }}
+
+    - name: Run tox with tox-gh-actions (Regex feature flag)
+      uses: ymyzk/run-tox-gh-actions@main
+      env:
+        DPATH_ALLOW_REGEX: True
+      with:
+        tox-args: -vv --hashseed=${{ needs.generate-hashseed.outputs.hashseed }}

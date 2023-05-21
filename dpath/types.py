@@ -1,5 +1,6 @@
 from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
+from re import Pattern
 
 
 class SymmetricInt(int):
@@ -46,7 +47,7 @@ class MergeType(IntFlag):
     replaces the destination in this situation."""
 
 
-PathSegment = Union[int, str, bytes]
+PathSegment = Union[int, str, bytes, Pattern]
 """Type alias for dict path segments where integers are explicitly casted."""
 
 Filter = Callable[[Any], bool]
@@ -54,10 +55,11 @@ Filter = Callable[[Any], bool]
 
 (Any) -> bool"""
 
-Glob = Union[str, Sequence[str]]
+Glob = Union[str, Pattern, Sequence[Union[str, Pattern]]]
 """Type alias for glob parameters."""
 
-Path = Union[str, Sequence[PathSegment]]
+
+Path = Union[str, Pattern, Sequence[PathSegment]]
 """Type alias for path parameters."""
 
 Hints = Sequence[Tuple[PathSegment, type]]
