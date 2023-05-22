@@ -52,7 +52,6 @@ def test_broken_afilter():
         ],
     }
 
-    results = [[x[0], x[1]] for x in dpath.search(a, 'actions/*', yielded=True)]
     results = [[x[0], x[1]] for x in dpath.search(a, 'actions/*', afilter=filter, yielded=True)]
     assert len(results) == 1
     assert results[0][1]['type'] == 'correct'
