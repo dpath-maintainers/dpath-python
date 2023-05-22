@@ -27,8 +27,24 @@ def delete(obj, glob, separator="/", afilter=None):
 
 
 @deprecated
-def set(obj, glob, value, separator="/", afilter=None):
-    return dpath.set(obj, glob, value, separator, afilter)
+def set(
+        obj,
+        glob,
+        value,
+        separator="/",
+        afilter=None,
+        is_only_leaves_filter: bool = True,
+        is_dict_update: bool = False
+):
+    return dpath.set(
+        obj,
+        glob,
+        value,
+        separator,
+        afilter,
+        is_only_leaves_filter,
+        is_dict_update
+    )
 
 
 @deprecated

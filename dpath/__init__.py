@@ -40,12 +40,7 @@ def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSe
     ignored, and is assumed to be part of each key glob. It will not be
     stripped.
     """
-    if not segments.leaf(path):
-        split_segments = path
-    else:
-        split_segments = path.lstrip(separator).split(separator)
-
-    return split_segments
+    return path.lstrip(separator).split(separator) if segments.leaf(path) else path
 
 
 def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
@@ -127,7 +122,15 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = Non
     return deleted
 
 
-def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter = None) -> int:
+def set(
+        obj: MutableMapping,
+        glob: Glob,
+        value,
+        separator="/",
+        afilter: Filter = None,
+        is_only_leaves_filter: bool = True,
+        is_dict_update: bool = False
+) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -142,9 +145,19 @@ def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter =
             return
 
         matched = segments.match(path_segments, globlist)
-        selected = afilter and segments.leaf(found) and afilter(found)
+        if is_only_leaves_filter:
+            selected = afilter and segments.leaf(found) and afilter(found)
+        else:
+            selected = afilter and afilter(found)
 
-        if (matched and not afilter) or (matched and selected):
+        if (
+                (matched and not afilter) or
+                (matched and selected) or
+                (selected and not is_only_leaves_filter)
+        ):
+            nonlocal value
+            if is_dict_update and isinstance(value, dict):
+                value = {**found, **value}
             segments.set(obj, path_segments, value, creator=None)
             counter[0] += 1
 
