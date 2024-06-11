@@ -2,7 +2,8 @@ import datetime
 import decimal
 import time
 
-import mock
+from unittest import mock
+
 from nose2.tools.such import helper
 
 import dpath
