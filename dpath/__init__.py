@@ -167,7 +167,7 @@ def get(
     If more than one leaf matches the glob, ValueError is raised. If the glob is
     not found and a default is not provided, KeyError is raised.
     """
-    if glob == "/":
+    if isinstance(glob, str) and glob == "/" or len(glob) == 0:
         return obj
 
     globlist = _split_path(glob, separator)

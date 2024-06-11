@@ -17,6 +17,9 @@ def test_util_get_root():
     ret = dpath.get(x, '/')
     assert ret == x
 
+    ret = dpath.get(x, [])
+    assert ret == x
+
 
 def test_get_explicit_single():
     ehash = {
