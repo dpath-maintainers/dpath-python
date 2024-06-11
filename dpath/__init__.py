@@ -167,7 +167,7 @@ def get(
     If more than one leaf matches the glob, ValueError is raised. If the glob is
     not found and a default is not provided, KeyError is raised.
     """
-    if glob == "/":
+    if isinstance(glob, str) and glob == "/" or len(glob) == 0:
         return obj
 
     globlist = _split_path(glob, separator)
@@ -316,7 +316,7 @@ def merge(dst: MutableMapping, src: MutableMapping, separator="/", afilter: Filt
             target = segments.get(dst, current_path)
 
             # If the types don't match, replace it.
-            if type(found) != type(target) and not are_both_mutable(found, target):
+            if type(found) is not type(target) and not are_both_mutable(found, target):
                 segments.set(dst, current_path, found)
                 continue
 
