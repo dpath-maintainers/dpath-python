@@ -30,18 +30,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@main
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@main
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Setup flake8 annotations
-        uses: rbialon/flake8-annotations@v1.1
-
-      - name: Lint with flake8
-        run: |
-          pip install flake8
-          flake8 setup.py dpath/ tests/
+        uses: TrueBrain/actions-flake8@v2.3
+        with:
+          path: setup.py dpath/ tests/
 
   # Generate a common hashseed for all tests
   generate-hashseed:
@@ -70,7 +67,7 @@ jobs:
     strategy:
       matrix:
         # Match versions specified in tox.ini
-        python-version: ['3.8', '3.9', '3.10', '3.11', 'pypy-3.7']
+        python-version: ['3.8', '3.9', '3.10', '3.11', 'pypy-3.7', '3.12']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
