@@ -30,10 +30,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@main
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@main
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Setup flake8 annotations
         uses: rbialon/flake8-annotations@v1.1
