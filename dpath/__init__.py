@@ -1,3 +1,6 @@
+# Needed for pre-3.10 versions
+from __future__ import annotations
+
 __all__ = [
     "new",
     "delete",
@@ -48,7 +51,7 @@ def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSe
     return split_segments
 
 
-def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator = None) -> MutableMapping:
+def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator | None = None) -> MutableMapping:
     """
     Set the element at the terminus of path to value, and create
     it if it does not exist (as opposed to 'set' that can only
@@ -68,7 +71,7 @@ def new(obj: MutableMapping, path: Path, value, separator="/", creator: Creator 
     return segments.set(obj, split_segments, value)
 
 
-def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None) -> int:
+def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter | None = None) -> int:
     """
     Given a obj, delete all elements that match the glob.
 
@@ -127,7 +130,7 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = Non
     return deleted
 
 
-def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter = None) -> int:
+def set(obj: MutableMapping, glob: Glob, value, separator="/", afilter: Filter | None = None) -> int:
     """
     Given a path glob, set all existing elements in the document
     to the given value. Returns the number of elements changed.
@@ -193,7 +196,7 @@ def get(
     return results[0]
 
 
-def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = None, dirs=True):
+def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter | None = None, dirs=True):
     """
     Given an object and a path glob, return an array of all values which match
     the glob. The arguments to this function are identical to those of search().
@@ -203,13 +206,13 @@ def values(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter = Non
     return [v for p, v in search(obj, glob, yielded, separator, afilter, dirs)]
 
 
-def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilter: Filter = None, dirs=True):
+def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilter: Filter | None = None, dirs=True):
     """
     Given a path glob, return a dictionary containing all keys
     that matched the given glob.
 
     If 'yielded' is true, then a dictionary will not be returned.
-    Instead tuples will be yielded in the form of (path, value) for
+    Instead, tuples will be yielded in the form of (path, value) for
     every element in the document that matched the glob.
     """
 
@@ -218,7 +221,7 @@ def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilte
     def keeper(path, found):
         """
         Generalized test for use in both yielded and folded cases.
-        Returns True if we want this result. Otherwise returns False.
+        Returns True if we want this result. Otherwise, returns False.
         """
         if not dirs and not segments.leaf(found):
             return False
@@ -245,7 +248,13 @@ def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilte
         return segments.fold(obj, f, {})
 
 
-def merge(dst: MutableMapping, src: MutableMapping, separator="/", afilter: Filter = None, flags=MergeType.ADDITIVE):
+def merge(
+        dst: MutableMapping,
+        src: MutableMapping,
+        separator="/",
+        afilter: Filter | None = None,
+        flags=MergeType.ADDITIVE
+):
     """
     Merge source into destination. Like dict.update() but performs deep
     merging.
