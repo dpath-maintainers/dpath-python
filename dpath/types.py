@@ -21,6 +21,7 @@ class ListIndex(int):
         if not isinstance(other, int):
             return False
 
+        # Based on how Python sequences handle negative indices as described in footnote (3) of https://docs.python.org/3/library/stdtypes.html#common-sequence-operations
         return other == int(self) or self.list_length + other == int(self)
 
     def __repr__(self):
