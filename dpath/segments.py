@@ -4,7 +4,7 @@ from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMappi
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
-from dpath.types import PathSegment, Creator, Hints, Glob, Path, SymmetricInt
+from dpath.types import PathSegment, Creator, Hints, Glob, Path, ListIndex
 
 
 def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
@@ -22,8 +22,8 @@ def make_walkable(node) -> Iterator[Tuple[PathSegment, Any]]:
     except AttributeError:
         try:
             indices = range(len(node))
-            # Convert all list indices to object so negative indexes are supported.
-            indices = map(lambda i: SymmetricInt(i, len(node)), indices)
+            # Convert all list indices to objects so negative indices are supported.
+            indices = map(lambda i: ListIndex(i, len(node)), indices)
             return zip(indices, node)
         except TypeError:
             # This can happen in cases where the node isn't leaf(node) == True,

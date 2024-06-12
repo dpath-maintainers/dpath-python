@@ -2,18 +2,18 @@ from enum import IntFlag, auto
 from typing import Union, Any, Callable, Sequence, Tuple, List, Optional, MutableMapping
 
 
-class SymmetricInt(int):
-    """Same as a normal int but mimicks the behavior of list indexes (can be compared to a negative number)."""
+class ListIndex(int):
+    """Same as a normal int but mimics the behavior of list indices (can be compared to a negative number)."""
 
-    def __new__(cls, value: int, max_value: int, *args, **kwargs):
-        if value >= max_value:
+    def __new__(cls, value: int, list_length: int, *args, **kwargs):
+        if value >= list_length:
             raise TypeError(
                 f"Tried to initiate a {cls.__name__} with a value ({value}) "
-                f"greater than the provided max value ({max_value})"
+                f"greater than the provided max value ({list_length})"
             )
 
         obj = super().__new__(cls, value)
-        obj.max_value = max_value
+        obj.list_length = list_length
 
         return obj
 
@@ -21,13 +21,11 @@ class SymmetricInt(int):
         if not isinstance(other, int):
             return False
 
-        if other >= self.max_value or other <= -self.max_value:
-            return False
-
-        return int(self) == (self.max_value + other) % self.max_value
+        # Based on how Python sequences handle negative indices as described in footnote (3) of https://docs.python.org/3/library/stdtypes.html#common-sequence-operations
+        return other == int(self) or self.list_length + other == int(self)
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {int(self)}%{self.max_value}>"
+        return f"<{self.__class__.__name__} {int(self)}/{self.list_length}>"
 
     def __str__(self):
         return str(int(self))
