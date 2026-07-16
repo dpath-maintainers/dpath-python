@@ -30,10 +30,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@main
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.14
         uses: actions/setup-python@main
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Setup flake8 annotations
         uses: TrueBrain/actions-flake8@v2.3
@@ -67,7 +67,7 @@ jobs:
     strategy:
       matrix:
         # Match versions specified in tox.ini
-        python-version: ['3.8', '3.9', '3.10', '3.11', 'pypy-3.7', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', 'pypy-3.7', '3.12', '3.13', '3.14']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
