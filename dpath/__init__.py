@@ -21,6 +21,7 @@ __all__ = [
     "Path",
     "Hints",
     "Creator",
+    "DDict",
 ]
 
 from collections.abc import MutableMapping, MutableSequence
@@ -29,6 +30,8 @@ from typing import Union, List, Any, Callable, Optional
 from dpath import segments, options
 from dpath.exceptions import InvalidKeyName, PathNotFound
 from dpath.types import MergeType, PathSegment, Creator, Filter, Glob, Path, Hints
+from dpath.ddict import DDict
+
 
 _DEFAULT_SENTINEL = object()
 
