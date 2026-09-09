@@ -1,6 +1,6 @@
 from copy import deepcopy
 from fnmatch import fnmatchcase
-from typing import Sequence, Tuple, Iterator, Any, Union, Optional, MutableMapping, MutableSequence
+from typing import Sequence, Tuple, Iterator, Any, Union, Optional, Mapping, MutableMapping, MutableSequence
 
 from dpath import options
 from dpath.exceptions import InvalidGlob, InvalidKeyName, PathNotFound
@@ -305,7 +305,22 @@ def _default_creator(
 
     # Infer the type from the hints provided.
     if i < len(hints):
-        current[segment] = hints[i][1]()
+        hint_type = hints[i][1]
+        if issubclass(hint_type, MutableMapping) or issubclass(hint_type, MutableSequence):
+            current[segment] = hint_type()
+        else:
+            # The hinted type was read off of the source object as-is (see
+            # types()), and it can be something like tuple, set or frozenset:
+            # a container walk() is happy to recurse into but that cannot be
+            # filled in afterwards through the item assignment and extend()
+            # calls this module uses to build nested containers incrementally.
+            # Creating one of those here would only defer the same crash to
+            # the next segment (or, for a mapping-like immutable type, to the
+            # assignment right below). Since the concrete type cannot survive
+            # this kind of reconstruction anyway, fall back to a mutable
+            # container with the same general shape: a plain dict for
+            # anything mapping-like, a plain list otherwise.
+            current[segment] = dict() if issubclass(hint_type, Mapping) else []
     else:
         # Peek at the next segment to determine if we should be
         # creating an array for it to access or dictionary.
@@ -356,6 +371,17 @@ def set(
                 creator(current, segments, i, hints)
             else:
                 raise
+        else:
+            # A value already sits at this segment. If it is an immutable
+            # sequence such as a tuple, it cannot support the extend() call
+            # or item assignment further down this function needs to fill
+            # in a deeper segment; that happens whenever a walk (search(),
+            # merge(), view()) has already written the tuple in whole at a
+            # shallower path before reaching one of its own elements at a
+            # deeper path. Swap it for an equivalent, mutable list in
+            # place so the walk can keep descending into it.
+            if isinstance(current[segment], tuple):
+                current[segment] = list(current[segment])
 
         current = current[segment]
         if i != length - 1 and leaf(current):

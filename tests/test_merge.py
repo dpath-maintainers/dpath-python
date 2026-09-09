@@ -195,3 +195,31 @@ def test_merge_list():
         dpath.merge(dst2, d)
     assert dst1["l"] == [1, 2]
     assert dst2["l"] == [1, 2]
+
+
+def test_merge_list_of_tuples():
+    # A tuple nested inside a list used to crash merge(): walking the
+    # source assigns the tuple in whole at its own path first, and then
+    # tries to descend into its elements at a deeper path as if it were
+    # still mutable, which raised AttributeError from extend(). See #189.
+    dst = {"foo": []}
+    src = {"foo": [("bar", "baz")]}
+
+    dpath.merge(dst, src)
+    assert dst["foo"] == [["bar", "baz"]]
+
+
+def test_merge_tuple_value():
+    dst = {}
+    src = {"a": ("x", "y")}
+
+    dpath.merge(dst, src)
+    assert dst["a"] == ["x", "y"]
+
+
+def test_merge_nested_tuple_value():
+    dst = {}
+    src = {"a": ("x", ("nested", "tuple"))}
+
+    dpath.merge(dst, src)
+    assert dst["a"] == ["x", ["nested", "tuple"]]
