@@ -90,7 +90,7 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter | Non
         matched = segments.match(path_segments, globlist)
         selected = afilter and segments.leaf(value) and afilter(value)
 
-        if (matched and not afilter) or selected:
+        if (matched and not afilter) or (matched and selected):
             key = path_segments[-1]
             parent = segments.get(obj, path_segments[:-1])
 
