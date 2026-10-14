@@ -301,7 +301,7 @@ def merge(
             # Our current path in the source.
             current_path = _segments + (key,)
 
-            if len(key) == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
+            if isinstance(key, (str, bytes)) and len(key) == 0 and not options.ALLOW_EMPTY_STRING_KEYS:
                 raise InvalidKeyName("Empty string keys not allowed without "
                                      "dpath.options.ALLOW_EMPTY_STRING_KEYS=True: "
                                      f"{current_path}")
@@ -313,7 +313,7 @@ def merge(
                     tt = type(target)
                     ft = type(found)
                     if tt != ft:
-                        path = separator.join(current_path)
+                        path = separator.join(map(segments.int_str, current_path))
                         raise TypeError(f"Cannot merge objects of type {tt} and {ft} at {path}")
 
             # Path not present in destination, create it.

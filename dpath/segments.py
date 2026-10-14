@@ -367,7 +367,7 @@ def set(
     if isinstance(last_segment, str) and isinstance(current, Sequence) and last_segment.isdecimal():
         last_segment = int(last_segment)
 
-    if isinstance(last_segment, int):
+    if isinstance(last_segment, int) and isinstance(current, MutableSequence):
         extend(current, last_segment)
 
     current[last_segment] = value

@@ -1,4 +1,6 @@
 import copy
+from collections import UserDict
+from unittest import mock
 
 from nose2.tools.such import helper
 
@@ -38,6 +40,61 @@ def test_merge_simple_int():
 
     dpath.merge(dst, src)
     assert dst["integer"] == src["integer"], "%r != %r" % (dst["integer"], src["integer"])
+
+
+def test_merge_integer_keys():
+    for mapping in (dict, UserDict):
+        src = mapping({0: "zero", -1: "new", 2: "two"})
+        dst = mapping({-1: "old", "0": "string key", "keep": True})
+
+        assert dpath.merge(dst, src) is dst
+        assert dst == {0: "zero", -1: "new", 2: "two", "0": "string key", "keep": True}
+
+
+def test_merge_nested_integer_keys():
+    src = {"data": {2: {"value": "new"}, 3: "added"}}
+    dst = {"data": {2: {"value": "old", "keep": True}, "2": "string key"}}
+
+    dpath.merge(dst, src)
+
+    assert dst == {"data": {2: {"value": "new", "keep": True}, 3: "added", "2": "string key"}}
+
+
+def test_merge_integer_keys_list_modes():
+    for mode, expected in ((MergeType.ADDITIVE, [1, 2]), (MergeType.REPLACE, [2])):
+        src = {0: [2]}
+        dst = {0: [1]}
+
+        dpath.merge(dst, src, flags=mode | MergeType.TYPESAFE)
+
+        assert dst == {0: expected}
+
+
+def test_merge_typesafe_integer_key_path():
+    for separator in ("/", ";"):
+        src = {"data": {2: {"value": "new"}}}
+        dst = {"data": {2: {"value": 1}}}
+
+        with helper.assertRaises(TypeError) as raised:
+            dpath.merge(dst, src, flags=MergeType.ADDITIVE | MergeType.TYPESAFE, separator=separator)
+
+        path = separator.join(("data", "2", "value"))
+        assert str(raised.exception) == f"Cannot merge objects of type <class 'int'> and <class 'str'> at {path}"
+        assert dst == {"data": {2: {"value": 1}}}
+
+
+def test_merge_empty_string_key_policy():
+    src = {"data": {"": "new"}}
+    dst = {"data": {"": "old"}}
+
+    with mock.patch.object(dpath.options, "ALLOW_EMPTY_STRING_KEYS", False):
+        with helper.assertRaises(dpath.exceptions.InvalidKeyName):
+            dpath.merge(dst, src)
+        assert dst == {"data": {"": "old"}}
+
+    with mock.patch.object(dpath.options, "ALLOW_EMPTY_STRING_KEYS", True):
+        dpath.merge(dst, src)
+        assert dst == src
 
 
 def test_merge_simple_string():
