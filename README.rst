@@ -354,19 +354,18 @@ not copied, they are just re-referenced in the merged object.
 Filtering
 =========
 
-All of the methods in this library (except new()) support a 'afilter'
-argument. This can be set to a function that will return True or False
-to say 'yes include that value in my result set' or 'no don't include
-it'.
+``dpath.search()`` supports an ``afilter`` argument: a function that returns
+``True`` to keep a value whose path matches the glob, or ``False`` to exclude
+it.
 
-Filtering functions receive every terminus node in a search - e.g.,
-anything that is not a dict or a list, at the very end of the path. For
-each value, they return True to include that value in the result set, or
-False to exclude it.
+By default, the filter receives leaf values and container values.
+Accepting a container whose path matches the glob includes its contents
+in the result. Pass ``dirs=False`` to restrict filtering to leaf values:
+``bytes``, ``str``, ``int``, ``float``, ``bool``, and ``None``. Containers,
+including empty ones, are not passed to the filter when ``dirs=False``.
 
-Consider this example. Given the source dictionary, we want to find ALL
-keys inside it, but we only really want the ones that contain "ffle" in
-them:
+Consider this example. Given the source dictionary, we want to find all
+values inside it that contain "ffle":
 
 .. code-block:: pycon
 
@@ -391,7 +390,7 @@ them:
     ...             return True
     ...     return False
     ...
-    >>> result = dpath.search(x, '**', afilter=afilter)
+    >>> result = dpath.search(x, '**', afilter=afilter, dirs=False)
     >>> print(json.dumps(result, indent=4, sort_keys=True))
     {
         "a": {
@@ -400,7 +399,7 @@ them:
                 "d": "Waffles",
                 "e": {
                     "f": {
-                      "g": "Roffle"
+                        "g": "Roffle"
                     }
                 }
             }
