@@ -23,6 +23,7 @@ __all__ = [
     "Creator",
 ]
 
+import builtins
 from collections.abc import MutableMapping, MutableSequence
 from typing import Union, List, Any, Callable, Optional
 
@@ -79,6 +80,7 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter | Non
     found to delete.
     """
     globlist = _split_path(glob, separator)
+    cleared_indices = {}
 
     def f(obj, pair, counter):
         (path_segments, value) = pair
@@ -107,19 +109,22 @@ def delete(obj: MutableMapping, glob: Glob, separator="/", afilter: Filter | Non
                     # truly removed without affecting the ordering of
                     # remaining items.
                     #
-                    # Note: In order to achieve proper behavior we are
-                    # relying on the reverse iteration of
-                    # non-dictionaries from segments.kvs().
-                    # Otherwise we'd be unable to delete all the tails
-                    # of a list and end up with None values when we
-                    # don't need them.
                     del parent[key]
+
+                    # Earlier matches may have cleared positions that are
+                    # now at the tail. Remove only those positions, keeping
+                    # any original None values and indices of retained items.
+                    cleared = cleared_indices.get(id(parent), builtins.set())
+                    while parent and len(parent) - 1 in cleared:
+                        cleared.remove(len(parent) - 1)
+                        del parent[-1]
 
                 else:
                     # This key can't be removed completely because it
                     # would affect the order of items that remain in our
                     # result.
                     parent[key] = None
+                    cleared_indices.setdefault(id(parent), builtins.set()).add(int(key))
 
             counter[0] += 1
 
