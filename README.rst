@@ -435,7 +435,7 @@ To get around this, you can sidestep the whole "filesystem path" style, and aban
 .. code-block:: python
 
    >>> x = { 'a': {'b/c': 0}}
-   >>> dpath.get(['a', 'b/c'])
+   >>> dpath.get(x, ['a', 'b/c'])
    0
 
 dpath.segments : The Low-Level Backend
