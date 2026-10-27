@@ -1,6 +1,16 @@
 import dpath
 
 
+def test_search_preserves_selected_tuple_container():
+    obj = {"foo": [("bar", {"baz": 1})]}
+
+    result = dpath.search(obj, "**")
+
+    assert result == obj
+    assert result["foo"] is obj["foo"]
+    assert isinstance(obj["foo"][0], tuple)
+
+
 def test_search_paths_with_separator():
     dict = {
         "a": {

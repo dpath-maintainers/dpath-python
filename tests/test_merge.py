@@ -7,6 +7,17 @@ import dpath
 from dpath import MergeType
 
 
+def test_merge_preserves_tuples_in_source_lists():
+    dst = {"foo": []}
+    src = {"foo": [("bar", "baz")]}
+
+    dpath.merge(dst, src)
+
+    assert dst == src
+    assert dst["foo"][0] is src["foo"][0]
+    assert isinstance(src["foo"][0], tuple)
+
+
 def test_merge_typesafe_and_separator():
     src = {
         "dict": {

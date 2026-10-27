@@ -243,6 +243,10 @@ def search(obj: MutableMapping, glob: Glob, yielded=False, separator="/", afilte
             (path, found) = pair
 
             if keeper(path, found):
+                # A selected parent already includes its descendants by reference.
+                # Reassigning them is unnecessary and would try to mutate tuples.
+                if segments.has(result, path) and segments.get(result, path) is found:
+                    return
                 segments.set(result, path, found, hints=segments.types(obj, path))
 
         return segments.fold(obj, f, {})
