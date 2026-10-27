@@ -262,6 +262,12 @@ class TestSegments(TestCase):
         (segments, glob) = pair
         assert api.match(segments, glob) is True
 
+    @given(st.integers())
+    def test_match_integer_glob_with_string_segment(self, number):
+        assert api.match([str(number)], [number]) is True
+        assert api.match([number], [str(number)]) is True
+        assert api.match([str(number) + '0'], [number]) is False
+
     @given(random_segments_with_nonmatching_glob())
     def test_match_nonmatching(self, pair):
         '''

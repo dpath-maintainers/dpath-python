@@ -61,6 +61,19 @@ def test_get_glob_single():
     assert dpath.get(ehash, ['doesnt', '*', 'exist'], default=6) == 6
 
 
+def test_integer_glob_with_string_mapping_key():
+    obj = {'records': {'0': 'original', '1': 'unrelated'}}
+    path = ['records', 0]
+
+    assert dpath.get(obj, path) == 'original'
+    assert dpath.values(obj, path) == ['original']
+    assert dpath.search(obj, path) == {'records': {'0': 'original'}}
+    assert dpath.set(obj, path, 'updated') == 1
+    assert obj == {'records': {'0': 'updated', '1': 'unrelated'}}
+    assert dpath.delete(obj, path) == 1
+    assert obj == {'records': {'1': 'unrelated'}}
+
+
 def test_get_glob_multiple():
     ehash = {
         "a": {

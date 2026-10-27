@@ -244,7 +244,7 @@ def match(segments: Path, glob: Glob):
                 # Let's see if the glob matches. We will turn any kind of
                 # exception while attempting to match into a False for the
                 # match.
-                if not fnmatchcase(s, g):
+                if not fnmatchcase(s, int_str(g)):
                     return False
             except:
                 return False
