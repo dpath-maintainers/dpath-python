@@ -334,6 +334,15 @@ def merge(
                 segments.set(dst, current_path, found)
                 continue
 
+            # Check nested mappings even when no list strategy is selected.
+            if (
+                    flags == MergeType.TYPESAFE
+                    and isinstance(target, MutableMapping)
+                    and isinstance(found, MutableMapping)
+            ):
+                merger(dst, found, current_path)
+                continue
+
             # At this point we know:
             #
             # * The target exists.
