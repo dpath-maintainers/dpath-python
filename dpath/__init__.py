@@ -46,7 +46,14 @@ def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSe
     if not segments.leaf(path):
         split_segments = path
     else:
-        split_segments = path.lstrip(separator).split(separator)
+        if separator is None:
+            path = path.lstrip()
+        elif separator:
+            start = 0
+            while path.startswith(separator, start):
+                start += len(separator)
+            path = path[start:]
+        split_segments = path.split(separator)
 
     return split_segments
 
