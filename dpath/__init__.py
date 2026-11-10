@@ -46,7 +46,16 @@ def _split_path(path: Path, separator: Optional[str] = "/") -> Union[List[PathSe
     if not segments.leaf(path):
         split_segments = path
     else:
-        split_segments = path.lstrip(separator).split(separator)
+        # Strip a leading separator (or repeated leading separators) treating
+        # `separator` as a whole string rather than the set of its characters.
+        # The previous `path.lstrip(separator)` treated the separator as a
+        # character set, which corrupted multi-character separators: with
+        # separator="ab", lstrip would strip any leading 'a'/'b' characters
+        # from the first key, selecting or creating the wrong key
+        # (e.g. "appleabkey" resolved as "pple/key").
+        while path.startswith(separator):
+            path = path[len(separator):]
+        split_segments = path.split(separator)
 
     return split_segments
 
@@ -347,13 +356,21 @@ def merge(
                     continue
 
                 if flags & MergeType.REPLACE:
-                    try:
-                        target[""]
-                    except TypeError:
-                        segments.set(dst, current_path, found)
+                    if isinstance(target, MutableMapping):
+                        # Mappings are always deep-merged, even under
+                        # REPLACE, so that existing keys (including an
+                        # empty-string key) are preserved. The previous
+                        # implementation probed the target with target[""]
+                        # to detect mappings; on a mapping that raised
+                        # KeyError (or, when the mapping contained an
+                        # empty-string key, succeeded) and silently
+                        # skipped the path, dropping the source data.
+                        merger(dst, found, current_path)
                         continue
-                    except Exception:
-                        raise
+                    # Sequences and other non-mapping targets are replaced
+                    # wholesale by the source.
+                    segments.set(dst, current_path, found)
+                    continue
             except Exception:
                 # We have a dictionary like thing and we need to attempt to
                 # recursively merge it.
