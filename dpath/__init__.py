@@ -347,13 +347,21 @@ def merge(
                     continue
 
                 if flags & MergeType.REPLACE:
-                    try:
-                        target[""]
-                    except TypeError:
-                        segments.set(dst, current_path, found)
+                    if isinstance(target, MutableMapping):
+                        # Mappings are always deep-merged, even under
+                        # REPLACE, so that existing keys (including an
+                        # empty-string key) are preserved. The previous
+                        # implementation probed the target with target[""]
+                        # to detect mappings; on a mapping that raised
+                        # KeyError (or, when the mapping contained an
+                        # empty-string key, succeeded) and silently
+                        # skipped the path, dropping the source data.
+                        merger(dst, found, current_path)
                         continue
-                    except Exception:
-                        raise
+                    # Sequences and other non-mapping targets are replaced
+                    # wholesale by the source.
+                    segments.set(dst, current_path, found)
+                    continue
             except Exception:
                 # We have a dictionary like thing and we need to attempt to
                 # recursively merge it.
