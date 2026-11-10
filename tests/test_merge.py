@@ -173,6 +173,21 @@ def test_merge_replace_2():
     assert d1['a'][0] == 'a'
 
 
+def test_merge_replace_empty_string_key_in_dst():
+    # Regression: a destination mapping that contains an empty-string key
+    # must not cause merge(REPLACE) to silently drop the source data.
+    # The old implementation probed the target with target[""], which
+    # succeeded on such a mapping and skipped the path entirely.
+    dst = {"a": {"": "keep", "x": 1}}
+    src = {"a": {"y": 2}}
+
+    dpath.merge(dst, copy.deepcopy(src), flags=dpath.MergeType.REPLACE)
+
+    assert dst["a"]["y"] == 2, "source data was dropped: %r" % (dst,)
+    assert dst["a"][""] == "keep", "existing empty-string key lost: %r" % (dst,)
+    assert dst["a"]["x"] == 1, "existing key lost: %r" % (dst,)
+
+
 def test_merge_list():
     src = {"l": [1]}
     p1 = {"l": [2], "v": 1}
